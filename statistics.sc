@@ -52,13 +52,13 @@
   (define (quantile ls p type)
    (define (calc-Q order-stats j gamma)
      ;; j is calculated for one-based indexing; need to adjust to zero-based
-     (define n-os (vector-length order-stats))
+     (define n-os (length order-stats))
      (define out
        (cond
-	[(< j 1) (vector-ref order-stats 0)]
-	[(>= j n-os) (vector-ref order-stats (sub1 n-os))]
-	[else (+ (* (- 1 gamma) (vector-ref order-stats (sub1 j)))
-		 (* gamma (vector-ref order-stats j)))]))
+	[(< j 1) (list-ref order-stats 0)]
+	[(>= j n-os) (list-ref order-stats (sub1 n-os))]
+	[else (+ (* (- 1 gamma) (list-ref order-stats (sub1 j)))
+		 (* gamma (list-ref order-stats j)))]))
      (exact->inexact out))
    (define gamma-proc
      (cond
@@ -71,7 +71,7 @@
    (when (or (< p 0) (> p 1)) (assertion-violation "(quantile)" "p is outside [0,1];" p))
    (when (inexact? p) (assertion-violation "(quantile)" "p must be exact number, e.g., #e0.5 or 1/2;" p))
    (let* ([n (length ls)]
-	  [order-stats (list->vector (unique ls))]
+	  [order-stats (unique ls)]
 	  [ms (list 0 0 -1/2 0 1/2 p (- 1 p) (* (add1 p) 1/3) (+ (* p 1/4) 3/8))]
 	  [m (list-ref ms (sub1 type))]
 	  [j (floor (+ (* n p) m))]
