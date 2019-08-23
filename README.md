@@ -49,8 +49,7 @@ Exception in (count): all elements of list must be real numbers; with irritant (
 #### standard-deviation
 #### unique
 #### variance
-#### weighted-mean
-**procedure:** `(weighted-mean ls weights)`  
+#### procedure: `(weighted-mean ls weights)`  
 
 ### Generating Random Variates
 
