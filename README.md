@@ -1,7 +1,7 @@
 # Chez Scheme Statistics Library
 
 ### [Descriptive Statistics](#descriptive-statistics)
-* [count](#count)
+* [count](#procedure-count-ls)
 * [cumulative-sum](#cumulative-sum)
 * [ecdf](#ecdf)
 * [interquartile-range](#interquartile-range)
@@ -13,7 +13,7 @@
 * [standard-deviation](#standard-deviation)
 * [unique](#unique)
 * [variance](#variance)
-* [weighted-mean](#weighted-mean)
+* [weighted-mean](#procedure-weighted-mean-ls-weights)
 
 ### [Generating Random Variates](#generating-random-deviates)
 
@@ -50,6 +50,9 @@ Exception in (count): all elements of list must be real numbers; with irritant (
 #### unique
 #### variance
 #### weighted-mean
+**procedure:** `(weighted-mean ls weights)`  
+
+### Generating Random Variates
 
 #### random-bernoulli
 #### random-binomial
