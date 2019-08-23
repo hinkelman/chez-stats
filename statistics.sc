@@ -1,20 +1,18 @@
-;; mean, mode, quantiles, variance, standard deviation, range, skewness, kurtosis, IQR
-
-;; (define (mean . args)
-;;   (/ (apply + args) (length args)))
-
 (library (statistics statistics)
   (export
    count
-   mode
-   unique
-   quantile
-   median
    cumulative-sum
    ecdf
+   interquartile-range
+   mean
+   median
+   mode
+   quantile
    range
+   standard-deviation
+   unique
    variance
-   standard-deviation)
+   weighted-mean)
 
   (import (chezscheme))
   
@@ -80,11 +78,11 @@
 
   (define (median ls)
     (list-check ls "(median)")
-    (quantile ls 1/2 7))
+    (quantile ls 0.5 7))
 
   (define (interquartile-range ls type)
     (list-check ls "(interquartile-range)")
-    (- (quantile ls #e0.75 type) (quantile ls #e0.25 type)))
+    (- (quantile ls 0.75 type) (quantile ls 0.25 type)))
 
   (define (cumulative-sum ls)
     (define (iterate ls result total)
@@ -122,7 +120,6 @@
   ;; https://www.johndcook.com/blog/standard_deviation/
   ;; variance is much slower than mean
   (define (variance ls)
-    (list-check ls "(variance)")
     (define (update-ms lsi ms i)
       (let* ([m (car ms)]
 	     [s (cdr ms)]
@@ -130,6 +127,7 @@
 	(cons new-m
 	      (+ s (* (- lsi m) (- lsi new-m))))))		     
     (define (iterate ls ms i)
+      (list-check ls "(variance)")
       (cond
        ;; when exit statement is reached, i is (length x) + 1
        ;; need to subtract 2 to get (length x) - 1 (i.e., sample variation)

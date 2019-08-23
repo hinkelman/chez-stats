@@ -1,5 +1,3 @@
-;; Slides describing algorithms found at https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
-
 (library (statistics random-variates)
   (export
    random-bernoulli
