@@ -1,31 +1,30 @@
 # Chez Scheme Statistics Library
 
-### [Descriptive Statistics](#descriptive-statistics)
-* [count](#procedure-count-ls)
-* [cumulative-sum](#cumulative-sum)
-* [ecdf](#ecdf)
-* [interquartile-range](#interquartile-range)
-* [mean](#mean)
-* [median](#median)
-* [mode](#mode)
-* [quantile](#quantile)
-* [range](#range)
-* [standard-deviation](#standard-deviation)
-* [unique](#unique)
-* [variance](#variance)
-* [weighted-mean](#procedure-weighted-mean-ls-weights)
+### [Descriptive Statistics](#descriptive-statistics)  
+[`(count ls)`](#procedure-count-ls)  
+[`(cumulative-sum ls)`](#procedure-cumulative-sum-ls)  
+[`(ecdf ls)`](#procedure-ecdf-ls)  
+[`(interquartile-range ls type)`](#procedure-interquartile-range-ls-type)  
+[`(mean ls)`](#procdure-mean-ls)  
+[`(median ls)`](#procedure-median-ls)  
+[`(mode ls)`](#procedure-mode-ls)  
+[`(quantile ls p type)`](#procedure-quantile-ls-p-type)  
+[`(range ls)`](#procedure-range-ls)  
+[`(standard-deviation ls)`](#procedure-standard-deviation-ls)  
+[`(unique ls)`](#procedure-unique-ls)  
+[`(variance ls)`](#procedure-variance-ls)  
+[`(weighted-mean ls weights)`](#procedure-weighted-mean-ls-weights)
 
 ### [Generating Random Variates](#generating-random-deviates)
 
-* [random-bernoulli](#random-bernoulli)
-* [random-binomial](#random-binomial)
-* [random-exponential](#random-exponential)
-* [random-poisson](#random-poisson)
+[`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
+[`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
+[`(random-exponential n mu)`](#procedure-random-exponential-n-mu)  
+[`(random-poisson n mu)`](#procedure-random-poisson-n-mu)
 
 ### Descriptive Statistics
 
-#### count
-**procedure:** `(count ls)`  
+#### procedure: `(count ls)`  
 **returns:** a list containing a sorted list of the unique values in the input list and a list of counts that correspond to the unique values
 
 ```
@@ -38,22 +37,52 @@
 > (count '("a" "b" "b" "a"))
 Exception in (count): all elements of list must be real numbers; with irritant ("a" "b" "b" "a")
 ```
-#### cumulative-sum
-#### ecdf
-#### interquartile-range
-#### mean
-#### median
-#### mode
-#### quantile
-#### range
-#### standard-deviation
-#### unique
-#### variance
+#### procedure: `(cumulative-sum ls)`  
+**returns:**
+
+#### procedure: `(ecdf ls)`  
+**returns:**
+
+#### procedure: `(interquartile-range ls type)`  
+**returns:**
+
+#### procedure: `(mean ls)`  
+**returns:**
+
+#### procedure: `(median ls)`  
+**returns:**
+
+#### procedure: `(mode ls)`  
+**returns:**
+
+#### procedure: `(quantile ls p type)`  
+**returns:**
+
+#### procedure: `(range ls)`  
+**returns:**
+
+#### procedure: `(standard-deviation ls)`  
+**returns:**
+
+#### procedure: `(unique ls)`  
+**returns:**
+
+#### procedure: `(variance ls)`  
+**returns:**
+
 #### procedure: `(weighted-mean ls weights)`  
+**returns:**
 
 ### Generating Random Variates
 
-#### random-bernoulli
-#### random-binomial
-#### random-exponential
-#### random-poisson
+#### procedure: `(random-bernoulli n p)`  
+**returns:**
+
+#### procedure: `(random-binomial n trials p)`  
+**returns:**
+
+#### procedure: `(random-exponential n mu)`  
+**returns:**
+
+#### procedure: `(random-poisson n mu)`  
+**returns:**
