@@ -15,7 +15,7 @@
 [`(variance ls)`](#procedure-variance-ls)  
 [`(weighted-mean ls weights)`](#procedure-weighted-mean-ls-weights)
 
-### [Generating Random Variates](#generating-random-deviates)
+### [Generating Random Variates](#generating-random-variates)
 
 [`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
 [`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
