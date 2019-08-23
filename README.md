@@ -1,6 +1,7 @@
 # Chez Scheme Statistics Library
 
-### [Descriptive Statistics](#descriptive-statistics)  
+### Descriptive Statistics  
+
 [`(count ls)`](#procedure-count-ls)  
 [`(cumulative-sum ls)`](#procedure-cumulative-sum-ls)  
 [`(ecdf ls)`](#procedure-ecdf-ls)  
@@ -15,7 +16,7 @@
 [`(variance ls)`](#procedure-variance-ls)  
 [`(weighted-mean ls weights)`](#procedure-weighted-mean-ls-weights)
 
-### [Generating Random Variates](#generating-random-variates)
+### Generating Random Variates
 
 [`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
 [`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
@@ -24,7 +25,7 @@
 
 ### Descriptive Statistics
 
-#### procedure: `(count ls)`  
+#### procedure: `(count ls)`
 **returns:** a list containing a sorted list of the unique values in the input list and a list of counts that correspond to the unique values
 
 ```
@@ -37,52 +38,52 @@
 > (count '("a" "b" "b" "a"))
 Exception in (count): all elements of list must be real numbers; with irritant ("a" "b" "b" "a")
 ```
-#### procedure: `(cumulative-sum ls)`  
+#### procedure: `(cumulative-sum ls)`
 **returns:**
 
-#### procedure: `(ecdf ls)`  
+#### procedure: `(ecdf ls)`
 **returns:**
 
-#### procedure: `(interquartile-range ls type)`  
+#### procedure: `(interquartile-range ls type)`
 **returns:**
 
-#### procedure: `(mean ls)`  
+#### procedure: `(mean ls)`
 **returns:**
 
-#### procedure: `(median ls)`  
+#### procedure: `(median ls)`
 **returns:**
 
-#### procedure: `(mode ls)`  
+#### procedure: `(mode ls)`
 **returns:**
 
-#### procedure: `(quantile ls p type)`  
+#### procedure: `(quantile ls p type)`
 **returns:**
 
-#### procedure: `(range ls)`  
+#### procedure: `(range ls)`
 **returns:**
 
-#### procedure: `(standard-deviation ls)`  
+#### procedure: `(standard-deviation ls)`
 **returns:**
 
-#### procedure: `(unique ls)`  
+#### procedure: `(unique ls)`
 **returns:**
 
-#### procedure: `(variance ls)`  
+#### procedure: `(variance ls)`
 **returns:**
 
-#### procedure: `(weighted-mean ls weights)`  
+#### procedure: `(weighted-mean ls weights)`
 **returns:**
 
 ### Generating Random Variates
 
-#### procedure: `(random-bernoulli n p)`  
+#### procedure: `(random-bernoulli n p)`
 **returns:**
 
-#### procedure: `(random-binomial n trials p)`  
+#### procedure: `(random-binomial n trials p)`
 **returns:**
 
-#### procedure: `(random-exponential n mu)`  
+#### procedure: `(random-exponential n mu)`
 **returns:**
 
-#### procedure: `(random-poisson n mu)`  
+#### procedure: `(random-poisson n mu)`
 **returns:**
