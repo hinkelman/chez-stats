@@ -25,8 +25,8 @@
 ### Descriptive Statistics
 
 #### count
-procedure: `(count ls)`
-returns: a list containing a sorted list of the unique values in the input list and a list of counts that correspond to the unique values
+**procedure:** `(count ls)`  
+**returns:** a list containing a sorted list of the unique values in the input list and a list of counts that correspond to the unique values
 
 ```
 > (count '(1 2 3 4 2 1))
