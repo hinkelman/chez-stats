@@ -63,7 +63,7 @@ Exception in (count): all elements of list must be real numbers; with irritant (
 ```
 
 #### procedure: `(interquartile-range ls type)`
-**returns:** the interquartile range of the values in `ls` for the given `type` ([see quantile](#procedure-interquartile-range-ls-type))
+**returns:** the interquartile range of the values in `ls` for the given `type` ([see quantile](#procedure-quantile-ls-p-type))
 
 ```
 > (interquartile-range '(1 2 3 4 5 6) 7)
