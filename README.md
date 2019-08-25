@@ -181,13 +181,43 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 ### Generating Random Variates
 
 #### procedure: `(random-bernoulli n p)`
-**returns:**
+**returns:** a list of `n` numbers from a Bernoulli distribution with probability `p`
+
+```
+> (random-bernoulli 25 0.1)
+(0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 1 0 0 0 0)
+> (random-bernoulli 25 0.9)
+(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1)
+```
 
 #### procedure: `(random-binomial n trials p)`
-**returns:**
+**returns:** a list of `n` successes out of the specified number of `trials` from a binomial distribution with probability `p`
+
+```
+> (random-binomial 25 10 0.5)
+(7 5 4 4 6 5 7 5 5 3 5 4 6 7 4 7 3 4 3 8 5 5 7 6 8)
+> (random-binomial 25 100 0.5)
+(57 47 49 52 48 55 48 49 60 46 61 49 48 46 53 53 57 57 47 58 44 53 57 54 47)
+> (random-binomial 25 1 0.5)
+(1 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 1 1 1 0 1 0 1 0 0)
+ ```
 
 #### procedure: `(random-exponential n mu)`
-**returns:**
+**returns:** a list of `n` numbers from an exponential distribution with mean `mu`
+
+```
+> (random-exponential 10 100)
+(35.8597072715694 104.1153422246636 61.130577404212985 74.51016205480595
+  28.757623000674293 69.03367489570623 1.9901391744468298
+  32.16039857943056 16.818138818937218 38.53838415351449)
+```
 
 #### procedure: `(random-poisson n mu)`
-**returns:**
+**returns:** a list of `n` integers from a Poisson distribution with mean and variance`mu`
+
+```
+> (random-poisson 25 10)
+(8 12 16 8 15 6 12 12 12 6 8 10 13 15 12 12 8 12 8 10 10 11 12 13 8)
+> (random-poisson 25 100)
+(102 94 107 102 106 100 99 102 94 88 85 103 96 92 110 105 83 87 109 84 98 105 83 107 111)
+```
