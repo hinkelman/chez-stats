@@ -14,11 +14,9 @@
    variance
    weighted-mean)
 
-  (import (chezscheme)
-	  (statistics helpers))
+  (import (chezscheme))
   
   (define (count ls)
-    (list-check ls "(count)")
     (let ([sorted-list (sort < ls)])
       (define (iterate first rest n vals counts)
 	(cond
@@ -32,7 +30,6 @@
       (iterate (car sorted-list) (cdr sorted-list) 1 '() '())))
   
   (define (mode ls)
-    (list-check ls "(mode)")
     (let* ([val-count (count ls)]
 	   [mx (apply max (cadr val-count))])
       (filter (lambda (x) (not (null? x)))
@@ -41,7 +38,6 @@
 		   (cadr val-count)))))
 
   (define (unique ls)
-    (list-check ls "(unique)")
     (car (count ls)))
 
   (define (quantile ls p type)
@@ -59,12 +55,9 @@
        [(= type 2) (lambda (g j) (if (= g 0) 0.5 1))]
        [(= type 3) (lambda (g j) (if (and (= g 0) (even? j)) 0 1))]
        [else (lambda (g j) g)]))
-    (list-check ls "(quantile)")
-    (quantile-type-check type "(quantile)")
-    (when (or (< p 0) (> p 1))
-      (assertion-violation "(quantile)" "p is outside [0,1];" p))
     (let* ([n (length ls)]
 	   [order-stats (unique ls)]
+	   ;; ms is list of m values for each quantile type
 	   [ms (list 0 0 -1/2 0 1/2 p (- 1 p) (* (add1 p) 1/3) (+ (* p 1/4) 3/8))]
 	   [m (list-ref ms (sub1 type))]
 	   [j (floor (+ (* n p) m))]
@@ -75,12 +68,9 @@
 					;(map (lambda (x) (quantile '(1 2 3 4 5 6) x 9)) '(#e0.0 #e0.1 #e0.2 #e0.3 #e0.4 #e0.5 #e0.6 #e0.7 #e0.8 #e0.9 #e1.0))
 
   (define (median ls)
-    (list-check ls "(median)")
     (quantile ls 0.5 7))
 
   (define (interquartile-range ls type)
-    (list-check ls "(interquartile-range)")
-    (quantile-type-check type "(interquartile-range)")
     (- (quantile ls 0.75 type) (quantile ls 0.25 type)))
 
   (define (cumulative-sum ls)
@@ -88,14 +78,11 @@
       (cond
        [(null? ls) (reverse result)]
        [else
-	(unless (for-all real? ls)
-	  (assertion-violation "(cumulative-sum)" "all elements of list must be real numbers;" ls))
 	(let ([new-total (+ (car ls) total)])
 	  (iterate (cdr ls) (cons new-total result) new-total))]))
     (iterate ls '() 0))
 
   (define (ecdf ls)
-    (list-check ls "(ecdf)")
     (let* ([n (length ls)]
 	   [val-count (count ls)]
 	   [cs (cumulative-sum (cadr val-count))])
@@ -103,25 +90,15 @@
 	    (map (lambda (x) (/ x n)) cs))))
 
   (define (range ls)
-    (list-check ls "(range)")
     (cons (apply min ls) (apply max ls)))
 
   (define (mean ls)
-    (list-check ls "(mean)")
     (/ (apply + ls) (length ls)))
 
   (define (weighted-mean ls weights)
-    ;; these list checks should be tailored more to each list
-    ;; i.e., problem with ls or weights?
-    (list-check ls "(weighted-mean)")
-    (list-check weights "(weighted-mean)")
-    (unless (= (length ls) (length weights))
-      (assertion-violation "(weighted-mean)" "ls and weights must be same length;" (list ls weights)))
     (/ (apply + (map (lambda (x y) (* x y)) ls weights)) (apply + weights)))
 
-  (define (var-helper ls)
-    ;; (var-helper) is clumsy way to include (list-check) in (variance)
-    ;; i.e., wasn't sure where to put (list-check) in this function without causing problems
+  (define (variance ls)
     (define (update-ms lsi ms i)
       (let* ([m (car ms)]
 	     [s (cdr ms)]
@@ -136,13 +113,9 @@
        [else (iterate (cdr ls) (update-ms (car ls) ms i) (add1 i))]))
     (iterate (cdr ls) (cons (car ls) 0) 2))
   
-  (define (variance ls)
-    (list-check ls "(variance)")
-    (var-helper ls))
-
   (define (standard-deviation ls)
-    (list-check ls "(standard-deviation)")
     (sqrt (variance ls)))
+  
   )
 
 
