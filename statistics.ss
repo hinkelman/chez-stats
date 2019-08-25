@@ -14,12 +14,9 @@
    variance
    weighted-mean)
 
-  (import (chezscheme))
+  (import (chezscheme)
+	  (statistics helpers))
   
-  (define (list-check ls who)
-    (unless (for-all real? ls) (assertion-violation who "all elements of list must be real numbers;" ls))
-    (when (null? ls) (assertion-violation who "list is empty;" ls)))
-
   (define (count ls)
     (list-check ls "(count)")
     (let ([sorted-list (sort < ls)])
@@ -63,8 +60,9 @@
        [(= type 3) (lambda (g j) (if (and (= g 0) (even? j)) 0 1))]
        [else (lambda (g j) g)]))
     (list-check ls "(quantile)")
-    (when (or (< type 1) (> type 9) (not (integer? type))) (assertion-violation "(quantile)" "type must be integer from 1-9;" type))
-    (when (or (< p 0) (> p 1)) (assertion-violation "(quantile)" "p is outside [0,1];" p))
+    (quantile-type-check type "(quantile)")
+    (when (or (< p 0) (> p 1))
+      (assertion-violation "(quantile)" "p is outside [0,1];" p))
     (let* ([n (length ls)]
 	   [order-stats (unique ls)]
 	   [ms (list 0 0 -1/2 0 1/2 p (- 1 p) (* (add1 p) 1/3) (+ (* p 1/4) 3/8))]
@@ -74,7 +72,7 @@
 	   [gamma (gamma-proc g j)])
       (calc-Q order-stats (inexact->exact j) gamma)))
 
-  ;(map (lambda (x) (quantile '(1 2 3 4 5 6) x 9)) '(#e0.0 #e0.1 #e0.2 #e0.3 #e0.4 #e0.5 #e0.6 #e0.7 #e0.8 #e0.9 #e1.0))
+					;(map (lambda (x) (quantile '(1 2 3 4 5 6) x 9)) '(#e0.0 #e0.1 #e0.2 #e0.3 #e0.4 #e0.5 #e0.6 #e0.7 #e0.8 #e0.9 #e1.0))
 
   (define (median ls)
     (list-check ls "(median)")
@@ -82,6 +80,7 @@
 
   (define (interquartile-range ls type)
     (list-check ls "(interquartile-range)")
+    (quantile-type-check type "(interquartile-range)")
     (- (quantile ls 0.75 type) (quantile ls 0.25 type)))
 
   (define (cumulative-sum ls)

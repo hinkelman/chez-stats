@@ -5,21 +5,16 @@
    random-exponential
    random-poisson)
 
-  (import (chezscheme))
-
-  (define (build-random-list n proc)
-    (define (iterate result i)
-      (if (= i n)
-        result
-        (iterate (cons (proc) result) (add1 i))))
-    (iterate '() 0))
-
+  (import (chezscheme)
+	  (statistics helpers))
+  
   ;; from Jain slides
   ;; should check that 0 >= p <= 1
   (define (random-bernoulli n p)
     (define (rbern p)
+      (check-p p "(random-bernoulli)")
       (if (<= (random 1.0) p) 1 0))
-    (build-random-list n (lambda () (rbern p))))
+    (build-random-list (floor n) (lambda () (rbern p))))
 
   ;; (define bernoulli-list (random-bernoulli 1e5 0.2))
   ;; (real->flonum (mean bernoulli-list))  ;; should be 0.2 when p = 0.2
