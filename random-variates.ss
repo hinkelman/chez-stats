@@ -65,4 +65,24 @@
   ;; (define poisson-list (random-poisson 1e5 7))
   ;; (real->flonum (mean poisson-list))
   ;; (variance poisson-list)
-)
+
+  ;; rejection method
+  (define (random-normal n mean sd)
+    (define (rnorm mean sd)
+      (let iterate ()
+	(let* ([u1 (random 1.0)]
+	       [u2 (random 1.0)]
+	       [x (* -1 (log u1))])
+	  (if (> u2 (exp (/ (* -1 (expt (sub1 x) 2)) 2)))
+	      (iterate)
+	      (let ([u3 (random 1.0)])
+		(if (> u3 0.5)
+		    (+ mean (* sd x))
+		    (- mean (* sd x))))))))
+    (build-random-list n (lambda () (rnorm mean sd))))
+
+  ;; (define normal-list (random-normal 1e5 42 5))
+  ;; (mean normal-list)
+  ;; (standard-deviation normal-list)
+  
+  )
