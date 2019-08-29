@@ -23,6 +23,7 @@ Work in progress. Procedures for basic descriptive statistics and generating ran
 [`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
 [`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
 [`(random-exponential n mu)`](#procedure-random-exponential-n-mu)  
+[`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)
 [`(random-poisson n mu)`](#procedure-random-poisson-n-mu)
 
 ### Descriptive Statistics
@@ -212,8 +213,22 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
   32.16039857943056 16.818138818937218 38.53838415351449)
 ```
 
+#### procedure: `(random-normal n mu sd)`
+**returns:** a list of `n` integers from a normal distribution with mean `mu` and standard deviation `sd`
+
+```
+> (random-normal 10 100 0.1)
+(99.84784484903868 99.89799008859833 100.06300994079052 100.00286968094662
+  99.89627748598733 99.9999359828298 100.02587497251288
+  100.1098673482077 100.09046451628667 99.98730494625542)
+> (random-normal 10 100 100)
+(32.583830587945286 -120.83252735310398 242.64250642313553 92.39493192862878
+  164.39808748159305 22.8058534483159 158.33535128554186
+  -30.757726972313066 132.37810774263465 145.9341465922021)
+```
+
 #### procedure: `(random-poisson n mu)`
-**returns:** a list of `n` integers from a Poisson distribution with mean and variance`mu`
+**returns:** a list of `n` integers from a Poisson distribution with mean and variance `mu`
 
 ```
 > (random-poisson 25 10)

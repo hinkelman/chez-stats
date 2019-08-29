@@ -1,9 +1,10 @@
-(library (statistics random-variates)
+(library (chez-stats random-variates)
   (export
    random-bernoulli
    random-binomial
    random-exponential
-   random-poisson)
+   random-poisson
+   random-normal)
 
   (import (chezscheme))
 
@@ -67,8 +68,8 @@
   ;; (variance poisson-list)
 
   ;; rejection method
-  (define (random-normal n mean sd)
-    (define (rnorm mean sd)
+  (define (random-normal n mu sd)
+    (define (rnorm mu sd)
       (let iterate ()
 	(let* ([u1 (random 1.0)]
 	       [u2 (random 1.0)]
@@ -77,9 +78,9 @@
 	      (iterate)
 	      (let ([u3 (random 1.0)])
 		(if (> u3 0.5)
-		    (+ mean (* sd x))
-		    (- mean (* sd x))))))))
-    (build-random-list n (lambda () (rnorm mean sd))))
+		    (+ mu (* sd x))
+		    (- mu (* sd x))))))))
+    (build-random-list n (lambda () (rnorm mu sd))))
 
   ;; (define normal-list (random-normal 1e5 42 5))
   ;; (mean normal-list)

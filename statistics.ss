@@ -1,4 +1,4 @@
-(library (statistics statistics)
+(library (chez-stats statistics)
   (export
    count
    cumulative-sum
