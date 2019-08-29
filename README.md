@@ -23,7 +23,7 @@ Work in progress. Procedures for basic descriptive statistics and generating ran
 [`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
 [`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
 [`(random-exponential n mu)`](#procedure-random-exponential-n-mu)  
-[`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)
+[`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)  
 [`(random-poisson n mu)`](#procedure-random-poisson-n-mu)
 
 ### Descriptive Statistics
