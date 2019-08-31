@@ -6,7 +6,8 @@
    random-poisson
    random-normal)
 
-  (import (chezscheme))
+  (import (chezscheme)
+	  (chez-stats assertions))
 
   (define (build-random-list n proc)
     (define (iterate result i)
@@ -20,7 +21,10 @@
   (define (random-bernoulli n p)
     (define (rbern p)
       (if (<= (random 1.0) p) 1 0))
-    (build-random-list (floor n) (lambda () (rbern p))))
+    (let ([proc-string "(random-bernoulli n p)"])
+      (check-positive-integer n "n" proc-string)
+      (check-p p proc-string))
+    (build-random-list n (lambda () (rbern p))))
 
   ;; (define bernoulli-list (random-bernoulli 1e5 0.2))
   ;; (real->flonum (mean bernoulli-list))  ;; should be 0.2 when p = 0.2
@@ -30,6 +34,10 @@
   (define (random-binomial n trials p)
     (define (rbin trials p)
       (apply + (random-bernoulli trials p)))
+    (let ([proc-string "(random-binomial n trials p)"])
+      (check-positive-integer n "n" proc-string)
+      (check-positive-integer trials "trials" proc-string)
+      (check-p p proc-string))
     (build-random-list n (lambda () (rbin trials p))))
 
   ;; (define binomial-list (random-binomial 1e5 10 0.5))
@@ -40,6 +48,9 @@
   (define (random-exponential n mu)
     (define (rexp mu)
       (- (* mu (log (random 1.0)))))
+    (let ([proc-string "(random-exponential n mu)"])
+      (check-positive-integer n "n" proc-string)
+      (check-real mu "mu" proc-string))
     (build-random-list n (lambda () (rexp mu))))
 
   ;; (define exponential-list (random-exponential 1e5 10))
@@ -61,6 +72,9 @@
 	(cond [(>= (cdr ps) u) (sub1 i)]
 	      [else (iterate (update-ps ps i) (add1 i))]))
       (iterate (cons p-init p-init) 1))
+    (let ([proc-string "(random-poisson n mu)"])
+      (check-positive-integer n "n" proc-string)
+      (check-real mu "mu" proc-string))
     (build-random-list n (lambda () (rpois mu))))
 
   ;; (define poisson-list (random-poisson 1e5 7))
@@ -80,6 +94,10 @@
 		(if (> u3 0.5)
 		    (+ mu (* sd x))
 		    (- mu (* sd x))))))))
+    (let ([proc-string "(random-normal n mu sd)"])
+      (check-positive-integer n "n" proc-string)
+      (check-real mu "mu" proc-string)
+      (check-real sd "sd" proc-string))
     (build-random-list n (lambda () (rnorm mu sd))))
 
   ;; (define normal-list (random-normal 1e5 42 5))

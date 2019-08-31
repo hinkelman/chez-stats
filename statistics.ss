@@ -14,9 +14,11 @@
    variance
    weighted-mean)
 
-  (import (chezscheme))
+  (import (chezscheme)
+	  (chez-stats assertions))
   
   (define (count ls)
+    (check-list ls "ls" "(count ls)")
     (let ([sorted-list (sort < ls)])
       (define (iterate first rest n vals counts)
 	(cond
@@ -30,6 +32,7 @@
       (iterate (car sorted-list) (cdr sorted-list) 1 '() '())))
   
   (define (mode ls)
+    (check-list ls "ls" "(mode ls)")
     (let* ([val-count (count ls)]
 	   [mx (apply max (cadr val-count))])
       (filter (lambda (x) (not (null? x)))
@@ -38,6 +41,7 @@
 		   (cadr val-count)))))
 
   (define (unique ls)
+    (check-list ls "ls" "(unique ls)")
     (car (count ls)))
 
   (define (quantile ls p type)
@@ -55,6 +59,10 @@
        [(= type 2) (lambda (g j) (if (= g 0) 0.5 1))]
        [(= type 3) (lambda (g j) (if (and (= g 0) (even? j)) 0 1))]
        [else (lambda (g j) g)]))
+    (let ([proc-string "(quantile ls p type)"])
+      (check-list ls "ls" proc-string)
+      (check-p p proc-string)
+      (check-quantile-type type proc-string))
     (let* ([n (length ls)]
 	   [order-stats (unique ls)]
 	   ;; ms is list of m values for each quantile type
@@ -68,9 +76,13 @@
 					;(map (lambda (x) (quantile '(1 2 3 4 5 6) x 9)) '(#e0.0 #e0.1 #e0.2 #e0.3 #e0.4 #e0.5 #e0.6 #e0.7 #e0.8 #e0.9 #e1.0))
 
   (define (median ls)
+    (check-list ls "ls" "(median ls)")
     (quantile ls 0.5 7))
 
   (define (interquartile-range ls type)
+    (let ([proc-string "(interquartile-range ls type)"])
+      (check-list ls "ls" proc-string)
+      (check-quantile-type type proc-string))
     (- (quantile ls 0.75 type) (quantile ls 0.25 type)))
 
   (define (cumulative-sum ls)
@@ -80,9 +92,11 @@
        [else
 	(let ([new-total (+ (car ls) total)])
 	  (iterate (cdr ls) (cons new-total result) new-total))]))
+    (check-list ls "ls" "(cumulative-sum ls)")
     (iterate ls '() 0))
 
   (define (ecdf ls)
+    (check-list ls "ls" "(ecdf ls)")
     (let* ([n (length ls)]
 	   [val-count (count ls)]
 	   [cs (cumulative-sum (cadr val-count))])
@@ -90,12 +104,19 @@
 	    (map (lambda (x) (/ x n)) cs))))
 
   (define (range ls)
+    (check-list ls "ls" "(range ls)")
     (cons (apply min ls) (apply max ls)))
 
   (define (mean ls)
+    (check-list ls "ls" "(mean ls)")
     (/ (apply + ls) (length ls)))
 
   (define (weighted-mean ls weights)
+    (let ([proc-string "(weighted-mean ls weights)"])
+      (check-list ls "ls" proc-string )
+      (check-list weights "weights" proc-string)
+      (unless (= (length ls) (length weights))
+	(assertion-violation proc-string "ls and weights are not the same length")))
     (/ (apply + (map (lambda (x y) (* x y)) ls weights)) (apply + weights)))
 
   (define (variance ls)
@@ -111,9 +132,11 @@
        ;; need to subtract 2 to get (length x) - 1 (i.e., sample variance)
        [(null? ls)  (/ (cdr ms) (- i 2.0))]
        [else (iterate (cdr ls) (update-ms (car ls) ms i) (add1 i))]))
+    (check-list ls "ls" "(variance ls)")
     (iterate (cdr ls) (cons (car ls) 0) 2))
   
   (define (standard-deviation ls)
+    (check-list ls "ls" "(standard-deviation ls)")
     (sqrt (variance ls)))
   
   )
