@@ -17,7 +17,6 @@
     (iterate '() 0))
   
   ;; from Jain slides
-  ;; should check that 0 >= p <= 1
   (define (random-bernoulli n p)
     (define (rbern p)
       (if (<= (random 1.0) p) 1 0))
@@ -25,10 +24,6 @@
       (check-positive-integer n "n" proc-string)
       (check-p p proc-string))
     (build-random-list n (lambda () (rbern p))))
-
-  ;; (define bernoulli-list (random-bernoulli 1e5 0.2))
-  ;; (real->flonum (mean bernoulli-list))  ;; should be 0.2 when p = 0.2
-  ;; (variance bernoulli-list)             ;; should be 0.16 when p = 0.2
 
   ;; from Jain slides
   (define (random-binomial n trials p)
@@ -40,22 +35,14 @@
       (check-p p proc-string))
     (build-random-list n (lambda () (rbin trials p))))
 
-  ;; (define binomial-list (random-binomial 1e5 10 0.5))
-  ;; (real->flonum (mean binomial-list))   ;; should be 5 when trials = 10 and p = 0.5
-  ;; (variance binomial-list)              ;; should be 2.5 when trials = 10 and p = 0.5
-
   ;; modified from SRFI 27
   (define (random-exponential n mu)
     (define (rexp mu)
       (- (* mu (log (random 1.0)))))
     (let ([proc-string "(random-exponential n mu)"])
       (check-positive-integer n "n" proc-string)
-      (check-real mu "mu" proc-string))
+      (check-positive-real mu "mu" proc-string))
     (build-random-list n (lambda () (rexp mu))))
-
-  ;; (define exponential-list (random-exponential 1e5 10))
-  ;; (mean exponential-list)                  ;; should be 10 when mu = 10
-  ;; (variance exponential-list)              ;; should be 100 when mu = 10
 
   ;; https://en.wikipedia.org/wiki/Poisson_distribution
   ;; parameter is conventionally called lambda but using mu to avoid confusion with how lambda is used in scheme
@@ -74,12 +61,8 @@
       (iterate (cons p-init p-init) 1))
     (let ([proc-string "(random-poisson n mu)"])
       (check-positive-integer n "n" proc-string)
-      (check-real mu "mu" proc-string))
+      (check-real-gte-zero mu "mu" proc-string))
     (build-random-list n (lambda () (rpois mu))))
-
-  ;; (define poisson-list (random-poisson 1e5 7))
-  ;; (real->flonum (mean poisson-list))
-  ;; (variance poisson-list)
 
   ;; rejection method
   (define (random-normal n mu sd)
@@ -97,11 +80,7 @@
     (let ([proc-string "(random-normal n mu sd)"])
       (check-positive-integer n "n" proc-string)
       (check-real mu "mu" proc-string)
-      (check-real sd "sd" proc-string))
+      (check-real-gte-zero sd "sd" proc-string))
     (build-random-list n (lambda () (rnorm mu sd))))
-
-  ;; (define normal-list (random-normal 1e5 42 5))
-  ;; (mean normal-list)
-  ;; (standard-deviation normal-list)
   
   )

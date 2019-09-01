@@ -1,18 +1,12 @@
-;; doens't make sense to print full object b/c it might be really long list
-;; would prefer to drop the with irritant part
-;; just discovered that irritation part is optional
-
-;; how do other people do it
-;; pulled this out of statistics package for now
-;; not critical until I understand how to do it well
-
 (library (chez-stats assertions)
   (export
    check-list
    check-quantile-type
    check-p
    check-positive-integer
-   check-real)
+   check-real
+   check-positive-real
+   check-real-gte-zero)
 
   (import (chezscheme))
 
@@ -38,6 +32,14 @@
 
   (define (check-real x x-name who)
     (unless (real? x)
-      (assertion-violation who (string-append x-name " is not a real number"))))		   
+      (assertion-violation who (string-append x-name " is not a real number"))))
+
+  (define (check-positive-real x x-name who)
+    (unless (and (real? x) (> x 0))
+      (assertion-violation who (string-append x-name " is not a positive real number"))))
+
+  (define (check-real-gte-zero x x-name who)
+    (unless (and (real? x) (>= x 0))
+      (assertion-violation who (string-append x-name " is not a real number >= 0"))))
   )
 
