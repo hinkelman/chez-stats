@@ -39,8 +39,9 @@ Work in progress. Procedures for basic descriptive statistics and generating ran
 > (count '(0.5 1/2 #e0.5 1 1 2))
 ((1/2 1 2) (3 2 1))
 > (count '("a" "b" "b" "a"))
-Exception in (count): all elements of list must be real numbers; with irritant ("a" "b" "b" "a")
+Exception in (count ls): at least one element of ls is not a real number
 ```
+
 #### procedure: `(cumulative-sum ls)`
 **returns:** a list that is the cumulative sum of the values in `ls`
 
