@@ -240,7 +240,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
 ```
 
 #### procedure: `(random-lognormal n mulog sdlog)`
-**returns:** a list of `n` numbers from a log normal distribution with mean `mulog` and standard deviation `sdlog` of the distribution on the log scale
+**returns:** a list of `n` numbers from a log normal distribution; `mulog` and `sdlog` are the mean and standard deviation of the distribution on the log scale
 
 ```
 > (random-lognormal 10 0.5 0.5)
@@ -251,6 +251,10 @@ The probability distribution of the number of Bernoulli trials needed to get one
 (0.2969164016733139 0.2365155761845435 5.046466120321887 1.130781900343789
   6.369004081277258 0.3286021295817909 0.08029195517816963
   4.048941125846343 0.13855459327532965 8.481507871950905)
+> (mean (map log (random-lognormal 1e5 0.5 0.5)))
+0.5010480725785834
+> (standard-deviation (map log (random-lognormal 1e5 0.5 0.5)))
+0.4995377386643435
 ```
 
 #### procedure: `(random-normal n mu sd)`
