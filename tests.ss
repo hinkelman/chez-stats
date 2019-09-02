@@ -129,6 +129,15 @@
 (test-error (random-geometric 2 1.2))
 (test-end "geometric-test")
 
+(test-begin "lognormal-test")
+(define lognormal-list (random-lognormal 1e5 2 1))
+(test-approximate 12.28 (mean lognormal-list) 0.614)
+(test-approximate 16 (standard-deviation lognormal-list) 0.8)
+(test-error (random-lognormal -999 2 1))
+(test-error (random-lognormal 2 "a" 1))
+(test-error (random-lognormal 2 2 -1))
+(test-end "lognormal-test")
+
 (test-begin "normal-test")
 (define normal-list (random-normal 1e5 42 5))
 (test-approximate 42 (mean normal-list) 2.1)

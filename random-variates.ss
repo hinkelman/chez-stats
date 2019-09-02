@@ -4,8 +4,9 @@
    random-binomial
    random-exponential
    random-geometric
-   random-poisson
-   random-normal)
+   random-lognormal
+   random-normal
+   random-poisson)
 
   (import (chezscheme)
 	  (chez-stats assertions))
@@ -54,7 +55,6 @@
       (check-p p proc-string))
     (build-random-list n (lambda () (rgeom p))))
 
-    
   ;; https://en.wikipedia.org/wiki/Poisson_distribution
   ;; parameter is conventionally called lambda but using mu to avoid confusion with how lambda is used in scheme
   (define (random-poisson n mu)
@@ -74,7 +74,7 @@
       (check-positive-integer n "n" proc-string)
       (check-real-gte-zero mu "mu" proc-string))
     (build-random-list n (lambda () (rpois mu))))
-
+  
   ;; rejection method from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-normal n mu sd)
     (define (rnorm mu sd)
@@ -93,5 +93,13 @@
       (check-real mu "mu" proc-string)
       (check-real-gte-zero sd "sd" proc-string))
     (build-random-list n (lambda () (rnorm mu sd))))
+  
+  ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
+  (define (random-lognormal n mulog sdlog)
+    (let ([proc-string "(random-lognormal n mulog sdlog)"])
+      (check-positive-integer n "n" proc-string)
+      (check-real mulog "mulog" proc-string)
+      (check-real-gte-zero sdlog "sdlog" proc-string))
+    (map (lambda (x) (exp (+ mulog (* sdlog x)))) (random-normal n 0 1)))
   
   )

@@ -35,6 +35,7 @@ For more information on installing Chez Scheme libraries, see this [blog post](h
 [`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
 [`(random-exponential n mu)`](#procedure-random-exponential-n-mu)  
 [`(random-geometric n p)`](#procedure-random-geometric-n-p)  
+[`(random-lognormal n mulog sdlog)`](#procedure-random-lognormal-n-mulog-sdlog)  
 [`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)  
 [`(random-poisson n mu)`](#procedure-random-poisson-n-mu)
 
@@ -238,8 +239,22 @@ The probability distribution of the number of Bernoulli trials needed to get one
 (1.0 2.0 1.0 1.0 1.0 2.0 2.0 1.0 1.0 1.0 1.0 1.0 1.0 2.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0)
 ```
 
+#### procedure: `(random-lognormal n mulog sdlog)`
+**returns:** a list of `n` numbers from a log normal distribution with mean `mulog` and standard deviation `sdlog` of the distribution on the log scale
+
+```
+> (random-lognormal 10 0.5 0.5)
+(1.7753306883641662 0.9327713859192857 1.9962785771068654 3.679668320402791
+  1.7400539336159713 3.171605081866387 0.39297081354878666
+  1.7114423881850356 1.455971890328584 1.1655978691542683)
+> (random-lognormal 10 0.5 2)
+(0.2969164016733139 0.2365155761845435 5.046466120321887 1.130781900343789
+  6.369004081277258 0.3286021295817909 0.08029195517816963
+  4.048941125846343 0.13855459327532965 8.481507871950905)
+```
+
 #### procedure: `(random-normal n mu sd)`
-**returns:** a list of `n` integers from a normal distribution with mean `mu` and standard deviation `sd`
+**returns:** a list of `n` numbers from a normal distribution with mean `mu` and standard deviation `sd`
 
 ```
 > (random-normal 10 100 0.1)
