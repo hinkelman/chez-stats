@@ -1,6 +1,17 @@
 # Chez Scheme Statistics Library
 
-Work in progress. Procedures for basic descriptive statistics and generating random variates. 
+Work in progress. Procedures for basic descriptive statistics and generating random variates in Chez Scheme. 
+
+## Installation
+
+```
+$ cd ~/scheme # where '~/scheme' is the path to your Chez Scheme libraries
+$ git clone git://github.com/hinkelman/chez-stats.git
+```
+
+For more information on installing Chez Scheme libraries, see this [blog post](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/).
+
+## Table of Contents 
 
 ### Descriptive Statistics  
 
@@ -26,7 +37,7 @@ Work in progress. Procedures for basic descriptive statistics and generating ran
 [`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)  
 [`(random-poisson n mu)`](#procedure-random-poisson-n-mu)
 
-### Descriptive Statistics
+## Descriptive Statistics
 
 #### procedure: `(count ls)`
 **returns:** a list containing a sorted list of the unique values in `ls` and a list of counts corresponding to the unique values
@@ -180,7 +191,7 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 13/4
 ```
 
-### Generating Random Variates
+## Generating Random Variates
 
 #### procedure: `(random-bernoulli n p)`
 **returns:** a list of `n` numbers from a Bernoulli distribution with probability `p`

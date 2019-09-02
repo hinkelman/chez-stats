@@ -16,7 +16,7 @@
 	  (iterate (cons (proc) result) (add1 i))))
     (iterate '() 0))
   
-  ;; from Jain slides
+  ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-bernoulli n p)
     (define (rbern p)
       (if (<= (random 1.0) p) 1 0))
@@ -25,7 +25,7 @@
       (check-p p proc-string))
     (build-random-list n (lambda () (rbern p))))
 
-  ;; from Jain slides
+  ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-binomial n trials p)
     (define (rbin trials p)
       (apply + (random-bernoulli trials p)))
@@ -35,7 +35,7 @@
       (check-p p proc-string))
     (build-random-list n (lambda () (rbin trials p))))
 
-  ;; modified from SRFI 27
+  ;; SRFI 27
   (define (random-exponential n mu)
     (define (rexp mu)
       (- (* mu (log (random 1.0)))))
@@ -64,7 +64,7 @@
       (check-real-gte-zero mu "mu" proc-string))
     (build-random-list n (lambda () (rpois mu))))
 
-  ;; rejection method
+  ;; rejection method from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-normal n mu sd)
     (define (rnorm mu sd)
       (let iterate ()
