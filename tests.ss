@@ -5,6 +5,8 @@
 	(chez-stats random-variates)
 	(srfi s64 testing))
 
+;; Descriptive Statistics
+
 (test-begin "count-test")
 (test-equal (list '(1 2 3 4) '(2 2 1 1)) (count '(1 2 3 4 2 1)))
 (test-equal (list '(1 1.1 2 2.2) '(1 3 1 1)) (count '(1.1 1 2.2 2 1.1 1.1)))
@@ -92,6 +94,8 @@
 (test-error (weighted-mean '(1) '(1 2 "a")))
 (test-end "weighted-mean-test")
 
+;; Random Variates
+
 (test-begin "bernoulli-test")
 (define bernoulli-list (random-bernoulli 1e5 0.2))
 (test-approximate 0.2 (mean bernoulli-list) 0.01)
@@ -116,6 +120,14 @@
 (test-error (random-exponential -2 10))
 (test-error (random-exponential 2 -2))
 (test-end "exponential-test")
+
+(test-begin "geometric-test")
+(define geometric-list (random-geometric 1e5 0.2))
+(test-approximate 5 (mean geometric-list) 0.25)
+(test-approximate 20 (variance geometric-list) 1)
+(test-error (random-geometric -1 0.2))
+(test-error (random-geometric 2 1.2))
+(test-end "geometric-test")
 
 (test-begin "normal-test")
 (define normal-list (random-normal 1e5 42 5))

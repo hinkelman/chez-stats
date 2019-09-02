@@ -3,6 +3,7 @@
    random-bernoulli
    random-binomial
    random-exponential
+   random-geometric
    random-poisson
    random-normal)
 
@@ -44,6 +45,16 @@
       (check-positive-real mu "mu" proc-string))
     (build-random-list n (lambda () (rexp mu))))
 
+   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
+  (define (random-geometric n p)
+    (define (rgeom p)
+      (ceiling (/ (log (random 1.0)) (log (- 1 p)))))
+    (let ([proc-string "(random-geometric n p)"])
+      (check-positive-integer n "n" proc-string)
+      (check-p p proc-string))
+    (build-random-list n (lambda () (rgeom p))))
+
+    
   ;; https://en.wikipedia.org/wiki/Poisson_distribution
   ;; parameter is conventionally called lambda but using mu to avoid confusion with how lambda is used in scheme
   (define (random-poisson n mu)

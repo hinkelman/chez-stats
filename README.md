@@ -33,7 +33,8 @@ For more information on installing Chez Scheme libraries, see this [blog post](h
 
 [`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
 [`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
-[`(random-exponential n mu)`](#procedure-random-exponential-n-mu)  
+[`(random-exponential n mu)`](#procedure-random-exponential-n-mu) 
+[`(random-geometric n p)`](#procedure-random-geometric-n-p)  
 [`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)  
 [`(random-poisson n mu)`](#procedure-random-poisson-n-mu)
 
@@ -223,6 +224,18 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 (35.8597072715694 104.1153422246636 61.130577404212985 74.51016205480595
   28.757623000674293 69.03367489570623 1.9901391744468298
   32.16039857943056 16.818138818937218 38.53838415351449)
+```
+
+#### procedure: `(random-geometric n p)`
+**returns:** a list of `n` numbers from a geometric distribution with probability `p`
+
+The probability distribution of the number of Bernoulli trials needed to get one success, supported on the set { 1, 2, 3, ... } (see [Wikipedia](https://en.wikipedia.org/wiki/Geometric_distribution)). Note, `rgeom` in R uses the other version of the geometric distribution described on the Wikipedia page.
+
+```
+> (random-geometric 25 0.2)
+(3.0 3.0 6.0 13.0 1.0 4.0 3.0 7.0 3.0 2.0 9.0 1.0 2.0 1.0 6.0 4.0 4.0 1.0 10.0 1.0 2.0 1.0 3.0 4.0 21.0)
+> (random-geometric 25 0.8)
+(1.0 2.0 1.0 1.0 1.0 2.0 2.0 1.0 1.0 1.0 1.0 1.0 1.0 2.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0)
 ```
 
 #### procedure: `(random-normal n mu sd)`
