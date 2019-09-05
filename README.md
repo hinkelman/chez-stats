@@ -37,6 +37,7 @@ For more information on installing Chez Scheme libraries, see this [blog post](h
 [`(random-geometric n p)`](#procedure-random-geometric-n-p)  
 [`(random-lognormal n mulog sdlog)`](#procedure-random-lognormal-n-mulog-sdlog)  
 [`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)  
+[`(random-pareto n shape)`](#procedure-random-pareto-n-shape)  
 [`(random-poisson n mu)`](#procedure-random-poisson-n-mu)
 
 ## Descriptive Statistics
@@ -270,6 +271,21 @@ The probability distribution of the number of Bernoulli trials needed to get one
   164.39808748159305 22.8058534483159 158.33535128554186
   -30.757726972313066 132.37810774263465 145.9341465922021)
 ```
+
+#### procedure: `(random-pareto n shape)`
+**returns:** a list of `n` numbers from a Pareto distribution with `shape` parameter
+
+```
+> (random-pareto 10 1)
+(1.1832574208131592 1.1148930254197593 4.195463431627 1.3200617807665502
+  1.9859628002254515 1.2586921428918592 1.7628680791986209
+  2.040914305978817 1.7318113216158157 1.3009663204194946)
+> (random-pareto 10 3)
+(1.4037062644512017 1.1054698023959297 1.0022192639936547 2.5126775158365344
+  1.6214825174549339 1.2489834137377076 1.3914657545229647
+  2.389540116143122 1.9472706245609315 1.591010960196833)
+```
+
 
 #### procedure: `(random-poisson n mu)`
 **returns:** a list of `n` integers from a Poisson distribution with mean and variance `mu`

@@ -147,6 +147,14 @@
 (test-error (random-normal 2 2 -5))
 (test-end "normal-test")
 
+(test-begin "pareto-test")
+(define pareto-list (random-pareto 1e5 5))
+(test-approximate 1.25 (mean pareto-list) 0.0625)
+(test-approximate 0.104 (variance pareto-list) 0.005)
+(test-error (random-pareto -10.5 10))
+(test-error (random-pareto 10 -2))
+(test-end "pareto-test")
+
 (test-begin "poisson-test")
 (define poisson-list (random-poisson 1e5 7))
 (test-approximate 7 (mean poisson-list) 0.35)

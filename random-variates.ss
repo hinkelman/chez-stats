@@ -6,6 +6,7 @@
    random-geometric
    random-lognormal
    random-normal
+   random-pareto
    random-poisson)
 
   (import (chezscheme)
@@ -46,7 +47,7 @@
       (check-positive-real mu "mu" proc-string))
     (build-random-list n (lambda () (rexp mu))))
 
-   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
+  ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-geometric n p)
     (define (rgeom p)
       (ceiling (/ (log (random 1.0)) (log (- 1 p)))))
@@ -55,25 +56,7 @@
       (check-p p proc-string))
     (build-random-list n (lambda () (rgeom p))))
 
-  ;; https://en.wikipedia.org/wiki/Poisson_distribution
-  ;; parameter is conventionally called lambda but using mu to avoid confusion with how lambda is used in scheme
-  (define (random-poisson n mu)
-    (define (rpois mu)
-      (define u (random 1.0))
-      (define p-init (exp (* -1 mu)))
-      (define (update-ps ps i)
-	(let* ([p (car ps)]
-	       [s (cdr ps)]
-	       [p-new (* p (/ mu i))])
-	  (cons p-new (+ s p-new))))
-      (define (iterate ps i)
-	(cond [(>= (cdr ps) u) (sub1 i)]
-	      [else (iterate (update-ps ps i) (add1 i))]))
-      (iterate (cons p-init p-init) 1))
-    (let ([proc-string "(random-poisson n mu)"])
-      (check-positive-integer n "n" proc-string)
-      (check-real-gte-zero mu "mu" proc-string))
-    (build-random-list n (lambda () (rpois mu))))
+
   
   ;; rejection method from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-normal n mu sd)
@@ -101,5 +84,34 @@
       (check-real mulog "mulog" proc-string)
       (check-real-gte-zero sdlog "sdlog" proc-string))
     (map (lambda (x) (exp (+ mulog (* sdlog x)))) (random-normal n 0 1)))
+
+  ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
+  (define (random-pareto n shape)
+    (define (rpareto shape)
+      (/ 1 (expt (random 1.0) (/ 1 shape))))
+    (let ([proc-string "(random-pareto n shape)"])
+      (check-positive-integer n "n" proc-string)
+      (check-positive-real shape "shape" proc-string))
+    (build-random-list n (lambda () (rpareto shape))))
+
+  ;; https://en.wikipedia.org/wiki/Poisson_distribution
+  ;; parameter is conventionally called lambda but using mu to avoid confusion with how lambda is used in scheme
+  (define (random-poisson n mu)
+    (define (rpois mu)
+      (define u (random 1.0))
+      (define p-init (exp (* -1 mu)))
+      (define (update-ps ps i)
+	(let* ([p (car ps)]
+	       [s (cdr ps)]
+	       [p-new (* p (/ mu i))])
+	  (cons p-new (+ s p-new))))
+      (define (iterate ps i)
+	(cond [(>= (cdr ps) u) (sub1 i)]
+	      [else (iterate (update-ps ps i) (add1 i))]))
+      (iterate (cons p-init p-init) 1))
+    (let ([proc-string "(random-poisson n mu)"])
+      (check-positive-integer n "n" proc-string)
+      (check-real-gte-zero mu "mu" proc-string))
+    (build-random-list n (lambda () (rpois mu))))
   
   )
