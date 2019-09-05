@@ -7,7 +7,8 @@
    random-lognormal
    random-normal
    random-pareto
-   random-poisson)
+   random-poisson
+   random-uniform)
 
   (import (chezscheme)
 	  (chez-stats assertions))
@@ -55,8 +56,6 @@
       (check-positive-integer n "n" proc-string)
       (check-p p proc-string))
     (build-random-list n (lambda () (rgeom p))))
-
-
   
   ;; rejection method from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-normal n mu sd)
@@ -113,5 +112,16 @@
       (check-positive-integer n "n" proc-string)
       (check-real-gte-zero mu "mu" proc-string))
     (build-random-list n (lambda () (rpois mu))))
-  
+
+  (define (random-uniform n mn mx)
+    (define (runif mn mx)
+      (+ mn (* (- mx mn) (random 1.0))))
+    (let ([proc-string "(random-uniform n mn mx)"])
+      (check-positive-integer n "n" proc-string)
+      (check-real mn "mn" proc-string)
+      (check-real mx "mx" proc-string)
+      (unless (> mx mn)
+	(assertion-violation proc-string "mx is not greater than mn")))
+    (build-random-list n (lambda () (runif mn mx))))
+    
   )

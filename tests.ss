@@ -163,5 +163,14 @@
 (test-error (random-normal 2 -10))
 (test-end "poisson-test")
 
+(test-begin "uniform-test")
+(define uniform-list (random-uniform 1e5 -10 7))
+(test-approximate -10 (apply min uniform-list) 0.01)
+(test-approximate 7 (apply max uniform-list) 0.01)
+(test-error (random-uniform -7 0 1))
+(test-error (random-uniform 2 'a 1))
+(test-error (random-uniform 2 2 1))
+(test-end "uniform-test")
+
 
 

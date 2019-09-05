@@ -38,7 +38,8 @@ For more information on installing Chez Scheme libraries, see this [blog post](h
 [`(random-lognormal n mulog sdlog)`](#procedure-random-lognormal-n-mulog-sdlog)  
 [`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)  
 [`(random-pareto n shape)`](#procedure-random-pareto-n-shape)  
-[`(random-poisson n mu)`](#procedure-random-poisson-n-mu)
+[`(random-poisson n mu)`](#procedure-random-poisson-n-mu)  
+[`(random-uniform n mn mx)`](#procedure-random-uniform-n-mn-mx)
 
 ## Descriptive Statistics
 
@@ -295,4 +296,16 @@ The probability distribution of the number of Bernoulli trials needed to get one
 (8 12 16 8 15 6 12 12 12 6 8 10 13 15 12 12 8 12 8 10 10 11 12 13 8)
 > (random-poisson 25 100)
 (102 94 107 102 106 100 99 102 94 88 85 103 96 92 110 105 83 87 109 84 98 105 83 107 111)
+```
+
+#### procedure: `(random-uniform n mn mx)`
+**returns:** a list of `n` numbers from a uniform distribution with mininum `mn` and maximum `mx`
+
+```
+> (random-uniform 10 -100 100)
+(-65.5058597140247 61.16064610295348 -2.6071638962549457 -53.230103242300466
+  78.5740908243061 6.188190661434589 -62.80124237884732
+  -75.50128468420634 16.438291149933804 -89.67898368495186)
+> (apply min (random-uniform 1e5 -10 10))
+-9.999928733983786
 ```
