@@ -32,6 +32,13 @@
 (test-error (interquartile-range '(1) 100))
 (test-end "interquartile-range")
 
+(test-begin "kurtosis")
+(test-assert (= 17/10 (kurtosis '(1 2 3 4 5))))
+(test-assert (= 51/25 (kurtosis '(1 2 2 3 3 3))))
+(test-error (kurtosis '()))
+(test-error (kurtosis "a"))
+(test-end "kurtosis")
+
 (test-begin "mean-test")
 (test-assert (= 3 (mean '(1 2 3 4 5))))
 (test-assert (= 0 (mean '(-10 0 10))))
@@ -66,6 +73,13 @@
 (test-equal (cons -99 100) (range '(-10 -7 3 -99 100)))
 (test-error (range '()))
 (test-end "range-test")
+
+(test-begin "skewness-test")
+(test-assert (= 0 (skewness '(1 2 3 4 5))))
+(test-assert (= -0.6 (skewness '(1 2 2 3 3 3 4 4 4 4))))
+(test-error (skewness '()))
+(test-error (skewness '("a" 1)))
+(test-end "skewness-test")
 
 (test-begin "standard-deviation-test")
 (test-assert (= 1.8708286933869707 (standard-deviation '(0 1 2 3 4 5))))

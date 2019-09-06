@@ -4,12 +4,14 @@
    cumulative-sum
    ecdf
    interquartile-range
+   kurtosis
    mean
    median
    mode
    quantile
    range
    standard-deviation
+   skewness
    unique
    variance
    weighted-mean)
@@ -110,6 +112,24 @@
   (define (mean ls)
     (check-list ls "ls" "(mean ls)")
     (/ (apply + ls) (length ls)))
+
+  (define (skewness ls)
+    (check-list ls "ls" "(skewness ls)")
+    (let* ([n (length ls)]
+	   [x-bar (mean ls)]
+	   [x-diff (map (lambda (x) (- x x-bar)) ls)]
+	   [num (/ (apply + (map (lambda (x) (expt x 3)) x-diff)) n)]
+	   [den (/ (apply + (map (lambda (x) (expt x 2)) x-diff)) n)])
+      (/ num (expt den (/ 3 2)))))
+
+  (define (kurtosis ls)
+    (check-list ls "ls" "(kurtosis ls)")
+    (let* ([n (length ls)]
+	   [x-bar (mean ls)]
+	   [x-diff (map (lambda (x) (- x x-bar)) ls)]
+	   [num (apply + (map (lambda (x) (expt x 4)) x-diff))]
+	   [den (expt (apply + (map (lambda (x) (expt x 2)) x-diff)) 2)])
+      (* n (/ num den))))
 
   (define (weighted-mean ls weights)
     (let ([proc-string "(weighted-mean ls weights)"])

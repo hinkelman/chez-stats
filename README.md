@@ -19,11 +19,13 @@ For more information on installing Chez Scheme libraries, see this [blog post](h
 [`(cumulative-sum ls)`](#procedure-cumulative-sum-ls)  
 [`(ecdf ls)`](#procedure-ecdf-ls)  
 [`(interquartile-range ls type)`](#procedure-interquartile-range-ls-type)  
+[`(kurtosis ls)`](#procedure-kurtosis-ls)  
 [`(mean ls)`](#procdure-mean-ls)  
 [`(median ls)`](#procedure-median-ls)  
 [`(mode ls)`](#procedure-mode-ls)  
 [`(quantile ls p type)`](#procedure-quantile-ls-p-type)  
 [`(range ls)`](#procedure-range-ls)  
+[`(skewness ls)`](#procedure-skewness-ls)  
 [`(standard-deviation ls)`](#procedure-standard-deviation-ls)  
 [`(unique ls)`](#procedure-unique-ls)  
 [`(variance ls)`](#procedure-variance-ls)  
@@ -91,6 +93,16 @@ Exception in (count ls): at least one element of ls is not a real number
 2.25
 ```
 
+#### procedure: `(kurtosis ls)`
+**returns:** the kurtosis of the values in `ls`
+
+```
+> (kurtosis '(-10 0 10))
+3/2
+> (kurtosis '(1 2 2 3 3 3))
+51/25
+```
+
 #### procedure: `(mean ls)`
 **returns:** the arithmetic mean of the values in `ls`
 
@@ -147,6 +159,16 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 (1 . 5)
 > (range '(-10 -7 3 -99 100))
 (-99 . 100)
+```
+
+#### procedure: `(skewness ls)`
+**returns:** the skewness of the values in `ls`
+
+```
+> (skewness '(1 2 3 4 5))
+0.0
+> (skewness '(1 2 2 3 3 3 4 4 4 4))
+-0.6
 ```
 
 #### procedure: `(standard-deviation ls)`
