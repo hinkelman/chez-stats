@@ -3,6 +3,7 @@
    check-list
    check-quantile-type
    check-p
+   check-p-exclusive
    check-positive-integer
    check-real
    check-positive-real
@@ -24,7 +25,11 @@
 
   (define (check-p p who)
     (unless (and (and (>= p 0) (<= p 1)) (real? p))
-      (assertion-violation who "p is not a real number from 0-1")))
+      (assertion-violation who "p is not a real number in [0,1]")))
+
+  (define (check-p-exclusive p who)
+    (unless (and (and (> p 0) (< p 1)) (real? p))
+      (assertion-violation who "p is not a real number in (0,1)")))
 
   (define (check-positive-integer x x-name who)
     (unless (and (> x 0) (integer? x))

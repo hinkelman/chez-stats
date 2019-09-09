@@ -34,10 +34,14 @@ For more information on installing Chez Scheme libraries, see this [blog post](h
 ### Generating Random Variates
 
 [`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
+[`(random-beta n a b)`](#procedure-random-beta-n-a-b)  
+[`(random-beta-binomial n trials p dispersion)`](#procedure-random-binomial-n-trials-p-dispersion)  
 [`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
 [`(random-exponential n mu)`](#procedure-random-exponential-n-mu)  
+[`(random-gamma n shape rate)`](#procedure-random-gamma-n-shape-rate)  
 [`(random-geometric n p)`](#procedure-random-geometric-n-p)  
 [`(random-lognormal n mulog sdlog)`](#procedure-random-lognormal-n-mulog-sdlog)  
+[`(random-negative-binomial n trials p)`](#procedure-random-negative-binomial-n-trials-p)  
 [`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)  
 [`(random-pareto n shape)`](#procedure-random-pareto-n-shape)  
 [`(random-poisson n mu)`](#procedure-random-poisson-n-mu)  
@@ -229,8 +233,44 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1)
 ```
 
+#### procedure: `(random-beta n a b)`
+**returns:** a list of `n` numbers from a beta distribution with shape parameters `a` and `b`
+
+```
+> (random-beta 10 1 1)
+(0.1608787838443958 0.13619509140081779 0.9834731616787276 0.5743357684870621
+  0.8637598266739267 0.6942190873522962 0.645854411263454
+  0.41051274063753873 0.668801118029433 0.7873753287243728)
+> (map round (random-beta 10 0.01 1))
+(0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0)
+> (map round (random-beta 10 1 0.01))
+(1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0)
+```
+
+#### procedure: `(random-beta-binomial n trials p dispersion)`
+**returns:** a list of `n` successes out the number of `trials` from a binomial distribution where probability of success `p` is drawn from a beta distribution with shape parameters derived from `p` and `dispersion`
+
+```
+> (random-beta-binomial 25 10 0.5 1.001)
+(5 3 7 6 6 4 4 7 2 4 5 2 6 8 5 5 8 6 4 4 3 3 4 5 5)
+> (random-beta-binomial 25 10 0.5 9)
+(10 10 0 10 10 0 10 1 2 2 0 0 10 0 8 2 10 10 10 0 10 10 0 0 0)
+> (exact->inexact (mean (random-beta-binomial 1e5 10 0.5 1.001)))
+5.00051
+> (exact->inexact (mean (random-binomial 1e5 10 0.5)))
+5.0002
+> (variance (random-beta-binomial 1e5 10 0.5 1.001))
+2.5040549180491807
+> (variance (random-binomial 1e5 10 0.5))
+2.5000544964449647
+> (exact->inexact (mean (random-beta-binomial 1e5 10 0.5 9)))
+4.98816
+> (variance (random-beta-binomial 1e5 10 0.5 9))
+22.50210069290693
+```
+
 #### procedure: `(random-binomial n trials p)`
-**returns:** a list of `n` successes out of the specified number of `trials` from a binomial distribution with probability `p`
+**returns:** a list of `n` successes out of the number of `trials` from a binomial distribution with probability `p`
 
 ```
 > (random-binomial 25 10 0.5)
@@ -249,6 +289,20 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 (35.8597072715694 104.1153422246636 61.130577404212985 74.51016205480595
   28.757623000674293 69.03367489570623 1.9901391744468298
   32.16039857943056 16.818138818937218 38.53838415351449)
+```
+
+#### procedure: `(random-gamma n shape rate)`
+**returns:** a list of `n` numbers from an gamma distribution with `shape` and `rate` parameters
+
+```
+> (random-gamma 10 1 1)
+(0.18951484852194106 0.2863156678119879 0.5263915675137112 1.774829314438009
+  0.5811076220295317 1.6993576614297963 1.243626305131102
+  1.17084207353143 0.2806255087837392 0.2860118057459071)
+> (mean (random-gamma 1e5 5 5))
+0.9995798340045534
+> (mean (random-gamma 1e5 10 10))
+0.9989805807416875
 ```
 
 #### procedure: `(random-geometric n p)`
@@ -281,6 +335,18 @@ The probability distribution of the number of Bernoulli trials needed to get one
 0.4995377386643435
 ```
 
+#### procedure: `(random-negative-binomial n trials p)`
+**returns:** a list of `n` successes from a negative binomial distribution with target number of successful `trials` with probability `p` of success
+
+```
+> (random-negative-binomial 25 11.5 0.5)
+(14 11 8 5 9 23 12 4 11 12 15 8 14 12 12 11 14 15 14 11 12 17 12 12 10)
+> (exact->inexact (mean (random-negative-binomial 1e5 7 0.5)))
+6.99912
+> (exact->inexact (mean (random-poisson 1e5 7)))
+7.00023
+```
+
 #### procedure: `(random-normal n mu sd)`
 **returns:** a list of `n` numbers from a normal distribution with mean `mu` and standard deviation `sd`
 
@@ -308,7 +374,6 @@ The probability distribution of the number of Bernoulli trials needed to get one
   1.6214825174549339 1.2489834137377076 1.3914657545229647
   2.389540116143122 1.9472706245609315 1.591010960196833)
 ```
-
 
 #### procedure: `(random-poisson n mu)`
 **returns:** a list of `n` integers from a Poisson distribution with mean and variance `mu`

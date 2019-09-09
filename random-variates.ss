@@ -1,10 +1,14 @@
 (library (chez-stats random-variates)
   (export
    random-bernoulli
+   random-beta
+   random-beta-binomial
    random-binomial
    random-exponential
+   random-gamma
    random-geometric
    random-lognormal
+   random-negative-binomial
    random-normal
    random-pareto
    random-poisson
@@ -31,13 +35,13 @@
 
   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-binomial n trials p)
-    (define (rbin trials p)
+    (define (rbinom trials p)
       (apply + (random-bernoulli trials p)))
     (let ([proc-string "(random-binomial n trials p)"])
       (check-positive-integer n "n" proc-string)
       (check-positive-integer trials "trials" proc-string)
       (check-p p proc-string))
-    (build-random-list n (lambda () (rbin trials p))))
+    (build-random-list n (lambda () (rbinom trials p))))
 
   ;; SRFI 27
   (define (random-exponential n mu)
@@ -54,7 +58,7 @@
       (ceiling (/ (log (random 1.0)) (log (- 1 p)))))
     (let ([proc-string "(random-geometric n p)"])
       (check-positive-integer n "n" proc-string)
-      (check-p p proc-string))
+      (check-p-exclusive p proc-string))
     (build-random-list n (lambda () (rgeom p))))
   
   ;; rejection method from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
@@ -75,7 +79,60 @@
       (check-real mu "mu" proc-string)
       (check-real-gte-zero sd "sd" proc-string))
     (build-random-list n (lambda () (rnorm mu sd))))
-  
+
+  ;; Marsaglia and Tsang’s Method
+  ;; from https://www.hongliangjie.com/2012/12/19/how-to-generate-gamma-random-variables/
+  ;; material at url refers to rate parameter as scale
+  (define (random-gamma n shape rate)
+    (define (rgamma shape rate)
+      (cond [(not (= rate 1))
+	     (/ (rgamma shape 1) rate)]
+	    [else
+	     (cond [(< shape 1)
+		    (* (rgamma (add1 shape) rate) (expt (random 1.0) (/ 1 shape)))]
+		   [else
+		    (let* ([d (- shape 1/3)]
+			   [c (/ 1 (sqrt (* 9 d)))]
+			   [Z (list-ref (random-normal 1 0 1) 0)]
+			   [U (random 1.0)]
+			   [V (expt (add1 (* c Z)) 3)]
+			   [z-comp (/ -1 c)]
+			   [log-U-comp (+ (* 1/2 (expt Z 2)) (- d (* d V)) (* d (log V)))])
+		      (cond [(and (> Z z-comp) (< (log U) log-U-comp)) (* d V)]
+			    [else (rgamma shape rate)]))])]))
+    (let ([proc-string "(random-gamma n shape rate)"])
+      (check-positive-integer n "n" proc-string)
+      (check-positive-real shape "shape" proc-string)
+      (check-positive-real rate "rate" proc-string))
+    (build-random-list n (lambda () (rgamma shape rate))))
+
+  ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
+  (define (random-beta n a b)
+    (let ([proc-string "(random-beta n a b)"])
+      (check-positive-integer n "n" proc-string)
+      (check-positive-real a "a" proc-string)
+      (check-positive-real b "b" proc-string))
+    (let ([A (random-gamma n a 1)]
+	  [B (random-gamma n b 1)])
+      (map (lambda (x y) (/ x (+ x y))) A B)))
+
+  (define (random-beta-binomial n trials p dispersion)
+    (let ([proc-string "(random-beta-binomial n trials p dispersion)"])
+      (check-positive-integer n "n" proc-string)
+      (check-positive-integer trials "trials" proc-string)
+      (check-p-exclusive p proc-string)
+      (unless (> dispersion 1)
+	(assertion-violation proc-string "dispersion is not a real number > 1"))
+      ;; as difference between trials and dispersion approaches zero
+      ;; will get an error from (random-binomial) about invalid values of p
+      (unless (> trials dispersion)
+    	(assertion-violation proc-string "trials is not greater than dispersion")))
+    (let* ([g (/ (- trials dispersion) (sub1 dispersion))]
+	   [a (* g p)]
+	   [b (* g (- 1 p))])
+      (map (lambda (x) (list-ref (random-binomial 1 trials x) 0))
+  	   (random-beta n a b))))
+      	      
   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-lognormal n mulog sdlog)
     (let ([proc-string "(random-lognormal n mulog sdlog)"])
@@ -113,6 +170,15 @@
       (check-real-gte-zero mu "mu" proc-string))
     (build-random-list n (lambda () (rpois mu))))
 
+  ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
+  (define (random-negative-binomial n trials p)
+    (let ([proc-string "(random-negative-binomial n trials p)"])
+      (check-positive-integer n "n" proc-string)
+      (check-p-exclusive p proc-string)
+      (check-positive-real trials "trials" proc-string))
+    (let ([gamma-list (random-gamma n trials (/ p (- 1 p)))])
+      (map (lambda (x) (list-ref (random-poisson 1 x) 0)) gamma-list)))
+	
   (define (random-uniform n mn mx)
     (define (runif mn mx)
       (+ mn (* (- mx mn) (random 1.0))))
