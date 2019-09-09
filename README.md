@@ -35,7 +35,7 @@ For more information on installing Chez Scheme libraries, see this [blog post](h
 
 [`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
 [`(random-beta n a b)`](#procedure-random-beta-n-a-b)  
-[`(random-beta-binomial n trials p dispersion)`](#procedure-random-binomial-n-trials-p-dispersion)  
+[`(random-beta-binomial n trials p dispersion)`](#procedure-random-beta-binomial-n-trials-p-dispersion)  
 [`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
 [`(random-exponential n mu)`](#procedure-random-exponential-n-mu)  
 [`(random-gamma n shape rate)`](#procedure-random-gamma-n-shape-rate)  
