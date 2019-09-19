@@ -1,8 +1,7 @@
 ;; run this file from terminal with
 ;; > chez path/to/tests.ss
 
-(import (chez-stats statistics)
-	(chez-stats random-variates)
+(import (chez-stats chez-stats)
 	(srfi s64 testing))
 
 ;; Descriptive Statistics

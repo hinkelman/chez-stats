@@ -2,7 +2,7 @@
 
 Work in progress. Procedures for basic descriptive statistics and generating random variates in Chez Scheme. 
 
-## Installation
+## Installation and Import
 
 ```
 $ cd ~/scheme # where '~/scheme' is the path to your Chez Scheme libraries
@@ -10,6 +10,8 @@ $ git clone git://github.com/hinkelman/chez-stats.git
 ```
 
 For more information on installing Chez Scheme libraries, see this [blog post](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/).
+
+Import all procedures: `(import (chez-stats chez-stats))`
 
 ## Table of Contents 
 
@@ -48,6 +50,8 @@ For more information on installing Chez Scheme libraries, see this [blog post](h
 [`(random-uniform n mn mx)`](#procedure-random-uniform-n-mn-mx)
 
 ## Descriptive Statistics
+
+Import only the descriptive statistics procedures: `(import (chez-stats statistics))`
 
 #### procedure: `(count ls)`
 **returns:** a list containing a sorted list of the unique values in `ls` and a list of counts corresponding to the unique values
@@ -222,6 +226,8 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 ```
 
 ## Generating Random Variates
+
+Import only the random variate procedures: `(import (chez-stats random-variates))`
 
 #### procedure: `(random-bernoulli n p)`
 **returns:** a list of `n` numbers from a Bernoulli distribution with probability `p`

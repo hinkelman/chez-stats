@@ -75,8 +75,6 @@
 	   [gamma (gamma-proc g j)])
       (calc-Q order-stats (inexact->exact j) gamma)))
 
-					;(map (lambda (x) (quantile '(1 2 3 4 5 6) x 9)) '(#e0.0 #e0.1 #e0.2 #e0.3 #e0.4 #e0.5 #e0.6 #e0.7 #e0.8 #e0.9 #e1.0))
-
   (define (median ls)
     (check-list ls "ls" "(median ls)")
     (quantile ls 0.5 7))
