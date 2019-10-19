@@ -1,6 +1,9 @@
 # Chez Scheme Statistics Library
 
-Work in progress. Procedures for basic descriptive statistics and generating random variates in Chez Scheme. 
+This is a statistics library only in a loose sense. More accurately, it is a hodgepodge of procedures
+that an R programmer thought would be useful when working in Chez Scheme. For more information, see blog posts 
+[here](https://www.travishinkelman.com/post/writing-chez-scheme-library/) and
+[here](https://www.travishinkelman.com/post/reading-writing-csv-files-chez-scheme/).
 
 ## Installation and Import
 
@@ -13,7 +16,7 @@ For more information on installing Chez Scheme libraries, see this [blog post](h
 
 Import all procedures: `(import (chez-stats chez-stats))`
 
-## Table of Contents 
+## Table of Contents
 
 ### Descriptive Statistics  
 
@@ -33,7 +36,13 @@ Import all procedures: `(import (chez-stats chez-stats))`
 [`(variance ls)`](#procedure-variance-ls)  
 [`(weighted-mean ls weights)`](#procedure-weighted-mean-ls-weights)
 
-### Generating Random Variates
+### Read and Write CSV Files
+
+[`(preview-csv path rows)`](#procedure-preview-csv-path-rows)  
+[`(read-csv path)`](#procedure-read-csv-path)  
+[`(write-csv ls path overwrite)`](#procedure-write-csv-ls-path-overwrite)  
+
+### Generate Random Variates
 
 [`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
 [`(random-beta n a b)`](#procedure-random-beta-n-a-b)  
@@ -225,7 +234,51 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 13/4
 ```
 
-## Generating Random Variates
+## Read and Write CSV Files
+
+There is nothing sophisticated about this approach to reading CSV files. For all files, `read-csv` produces a list of lists of strings.
+There is no attempt to convert strings to numbers or other objects. The CSV file needs to be rectangular, i.e., every row must have the
+same number of columns.
+
+Import only the CSV procedures: `(import (chez-stats csv))`
+
+### Read and Write CSV Files
+
+#### procedure: `(preview-csv path rows)`
+**returns:** a list of lists where each sub-list is one row in the CSV file, `path`, up to the number of `rows`
+
+```
+# example requires that you first run code for (write-csv) below
+> (preview-csv "example.csv" 2)
+(("col1" "col2" "col3" "col4")
+  ("10.02" "A" "\"1,000\"" "\"Glen \"Big Baby\" Davis\""))
+```
+
+#### procedure: `(read-csv path rows)`
+**returns:** a list of lists where each sub-list is one row in the CSV file, `path`
+
+```
+# example requires that you first run code for (write-csv) below
+> (read-csv "example.csv")
+(("col1" "col2" "col3" "col4")
+  ("10.02" "A" "\"1,000\"" "\"Glen \"Big Baby\" Davis\"")
+  ("0.3333333333333333" "B" "1000" "\"Earvin \"Magic\" Johnson\""))
+```
+
+#### procedure: `(write-csv ls path overwrite)`
+**returns:** writes a list of lists as a CSV file to `path`; if file exists at `path`, operation will fail unless `overwrite` is `#t`
+
+```
+> (define example-list (list
+                        (list "col1" "col2" "col3" "col4")
+                        (list 10.02 #\A "1,000" "Glen \"Big Baby\" Davis")
+                        (list 1/3 #\B "1000" "Earvin \"Magic\" Johnson")))
+> (display example-list)
+((col1 col2 col3 col4) (10.02 A 1,000 Glen "Big Baby" Davis) (1/3 B 1000 Earvin "Magic" Johnson))
+> (write-csv example-list "example.csv" #f)
+```
+
+## Generate Random Variates
 
 Import only the random variate procedures: `(import (chez-stats random-variates))`
 

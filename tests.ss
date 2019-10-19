@@ -1,5 +1,7 @@
-;; run this file from terminal with
-;; > chez path/to/tests.ss
+;; before running tests need to install srfi 64 from thunderchez (https://pizzahack.eu/fossil/thunderchez/index)
+;; and add to library directories 
+;; then run this file from terminal with
+;; $ chez path/to/tests.ss
 
 (import (chez-stats chez-stats)
 	(srfi s64 testing))
@@ -223,5 +225,6 @@
 (test-error (random-uniform 2 2 1))
 (test-end "uniform-test")
 
+(exit (if (zero? (test-runner-fail-count (test-runner-get))) 0 1))
 
 

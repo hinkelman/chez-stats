@@ -27,10 +27,14 @@
    random-normal
    random-pareto
    random-poisson
-   random-uniform)
+   random-uniform
+   preview-csv
+   read-csv
+   write-csv)
 
   (import (chezscheme)
 	  (chez-stats statistics)
-	  (chez-stats random-variates)))
+	  (chez-stats random-variates)
+	  (chez-stats csv))
 
-
+  )

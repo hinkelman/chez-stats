@@ -1,6 +1,6 @@
 (("name" . "chez-stats")
-("version" . "0.4.2")
-("description" . "Procedures for basic descriptive statistics and generating random variates in Chez Scheme.")
+("version" . "0.5.0")
+("description" . "Read/write CSV files, compute descriptive statistics, and generate random variates in Chez Scheme.")
 ("keywords")
 ("author" 
     ("hinkelman"))
