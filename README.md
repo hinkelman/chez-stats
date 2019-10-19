@@ -254,7 +254,7 @@ Import only the CSV procedures: `(import (chez-stats csv))`
   ("10.02" "A" "\"1,000\"" "\"Glen \"Big Baby\" Davis\""))
 ```
 
-#### procedure: `(read-csv path rows)`
+#### procedure: `(read-csv path)`
 **returns:** a list of lists where each sub-list is one row in the CSV file, `path`
 
 ```
