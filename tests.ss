@@ -1,7 +1,9 @@
-;; before running tests need to install srfi 64 from thunderchez (https://pizzahack.eu/fossil/thunderchez/index)
-;; and add to library directories 
-;; then run this file from terminal with
+;; run this file from terminal with
 ;; $ chez path/to/tests.ss
+
+;; add local ./lib directory for dependency on srfi package
+(library-directories (cons (cons "./lib" "./lib")
+			   (library-directories)))
 
 (import (chez-stats chez-stats)
 	(srfi s64 testing))
