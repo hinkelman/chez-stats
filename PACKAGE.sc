@@ -6,7 +6,6 @@
     ("hinkelman"))
 ("private" . #f)
 ("scripts")
-("dependencies" 
-    ("srfi" . "1.0.0"))
+("dependencies")
 ("repl" . "scheme")
 ("run" . "scheme --script"))
