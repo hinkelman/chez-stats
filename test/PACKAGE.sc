@@ -1,6 +1,6 @@
 (("name" . "chez-stats-test")
 ("version" . "0.0.1")
-("description" . "")
+("description" . "chez stats test")
 ("keywords")
 ("author" 
     ("hinkelman"))
