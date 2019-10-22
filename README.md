@@ -254,8 +254,6 @@ same number of columns.
 
 Import only the CSV procedures: `(import (chez-stats csv))`
 
-### Read and Write CSV Files
-
 #### procedure: `(preview-csv path rows)`
 **returns:** a list of lists where each sub-list is one row in the CSV file, `path`, up to the number of `rows`
 
