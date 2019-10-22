@@ -5,7 +5,8 @@
  ("author" 
    ("hinkelman"))
  ("private" . #f)
+ ("scripts" 
+    ("repl" . "scheme")
+    ("run" . "scheme --script"))
  ("scripts")
  ("dependencies")
- ("repl" . "scheme")
- ("run" . "scheme --script"))
