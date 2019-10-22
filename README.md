@@ -258,7 +258,7 @@ Import only the CSV procedures: `(import (chez-stats csv))`
 **returns:** a list of lists where each sub-list is one row in the CSV file, `path`, up to the number of `rows`
 
 ```
-# example requires that you first run code for (write-csv) below
+;; example requires that you first run code for (write-csv) below
 > (preview-csv "example.csv" 2)
 (("col1" "col2" "col3" "col4")
   ("10.02" "A" "\"1,000\"" "\"Glen \"Big Baby\" Davis\""))
@@ -268,7 +268,7 @@ Import only the CSV procedures: `(import (chez-stats csv))`
 **returns:** a list of lists where each sub-list is one row in the CSV file, `path`
 
 ```
-# example requires that you first run code for (write-csv) below
+;; example requires that you first run code for (write-csv) below
 > (read-csv "example.csv")
 (("col1" "col2" "col3" "col4")
   ("10.02" "A" "\"1,000\"" "\"Glen \"Big Baby\" Davis\"")
