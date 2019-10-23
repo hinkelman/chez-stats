@@ -64,6 +64,7 @@ Import all `chez-stats` procedures: `(import (chez-stats chez-stats))`
 [`(random-gamma n shape rate)`](#procedure-random-gamma-n-shape-rate)  
 [`(random-geometric n p)`](#procedure-random-geometric-n-p)  
 [`(random-lognormal n mulog sdlog)`](#procedure-random-lognormal-n-mulog-sdlog)  
+[`(random-multinomial trials ps)`](#procedure-random-multinomial-trials-ps)  
 [`(random-negative-binomial n trials p)`](#procedure-random-negative-binomial-n-trials-p)  
 [`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)  
 [`(random-pareto n shape)`](#procedure-random-pareto-n-shape)  
@@ -402,6 +403,20 @@ The probability distribution of the number of Bernoulli trials needed to get one
 0.5010480725785834
 > (standard-deviation (map log (random-lognormal 1e5 0.5 0.5)))
 0.4995377386643435
+```
+
+#### procedure: `(random-multinomial trials ps)`
+**returns:** a list of successes from a multinomial distribution that sums to `trials` and is the same length as the list of the probability `ps` of success; if necessary, `ps` is rescaled to sum to one
+
+```
+> (random-multinomial 10 '(0.01 0.5 0.49))
+(0 7 3)
+> (random-multinomial 100 '(0.01 0.5 0.49))
+(2 51 47)
+> (random-multinomial 100 '(1 50 49))
+(2 45 53)
+> (map (lambda (x) (/ x 1e5)) (random-multinomial 1e5 '(0.01 0.5 0.49)))
+(0.01016 0.50004 0.4898)
 ```
 
 #### procedure: `(random-negative-binomial n trials p)`

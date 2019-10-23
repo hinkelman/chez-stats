@@ -1,5 +1,5 @@
 (("name" . "chez-stats-test")
- ("version" . "0.0.1")
+ ("version" . "0.0.2")
  ("description" . "chez stats test")
  ("keywords")
  ("author" 
@@ -10,5 +10,5 @@
     ("run" . "scheme --script"))
  ("dependencies" 
   ("srfi" . "1.0.0")
-  ("chez-stats" . "0.5.0")))
+  ("chez-stats" . "0.5.2")))
  
