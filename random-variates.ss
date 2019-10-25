@@ -8,7 +8,6 @@
    random-gamma
    random-geometric
    random-lognormal
-   random-multinomial
    random-negative-binomial
    random-normal
    random-pareto
@@ -34,7 +33,7 @@
       (check-p p proc-string))
     (build-random-list n (lambda () (rbern p))))
 
-  ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pd
+  ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-binomial n trials p)
     (define (rbinom trials p)
       (apply + (random-bernoulli trials p)))
@@ -44,34 +43,6 @@
       (check-p p proc-string))
     (build-random-list n (lambda () (rbinom trials p))))
 
-  ;; same algorithm as rmultinom in R
-  ;; https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Multinom.html
-  (define (random-multinomial trials ps)
-    ;; rescale ps (if necessary)
-    (define (scale-ps ps)
-      (let ([p-sum (apply + ps)])
-	(if (= p-sum 1)
-	    ps
-	    (map (lambda (x) (/ x p-sum)) ps))))
-    (define (iterate p-scaled p-used results)
-      (cond
-       [(null? p-scaled)
-	(reverse results)]
-       [else
-	(let* ([p-now (car p-scaled)]
-	       [p-now-adj-temp (/ p-now (- 1 (apply + p-used)))]
-	       ;; floating point arithmetic was producing values of p-now-adj > 1
-	       ;; added condition for 0 as a precaution; not sure if it is necessary
-	       [p-now-adj (cond [(< p-now-adj-temp 0) 0]
-				[(> p-now-adj-temp 1) 1]
-				[else p-now-adj-temp])]
-	       [result-next (random-binomial 1 (- trials (apply + results)) p-now-adj)])
-	  (iterate (cdr p-scaled) (cons p-now p-used) (cons (car result-next) results)))]))
-    (let ([proc-string "(random-multinomial trials ps)"])
-      (check-positive-integer trials "trials" proc-string)
-      (check-list ps "ps" proc-string))
-    (iterate (scale-ps ps) '() '()))
-  
   ;; SRFI 27
   (define (random-exponential n mu)
     (define (rexp mu)

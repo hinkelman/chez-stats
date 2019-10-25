@@ -104,24 +104,6 @@
 (test-error (weighted-mean '(1) '(1 2 "a")))
 (test-end "weighted-mean-test")
 
-;; Read/Write CSV
-
-(test-begin "csv-test")
-(define example-list (list
-		      (list "col1" "col2" "col3" "col4")
-		      (list 10.02 #\A "1,000" "Glen \"Big Baby\" Davis")
-		      (list 1/3 #\B "1000" "Earvin \"Magic\" Johnson")))
-(write-csv example-list "example.csv" #f)
-(test-error (write-csv example-list "example.csv" #f))
-;; if example-list was all string wouldn't need to jump through these extra hoops
-(define example-list2 (read-csv "example.csv"))
-(write-csv example-list2 "example2.csv" #f)
-(test-equal example-list2 (read-csv "example2.csv"))
-(test-equal (reverse (cdr (reverse example-list2))) (preview-csv "example2.csv" 2))
-(delete-file "example.csv")
-(delete-file "example2.csv")
-(test-end "csv-test")
-
 ;; Random Variates
 
 (test-begin "bernoulli-test")
@@ -194,17 +176,6 @@
 (test-error (random-lognormal 2 "a" 1))
 (test-error (random-lognormal 2 2 -1))
 (test-end "lognormal-test")
-
-(test-begin "multinomial-test")
-(define multinomial-list (random-multinomial 1e5 '(0.05 0.45 0.45 0.05)))
-(define ml-sum (apply + multinomial-list))
-(test-equal 100000 ml-sum)
-(test-approximate 1 (apply + (map (lambda (x) (/ x ml-sum)) multinomial-list)) 0.01)
-(test-equal 100 (apply + (random-multinomial 100 '(50 50))))
-(test-equal '(100) (random-multinomial 100 '(1)))
-(test-error (random-multinomial 'a '(0.5 0.5)))
-(test-error (random-multinomial 100 'b))
-(test-end "multinomial-test")
 
 (test-begin "negative-binomial-test")
 (define negative-binomial-list (random-negative-binomial 1e5 10 0.2))

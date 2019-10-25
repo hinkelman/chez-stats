@@ -1,5 +1,5 @@
 (("name" . "chez-stats")
- ("version" . "0.5.2")
+ ("version" . "0.5.1")
  ("description" . "Read/write CSV files, compute descriptive statistics, and generate random variates in Chez Scheme.")
  ("keywords")
  ("author" 
