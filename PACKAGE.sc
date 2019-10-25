@@ -9,4 +9,4 @@
     ("repl" . "scheme")
     ("run" . "scheme --script"))
  ("scripts")
- ("dependencies"))
+ ("dependencies")
