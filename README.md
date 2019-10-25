@@ -256,7 +256,7 @@ same number of columns.
 Import only the CSV procedures: `(import (chez-stats csv))`
 
 #### procedure: `(preview-csv path rows)`
-**returns:** a list of lists where each sub-list is one row in the CSV file, `path`, up to the number of `rows`
+**returns:** a list of lists where each sub-list is one row in the CSV file at `path` up to the number of `rows`
 
 ```
 ;; example requires that you first run code for (write-csv) below
@@ -266,7 +266,7 @@ Import only the CSV procedures: `(import (chez-stats csv))`
 ```
 
 #### procedure: `(read-csv path)`
-**returns:** a list of lists where each sub-list is one row in the CSV file, `path`
+**returns:** a list of lists where each sub-list is one row in the CSV file at `path`
 
 ```
 ;; example requires that you first run code for (write-csv) below
