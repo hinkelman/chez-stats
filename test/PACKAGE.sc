@@ -5,10 +5,9 @@
  ("author" 
    ("hinkelman"))
  ("private" . #f)
- ("scripts" 
-    ("repl" . "scheme")
-    ("run" . "scheme --script"))
+ ("scripts")
  ("dependencies" 
   ("srfi" . "1.0.0")
   ("chez-stats" . "0.5.0"))
- 
+ ("repl" . "scheme")
+ ("run" . "scheme --script"))
