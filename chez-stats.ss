@@ -23,6 +23,7 @@
    random-gamma
    random-geometric
    random-lognormal
+   random-multinomial
    random-negative-binomial
    random-normal
    random-pareto

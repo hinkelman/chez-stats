@@ -73,6 +73,7 @@
 	   [j (floor (+ (* n p) m))]
 	   [g (- (+ (* n p) m) j)]
 	   [gamma (gamma-proc g j)])
+      ;; j needs to be exact for indexing
       (calc-Q order-stats (inexact->exact j) gamma)))
 
   (define (median ls)
