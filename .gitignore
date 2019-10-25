@@ -6,6 +6,4 @@
 *.scm#*
 .#*.scm
 
-test/lib/
-
-
+.Rhistory

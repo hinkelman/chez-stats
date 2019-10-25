@@ -1,3 +1,10 @@
+;; run this file from terminal with
+;; $ chez path/to/tests.ss
+
+;; add local ./lib directory for dependency on srfi package
+(library-directories (cons (cons "./lib" "./lib")
+			   (library-directories)))
+
 (import (chez-stats chez-stats)
 	(srfi s64 testing))
 
