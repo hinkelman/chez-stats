@@ -10,5 +10,5 @@
     ("run" . "scheme --script"))
  ("dependencies" 
   ("srfi" . "1.0.0")
-  ("chez-stats" . "0.5.2")))
+  ("chez-stats" . "0.6.0")))
  
