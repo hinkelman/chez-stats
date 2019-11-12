@@ -1,5 +1,6 @@
 (library (chez-stats chez-stats)
   (export
+   ;; statistics
    count
    cumulative-sum
    ecdf
@@ -15,6 +16,7 @@
    unique
    variance
    weighted-mean
+   ;; random-variates
    random-bernoulli
    random-beta
    random-beta-binomial
@@ -29,13 +31,20 @@
    random-pareto
    random-poisson
    random-uniform
+   ;; csv
    preview-csv
    read-csv
-   write-csv)
+   write-csv
+   ;; manipulation
+   drop-columns
+   rename-columns
+   select-columns
+  )
 
   (import (chezscheme)
 	  (chez-stats statistics)
 	  (chez-stats random-variates)
-	  (chez-stats csv))
+	  (chez-stats csv)
+	  (chez-stats manipulation))
 
   )

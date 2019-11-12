@@ -22,6 +22,12 @@ $ cd ~/scheme # where '~/scheme' is the path to your Chez Scheme libraries
 $ git clone git://github.com/hinkelman/chez-stats.git
 ```
 
+#### Development Version
+
+```
+$ git clone -b dev git://github.com/hinkelman/chez-stats.git
+```
+
 For more information on installing Chez Scheme libraries, see this [blog post](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/).
 
 ### Import 
@@ -47,6 +53,12 @@ Import all `chez-stats` procedures: `(import (chez-stats chez-stats))`
 [`(unique ls)`](#procedure-unique-ls)  
 [`(variance ls)`](#procedure-variance-ls)  
 [`(weighted-mean ls weights)`](#procedure-weighted-mean-ls-weights)
+
+### Data Manipulation
+
+[`(drop-columns ls columns)`](#procedure-drop-columns-ls-columns)  
+[`(rename-columns ls names)`](#procedure-rename-columns-ls-names)  
+[`(select-columns ls columns)`](#procedure-select-columns-ls-columns)  
 
 ### Read and Write CSV Files
 
@@ -245,6 +257,47 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 13/4
 > (mean '(1 3 4 5))
 13/4
+```
+
+## Data Manipulation
+
+Import only the manipulation procedures: `(import (chez-stats manipulation))`
+
+#### procedure: `(drop-columns ls columns)`
+**returns:** the list of lists that results from dropping the `columns` from the input list of lists `ls`; `columns` is either a list of names (symbols or strings) or a list of indices
+
+```
+> (define ls '((grp trt "resp") ("A" 1 0.3) ("B" 1 0.5))) 
+> (drop-columns ls '(grp trt))
+(("resp") (0.3) (0.5))
+> (drop-columns ls '(0 1))
+(("resp") (0.3) (0.5))
+> (drop-columns ls '("resp"))
+((grp trt) ("A" 1) ("B" 1))
+> (drop-columns ls '(resp))
+Exception in (drop-columns ls columns): names not found in header
+```
+
+#### procedure: `(rename-columns ls names)`
+**returns:** the list of lists that results from renaming columns in the header row of the input list of lists `ls`; `names` takes the form `'((old-name1 . new-name1) (old-name2 . new-name2))`
+
+```
+> (define ls '((grp trt "resp") ("A" 1 0.3) ("B" 1 0.5)))
+> (rename-columns ls '(("resp" . resp)))
+((grp trt resp) ("A" 1 0.3) ("B" 1 0.5))
+> (rename-columns ls '((grp . Group) (trt . Treatment) ("resp" . Response)))
+((Group Treatment Response) ("A" 1 0.3) ("B" 1 0.5))
+```
+
+#### procedure: `(select-columns ls columns)`
+**returns:** the list of lists that results from selecting the `columns` from the input list of lists `ls`; `columns` is either a list of names (symbols or strings) or a list of indices
+
+```
+> (define ls '((grp trt "resp") ("A" 1 0.3) ("B" 1 0.5)))
+> (select-columns ls '("resp" grp))
+(("resp" grp) (0.3 "A") (0.5 "B"))
+> (select-columns ls '(2 0))
+(("resp" grp) (0.3 "A") (0.5 "B"))
 ```
 
 ## Read and Write CSV Files

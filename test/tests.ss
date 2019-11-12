@@ -104,6 +104,43 @@
 (test-error (weighted-mean '(1) '(1 2 "a")))
 (test-end "weighted-mean-test")
 
+;; Data Manipulation
+
+(test-begin "rename-columns-test")
+(define lol1 '((grp trt resp) ("A" 1 0.3)))
+(define lol2 '((Group trt resp) ("A" 1 0.3)))
+(define lol3 '((grp "Treatment" resp) ("A" 1 0.3)))
+(test-equal lol2 (rename-columns lol1 '((grp . Group))))
+(test-equal lol3 (rename-columns lol1 '((trt . "Treatment"))))
+(test-error (rename-columns 10 '((grp . Group))))
+(test-error (rename-columns lol1 10))
+(test-error (rename-columns lol1 '((Group . grp))))
+(test-end "rename-columns-test")
+
+(test-begin "select-columns-test")
+(define lol1 '((grp trt resp) ("A" 1 0.3)))
+(define lol2 '((grp "trt" resp) ("A" 1 0.3)))
+(define lol3 '((trt grp) (1 "A")))
+(define lol4 '(("trt" resp) (1 0.3)))
+(test-equal lol3 (select-columns lol1 '(trt grp)))
+(test-equal lol4 (select-columns lol2 '("trt" resp)))
+(test-error (select-columns 'A '(trt grp)))
+(test-error (select-columns lol1 '(10)))
+(test-error (select-columns lol1 '("grp")))
+(test-end "select-columns-test")
+
+(test-begin "drop-columns-test")
+(define lol1 '((grp trt resp) ("A" 1 0.3)))
+(define lol2 '((grp "trt" resp) ("A" 1 0.3)))
+(define lol3 '((grp resp) ("A" 0.3)))
+(define lol4  '((grp) ("A")))
+(test-equal lol3 (drop-columns lol1 '(trt)))
+(test-equal lol4 (drop-columns lol2 '("trt" resp)))
+(test-error (drop-columns 'A '(trt grp)))
+(test-error (drop-columns lol1 '(10)))
+(test-error (drop-columns lol1 '("grp")))
+(test-end "drop-columns-test")
+
 ;; Read/Write CSV
 
 (test-begin "csv-test")
