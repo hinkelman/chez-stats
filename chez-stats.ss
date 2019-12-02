@@ -1,21 +1,30 @@
 (library (chez-stats chez-stats)
   (export
-   ;; statistics
-   count
-   cumulative-sum
-   ecdf
-   interquartile-range
-   kurtosis
-   mean
-   median
-   mode
-   quantile
-   range
-   standard-deviation
-   skewness
-   unique
-   variance
-   weighted-mean
+   ;; csv
+   preview-csv
+   read-csv
+   write-csv
+   ;; dataframe
+   ->
+   and2
+   or2
+   dataframe?
+   dataframe-add
+   dataframe-append
+   dataframe-alist
+   dataframe-contains?
+   dataframe-dim
+   dataframe-drop
+   dataframe-equal?
+   dataframe-filter
+   dataframe-head
+   dataframe-map
+   dataframe-names
+   dataframe-rename
+   dataframe-select
+   dataframe-update
+   dataframe-values
+   make-dataframe
    ;; random-variates
    random-bernoulli
    random-beta
@@ -31,20 +40,27 @@
    random-pareto
    random-poisson
    random-uniform
-   ;; csv
-   preview-csv
-   read-csv
-   write-csv
-   ;; manipulation
-   drop-columns
-   rename-columns
-   select-columns
-  )
+   ;; statistics
+   count
+   cumulative-sum
+   ecdf
+   interquartile-range
+   kurtosis
+   mean
+   median
+   mode
+   quantile
+   range
+   standard-deviation
+   skewness
+   unique
+   variance
+   weighted-mean)
 
   (import (chezscheme)
-	  (chez-stats statistics)
-	  (chez-stats random-variates)
 	  (chez-stats csv)
-	  (chez-stats manipulation))
+	  (chez-stats dataframe)
+	  (chez-stats random-variates)
+	  (chez-stats statistics))
 
   )

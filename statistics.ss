@@ -157,7 +157,6 @@
   (define (standard-deviation ls)
     (check-list ls "ls" "(standard-deviation ls)")
     (sqrt (variance ls)))
-  
   )
 
 
