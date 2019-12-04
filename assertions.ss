@@ -112,7 +112,6 @@
   (define (same-length? len ls)
     (= len (length ls)))
   
-  ;; does this add too much overhead?
   ;; lots of checking that will be performed every time a dataframe is created
   (define (check-alist alist who)
     (unless (list? alist)
@@ -126,8 +125,9 @@
       (check-names-unique names who))
     (unless (for-all (lambda (col) (list? (cadr col))) alist)
       (assertion-violation who "values are not a list"))
-    (unless (for-all (lambda (col) (simple-list? (cadr col))) alist)
-      (assertion-violation who "values are not a simple list"))
+    ;; dropping the simple-list check because it is too expensive to be worthwhile
+    ;; (unless (for-all (lambda (col) (simple-list? (cadr col))) alist)
+    ;;   (assertion-violation who "values are not a simple list"))
     (let ([num-rows (length (cadar alist))])
       (unless (for-all (lambda (col) (same-length? num-rows (cadr col))) alist)
 	(assertion-violation who "columns not all same length"))))

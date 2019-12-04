@@ -145,7 +145,7 @@
 (test-error (make-dataframe '(("a" (1 2 3)))))
 (test-error (make-dataframe '((a (1 2 3)) (a (1 2 3)))))
 (test-error (make-dataframe '((a 10))))
-(test-error (make-dataframe '((a (1 (2) 3)))))
+;; (test-error (make-dataframe '((a (1 (2) 3)))))
 (test-error (make-dataframe '((a (1 2 3)) (b (1 2 3 4)))))
 (test-end "make-dataframe-test")
 
@@ -175,6 +175,18 @@
 (test-error (dataframe-filter df10 `(,odd? d)))
 (test-error (dataframe-filter df10 10))
 (test-end "dataframe-filter-test")
+
+(define df16 (make-dataframe '((a (200)) (b (5)) (c (800)))))
+(define df17 (make-dataframe '((a (100 300)) (b (4 6)) (c (700 900)))))
+
+(test-begin "dataframe-partition-test")
+(define-values (part1 part2) (dataframe-partition df10 `(,odd? b)))
+(test-assert (dataframe-equal? part1 df16))
+(test-assert (dataframe-equal? part2 df17))
+(test-error (dataframe-partition 'A `(,odd? b)))
+(test-error (dataframe-partition df10 `(,odd? d)))
+(test-error (dataframe-partition df10 10))
+(test-end "dataframe-partition-test")
 
 ;; random-variates
 

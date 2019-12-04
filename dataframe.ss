@@ -11,13 +11,17 @@
 	  dataframe-drop
 	  dataframe-equal?
 	  dataframe-filter
+	  dataframe-groups
 	  dataframe-head
 	  dataframe-map
 	  dataframe-names
+	  dataframe-partition
+	  dataframe-read
 	  dataframe-rename
 	  dataframe-select
 	  dataframe-update
 	  dataframe-values
+	  dataframe-write
 	  make-dataframe)
 
   (import (chezscheme)
@@ -26,18 +30,35 @@
   ;; https://lispdreams.wordpress.com/2016/04/10/thread-first-thread-last-and-partials-oh-my/
   (define-syntax ->
     (syntax-rules ()
+      [(_ value) value] 
+      [(_ value (f1 . body) next ...)
+       (-> (f1 value . body) next ...)]))
+
+  (define (thread-last-helper f value . body)
+    (apply f (append body (list value))))
+
+  (define-syntax ->>
+    (syntax-rules ()
       ((_ value) value)
       ((_ value (f1 . body) next ...)
-       (-> (f1 value . body) next ...))))
-  
-  (define-record-type dataframe (fields alist names dim)
+       (->> (thread-last-helper f1 value . body) next ...))))
+
+  ;; still need to decide what groups should contain
+  ;; e.g., list of group names or alist with group names and group levels
+  ;; and then need to add a check that groups is not malformed to this procedure
+  (define (drt-helper new alist groups)
+    (check-alist alist "(make-dataframe alist)")
+    (new alist
+	 groups
+	 (map car alist)
+	 (cons (length (cadar alist)) (length alist))))
+    
+  (define-record-type dataframe (fields alist groups names dim)
 		      (protocol
 		       (lambda (new)
-			 (lambda (alist)
-			   (check-alist alist "(make-dataframe alist)")
-			   (new alist
-				(map car alist)
-				(cons (length (cadar alist)) (length alist)))))))
+			 (case-lambda
+			   [(alist) (drt-helper new alist '())]
+			   [(alist groups) (drt-helper new alist groups)]))))
   
   (define (check-dataframe df who)
     (unless (dataframe? df)
@@ -175,7 +196,7 @@
       (apply map f (map (lambda (x)
 			  (handle-item df x who))
 			args))))
-    
+  
   (define (handle-item df item who)
     (cond
      [(pair? item) (handle-expr df item who)]
@@ -192,91 +213,132 @@
       (check-new-names (dataframe-names df) '(name) proc-string)
       (dataframe-add df name (handle-expr df expr proc-string))))
 
-  ;; ;; filter two lists where ls is list filtered by procedure and
-  ;; ;; lol is list of lists where each sub-list is same length as ls
-  ;; (define (filter-two procedure ls lol)
-  ;;   (let loop ([ls ls]
-  ;; 	       [lol lol]
-  ;; 	       [res-ls '()]
-  ;; 	       [res-lol '()])
-  ;;     (cond [(null? ls)
-  ;; 	     (values (reverse res-ls)
-  ;; 		     (map reverse res-lol))]
-  ;; 	    [(procedure (car ls))
-  ;; 	     (loop (cdr ls)
-  ;; 		   (map cdr lol)
-  ;; 		   (cons (car ls) res-ls)
-  ;; 		   (if (null? res-lol)
-  ;; 		       (map (lambda (x) (list (car x))) lol)
-  ;; 		       (map (lambda (x y) (cons x y)) (map car lol) res-lol)))]
-  ;; 	    [else
-  ;; 	     (loop (cdr ls) (map cdr lol) res-ls res-lol)])))
+  (define (cons-acc ls-col acc)
+    (if (null? acc)
+	(map (lambda (x) (list (car x))) ls-col)
+	(map (lambda (x y) (cons x y)) (map car ls-col) acc)))
 
-  ;; filter list of lists, lol, based on list of boolean values, ls
+  ;; partition list of columns, ls-col, based on list of boolean values, ls
   ;; where each sub-list is same length as ls
-  (define (filter-lol ls lol)
+  (define (partition-ls-col ls ls-col)
     (let loop ([ls ls]
-	       [lol lol]
+	       [ls-col ls-col]
+	       [keep '()]
+	       [drop '()])
+      (if (null? ls)
+	  (values (map reverse keep)
+		  (map reverse drop))
+	  (if (car ls)  ;; ls is list of boolean values
+	      (loop (cdr ls) (map cdr ls-col) (cons-acc ls-col keep) drop)
+	      (loop (cdr ls) (map cdr ls-col) keep (cons-acc ls-col drop))))))
+
+  ;; filter list of columns, ls-col, based on list of boolean values, ls
+  ;; where each sub-list is same length as ls
+  ;; could just call (partition-ls-col) and return only the first value
+  ;; but avoiding potential overhead of accumulating values that aren't used
+  (define (filter-ls-col ls ls-col)
+    (let loop ([ls ls]
+	       [ls-col ls-col]
 	       [results '()])
       (if (null? ls)
 	  (map reverse results)
 	  (if (car ls)
-	      (loop (cdr ls)
-		    (map cdr lol)
-		    (if (null? results)
-			(map (lambda (x) (list (car x))) lol)
-			(map (lambda (x y) (cons x y)) (map car lol) results)))
-	      (loop (cdr ls) (map cdr lol) results)))))
-		 
-  (define (and2 expr1 expr2)
-    (and expr1 expr2))
+	      (loop (cdr ls) (map cdr ls-col) (cons-acc ls-col results))
+	      (loop (cdr ls) (map cdr ls-col) results)))))
 
-  (define (or2 expr1 expr2)
-    (or expr1 expr2))
- 
-  ;; (define (dataframe-filter df name procedure)
-  ;;   (let ([proc-string "(dataframe-filter df name procedure)"])
-  ;;     (check-dataframe df proc-string)
-  ;;     (check-procedure procedure proc-string)
-  ;;     (check-name-exists df name proc-string))
-  ;;   (let ([ls (dataframe-values df name)]
-  ;; 	  [other-names (filter (lambda (x) (not (symbol=? x name)))
-  ;; 			       (dataframe-names df))])
-  ;;     (if (= 1 (length (dataframe-names df)))
-  ;; 	  (make-dataframe (list (list name (filter procedure ls))))
-  ;; 	  (let-values ([(new-ls new-lol)
-  ;; 			(filter-two procedure ls
-  ;; 				    (map cadr (dataframe-alist
-  ;; 					       (dataframe-drop df name))))])
-  ;; 	    (dataframe-add (make-dataframe
-  ;; 			    (map (lambda (x y) (list x y)) other-names new-lol))
-  ;; 			   name
-  ;; 			   new-ls)))))
+  (define (add-names-ls-col names ls-col)
+    (if (null? ls-col)
+	(map (lambda (name) (list name '())) names)
+	(map (lambda (name values) (list name values)) names ls-col)))
 
+  (define (dataframe-partition df expr)
+    (let ([proc-string "(dataframe-partition df expr)"])
+      (check-dataframe df proc-string)
+      (let ([bool-ls (handle-expr df expr proc-string)]
+	    [names (dataframe-names df)])
+	(let-values ([(keep drop) (partition-ls-col bool-ls (map cadr (dataframe-alist df)))])
+	  (values (make-dataframe (add-names-ls-col names keep))
+		  (make-dataframe (add-names-ls-col names drop)))))))
+  
   (define (dataframe-filter df expr)
     (let ([proc-string "(dataframe-filter df expr)"])
       (check-dataframe df proc-string)
       (let* ([bool-ls (handle-expr df expr proc-string)]
-	     [new-lol (filter-lol bool-ls (map cadr (dataframe-alist df)))]
+	     [new-ls-col (filter-ls-col bool-ls (map cadr (dataframe-alist df)))]
 	     [names (dataframe-names df)])
-	(if (null? new-lol)
-	    (make-dataframe (map (lambda (name) (list name '())) names))
-	    (make-dataframe (map (lambda (name values) (list name values)) names new-lol))))))
-	
+	(make-dataframe (add-names-ls-col names new-ls-col)))))
+
+  ;; can't use regular and & or in filter expr
+  ;; because and & or are macros, not procedures
+  (define (and2 expr1 expr2)
+    (and expr1 expr2))
     
+  (define (or2 expr1 expr2)
+    (or expr1 expr2))
 
+  (define (transpose ls)
+    (apply map list ls))
 
+  (define (alist-unique alist)
+    (let* ([names (map car alist)]
+	   [ls-col (map cadr alist)]
+	   [ls-row (transpose ls-col)])
+      (add-names-ls-col
+       names
+       (transpose
+	(remove-duplicates ls-row)))))
 
+  ;; need to add assertions to dataframe-write (and read?) and add to tests
 
+  (define (dataframe-unique df)
+    (alist-unique (dataframe-alist df)))
 
+  ;; add option for overwriting (see write_csv as example)
+  ;; maybe good use for case-lambda in both write_csv and dataframe_write
+  (define (dataframe-write df path)
+    (with-output-to-file path
+      (lambda () (write (dataframe-alist df)))))
 
-
-
-
-
-
+  (define (dataframe-read path)
+    (make-dataframe (with-input-from-file path read)))
+      
+  ;; (define a (list (list 'trt (append (make-list 5 'A)
+  ;; 				     (make-list 5 'B)))
+  ;; 		  (list 'val (random-binomial 10 1 0.5))))
+  ;; (alist-unique a)
   
+  ;; (define b (list (list 'trt (append (make-list (inexact->exact 5e6) 'A)
+  ;; 				     (make-list (inexact->exact 5e6) 'B)))
+  ;; 		  (list 'val (random-poisson (inexact->exact 1e7) 10))))
+  ;; (time (alist-unique b))
+	   
 
+  ;; latest thinking on group-by...
+  ;; dataframe-group-by should create a list of dataframes (using dataframe-partition)
+  ;; maybe dataframe-partition needs optional groups argument for use in group-by
+  ;; or perhaps just re-use small bit of overlapping code in dataframe-partition and dataframe-group-by
+  ;; if you want to do the equivalent of group_by mutate in dplyr
+  ;; then you will need to map over list of dataframes with dataframe-map
+  ;; sidebar: this seems confusing, i.e., mapping the function called dataframe-map
+  ;; and doesn't work with thread-first or thread-last
+  ;; this mapping would then be followed by dataframe-append
+  ;; which already removes grouping information from each dataframe
+  ;; in this scenario, aggregate would only accept a list of dataframes
+  ;; I'm now thinking that dataframe-map, dataframe-add, and dataframe-aggregate (and maybe dataframe-filter)
+  ;; should all except either a list of dataframes or a single dataframe
+  ;; and subsequent behavior depends on whether working with one or many dataframes
+  ;; hopefully, this doesn't require too much additional checking of inputs
+  ;; dataframe-aggregate is only function that will use information stored in dataframe-groups
+  
+  
+  ;; (define (filter-wrap df name value)
+  ;;   (dataframe-filter df `(,= ,name ,value)))
+
+  ;; grouping columns must be strings or symbols
+  ;; find unique combinations by pasting grouping variables together
+  ;; loop through those unique combinations to partition dataframe
+  ;; on 2nd thought, probably better to select columns
+  ;; and then loop through to find unique combinations of rows
 
 
   ;; (define (listtable? ls)

@@ -17,13 +17,17 @@
    dataframe-drop
    dataframe-equal?
    dataframe-filter
+   dataframe-groups
    dataframe-head
    dataframe-map
    dataframe-names
+   dataframe-partition
    dataframe-rename
+   dataframe-read
    dataframe-select
    dataframe-update
    dataframe-values
+   dataframe-write
    make-dataframe
    ;; random-variates
    random-bernoulli
