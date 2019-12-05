@@ -39,13 +39,6 @@
 (test-assert (not (dataframe? '((a (1 2 3)) (b (4 5 6))))))
 (test-end "dataframe?-test")
 
-(test-begin "dataframe-add-test")
-(test-assert (dataframe-equal? df2 (dataframe-add df1 'c '(7 8 9))))
-(test-error (dataframe-add df1 'c '(7 8)))
-(test-error (dataframe-add df1 "c" '(7 8 9)))
-(test-error (dataframe-add df1 'b '(7 8 9)))
-(test-end "dataframe-add-test")
-
 (test-begin "dataframe-alist-test")
 (test-equal '((a (1 2 3)) (b (4 5 6))) (dataframe-alist df1))
 (test-error (dataframe-alist '((a (1 2 3)) (b (4 5 6)))))
@@ -54,11 +47,11 @@
 (define df3 (make-dataframe '((a (1 2 3 1 2 3)) (b (4 5 6 4 5 6)) (c (-999 -999 -999 7 8 9)))))
 (define df4 (make-dataframe '((a (1 2 3 1 2 3)) (b (4 5 6 4 5 6)) (c (7 8 9 -999 -999 -999)))))
 
-(test-begin "dataframe-append-test")
-(test-assert (dataframe-equal? df3 (dataframe-append -999 df1 df2)))
-(test-assert (dataframe-equal? df4 (dataframe-append -999 df2 df1)))
-(test-error (dataframe-append df3 df4 '(1 2 3)))
-(test-end "dataframe-append-test")
+(test-begin "dataframe-append-all-test")
+(test-assert (dataframe-equal? df3 (dataframe-append-all -999 df1 df2)))
+(test-assert (dataframe-equal? df4 (dataframe-append-all -999 df2 df1)))
+(test-error (dataframe-append-all -999 df3 df4 '(1 2 3)))
+(test-end "dataframe-append-all-test")
 
 (test-begin "dataframe-contains?-test")
 (test-assert (dataframe-contains? df1 'b))
@@ -153,16 +146,18 @@
 (define df12 (make-dataframe '((a (100 200 300)) (b (4 5 6)) (c (700 800 900)) (d (400 500 600)))))
 (define df13 (make-dataframe '((a (100 200 300)) (b (4 5 6)) (c (700 800 900)) (d ("100_4" "200_5" "300_6")))))
 
-(test-begin "dataframe-map-test")
-(test-assert (dataframe-equal? df11 (dataframe-map df10 'd `(,+ a b))))
-(test-assert (dataframe-equal? df12 (dataframe-map df10 'd `(,/ (,+ a c) 2))))
-(test-assert (dataframe-equal? df13 (dataframe-map df10 'd `(,string-append
+(test-begin "dataframe-add-test")
+(test-assert (dataframe-equal? df2 (dataframe-add df1 'c '(7 8 9))))
+(test-error (dataframe-add df1 'c '(7 8)))
+(test-error (dataframe-add df1 "c" '(7 8 9)))
+(test-error (dataframe-add df1 'b '(7 8 9)))
+(test-assert (dataframe-equal? df11 (dataframe-add df10 'd `(,+ a b))))
+(test-assert (dataframe-equal? df12 (dataframe-add df10 'd `(,/ (,+ a c) 2))))
+(test-assert (dataframe-equal? df13 (dataframe-add df10 'd `(,string-append
 							    (,number->string a) "_"
 							    (,number->string b)))))
-(test-error (dataframe-map '(1 2 3) 'd `(,+ a b)))
-(test-error (dataframe-map df10 'c `(,+ a b)))
-(test-error (dataframe-map df10 'd `(,+ a d)))
-(test-end "dataframe-map-test")
+(test-error (dataframe-add '(1 2 3) 'd `(,+ a b)))
+(test-end "dataframe-add-test")
 
 (define df14 (make-dataframe '((a (200 300)) (b (5 6)) (c (800 900)))))
 (define df15 (make-dataframe '((a (200)) (b (5)) (c (800)))))
@@ -187,6 +182,23 @@
 (test-error (dataframe-partition df10 `(,odd? d)))
 (test-error (dataframe-partition df10 10))
 (test-end "dataframe-partition-test")
+
+(test-begin "df-read-write-test")
+(dataframe-write df10 "example.scm" #f)
+(test-error (dataframe-write df10 "example.scm" #f))
+(test-assert (dataframe-equal? df10 (dataframe-read "example.scm")))
+(delete-file "example.scm")
+(test-end "df-read-write-test")
+
+(define df18 (make-dataframe '((a (1 2 3 1 2 3)) (b (4 5 6 4 5 6)))))
+(define df19 (make-dataframe '((c (1 2 3)))))
+
+(test-begin "dataframe-append-test")
+(test-assert (dataframe-equal? df18 (dataframe-append df1 df2)))
+(test-assert (dataframe-equal? df18 (dataframe-append df2 df1)))
+(test-error (dataframe-append df1 df19))
+(test-error (dataframe-append-all df3 df4 '(1 2 3)))
+(test-end "dataframe-append-test")
 
 ;; random-variates
 

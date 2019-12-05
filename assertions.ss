@@ -16,7 +16,7 @@
    check-new-names
    check-name-pairs
    check-alist
-   check-values
+   check-values/expr
    check-procedure
    remove-duplicates)
 
@@ -58,10 +58,6 @@
     (unless (and (real? x) (>= x 0))
       (assertion-violation who (string-append x-name " is not a real number >= 0"))))
 
-  ;; (define (check-list-of-lists ls who)
-  ;;   (unless (and (list? ls) (list? (car ls)))
-  ;;     (assertion-violation who "ls is not a list of lists")))
-
   (define (check-names-unique names who)
     (unless (= (length names) (length (remove-duplicates names)))
       (assertion-violation who "names are not unique")))
@@ -98,17 +94,6 @@
 	  [else
 	   (cons (car ls) (remove-duplicates (cdr ls)))]))
 
-  ;; https://stackoverflow.com/questions/28753729/how-to-manually-flatten-a-list-in-racket-scheme
-  (define (flatten obj)
-    (cond [(null? obj) '()]
-	  [(list? obj)
-	   (append (flatten (car obj))
-		   (flatten (cdr obj)))]
-	  [else (list obj)]))
-
-  (define (simple-list? ls)
-    (equal? ls (flatten ls)))
-
   (define (same-length? len ls)
     (= len (length ls)))
   
@@ -125,27 +110,21 @@
       (check-names-unique names who))
     (unless (for-all (lambda (col) (list? (cadr col))) alist)
       (assertion-violation who "values are not a list"))
-    ;; dropping the simple-list check because it is too expensive to be worthwhile
-    ;; (unless (for-all (lambda (col) (simple-list? (cadr col))) alist)
-    ;;   (assertion-violation who "values are not a simple list"))
     (let ([num-rows (length (cadar alist))])
       (unless (for-all (lambda (col) (same-length? num-rows (cadr col))) alist)
 	(assertion-violation who "columns not all same length"))))
 
-  (define (check-values num-rows new-values who)
-    (unless (list? new-values)
-      (assertion-violation who "values are not a list"))
-    (unless (simple-list? new-values)
-      (assertion-violation who "values are not a simple list"))
-    (unless (same-length? num-rows new-values)
-      (assertion-violation who (string-append "values length should be  "
-					      (number->string num-rows)
-					      ", not "
-					      (number->string (length new-values))))))
+  (define (check-values/expr values/expr who)
+    (unless (list? values/expr)
+      (assertion-violation who "values/expr not a list")))
 
   (define (check-procedure proc who)
     (unless (procedure? proc)
       (assertion-violation who "proc is not a procedure")))
+
+    ;; (define (check-list-of-lists ls who)
+  ;;   (unless (and (list? ls) (list? (car ls)))
+  ;;     (assertion-violation who "ls is not a list of lists")))
 
   ;; (define (check-indices row1 indices who)
   ;;   (define all-idx (enumerate row1))

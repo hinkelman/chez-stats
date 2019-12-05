@@ -11,6 +11,7 @@
    dataframe?
    dataframe-add
    dataframe-append
+   dataframe-append-all
    dataframe-alist
    dataframe-contains?
    dataframe-dim
@@ -19,7 +20,6 @@
    dataframe-filter
    dataframe-groups
    dataframe-head
-   dataframe-map
    dataframe-names
    dataframe-partition
    dataframe-rename
