@@ -26,10 +26,10 @@
 
 (test-begin "thread-test")
 (test-equal 12 (-> '(1 2 3) (mean) (+ 10)))
-(test-assert (dataframe-equal? df2 (-> df1 (dataframe-add 'c '(7 8 9)))))
-(test-assert (dataframe-equal? df1 (-> df1
-					(dataframe-add 'c '(7 8 9))
-					(dataframe-drop 'c))))
+;; (test-assert (dataframe-equal? df2 (-> df1 (dataframe-add 'c '(7 8 9)))))
+;; (test-assert (dataframe-equal? df1 (-> df1
+;; 					(dataframe-add 'c '(7 8 9))
+;; 					(dataframe-drop 'c))))
 (test-approximate 0 (-> (random-binomial 1e5 10 0.5) (variance) (- 2.5)) 0.125)
 (test-error (-> '(4 3 5 1) (sort <)))
 (test-end "thread-test")
@@ -131,6 +131,14 @@
 (test-error (dataframe-values df10 'a 'b))
 (test-end "dataframe-values-test")
 
+;; (test-begin "$-test")
+;; (test-equal '(100 200 300) ($ df10 'a))
+;; (test-equal '(4 5 6) ($ df10 'b))
+;; (test-error ($ df10 'd))
+;; (test-error ($ 100 'a))
+;; (test-error ($ df10 'a 'b))
+;; (test-end "$-test")
+
 (test-begin "make-dataframe-test")
 (test-error (make-dataframe 100))
 (test-error (make-dataframe '()))
@@ -147,40 +155,44 @@
 (define df13 (make-dataframe '((a (100 200 300)) (b (4 5 6)) (c (700 800 900)) (d ("100_4" "200_5" "300_6")))))
 
 (test-begin "dataframe-add-test")
-(test-assert (dataframe-equal? df2 (dataframe-add df1 'c '(7 8 9))))
-(test-error (dataframe-add df1 'c '(7 8)))
-(test-error (dataframe-add df1 "c" '(7 8 9)))
-(test-error (dataframe-add df1 'b '(7 8 9)))
-(test-assert (dataframe-equal? df11 (dataframe-add df10 'd `(,+ a b))))
-(test-assert (dataframe-equal? df12 (dataframe-add df10 'd `(,/ (,+ a c) 2))))
-(test-assert (dataframe-equal? df13 (dataframe-add df10 'd `(,string-append
-							    (,number->string a) "_"
-							    (,number->string b)))))
-(test-error (dataframe-add '(1 2 3) 'd `(,+ a b)))
+(test-error (dataframe-add df10 'c (lambda (a b) (+ a b)) 'a 'b 'c))
+(test-error (dataframe-add df10 'd (lambda (a b) (+ a b)) 'a 'd))
+(test-error (dataframe-add df10 'c (lambda (a b) (+ a b)) 'a 'b))
+(test-error (dataframe-add df10 "d" (lambda (a b) (+ a b)) 'a 'b))
+(test-error (dataframe-add 10 'd (lambda (a b) (+ a b)) 'a 'b))
+(test-assert (dataframe-equal? df11 (dataframe-add df10 'd (lambda (a b) (+ a b)) 'a 'b)))
+(test-assert (dataframe-equal? df12 (dataframe-add df10 'd (lambda (a c) (/ (+ a c) 2)) 'a 'c)))
+(test-assert (dataframe-equal? df13 (dataframe-add df10
+                                                   'd
+                                                   (lambda (a b)
+                                                     (string-append
+                                                      (number->string a) "_"
+                                                      (number->string b)))
+                                                   'a 'b)))
 (test-end "dataframe-add-test")
 
 (define df14 (make-dataframe '((a (200 300)) (b (5 6)) (c (800 900)))))
 (define df15 (make-dataframe '((a (200)) (b (5)) (c (800)))))
 
 (test-begin "dataframe-filter-test")
-(test-assert (dataframe-equal? df14 (dataframe-filter df10 `(,> a 100))))
-(test-assert (dataframe-equal? df15 (dataframe-filter df10 `(,= b 5))))
-(test-assert (dataframe-equal? df15 (dataframe-filter df10 `(,or2 (,odd? a) (,odd? b)))))
-(test-error (dataframe-filter 'A `(,odd? b)))
-(test-error (dataframe-filter df10 `(,odd? d)))
-(test-error (dataframe-filter df10 10))
+(test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (a) (> a 100)) 'a)))
+(test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (b) (= b 5)) 'b)))
+(test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (a b) (or (odd? a) (odd? b))) 'a 'b)))
+(test-error (dataframe-filter 'A (lambda (b) (odd? b)) 'b))
+(test-error (dataframe-filter df10 (lambda (d) (odd? d)) 'd))
+(test-error (dataframe-filter df10 10 'a))
 (test-end "dataframe-filter-test")
 
 (define df16 (make-dataframe '((a (200)) (b (5)) (c (800)))))
 (define df17 (make-dataframe '((a (100 300)) (b (4 6)) (c (700 900)))))
 
 (test-begin "dataframe-partition-test")
-(define-values (part1 part2) (dataframe-partition df10 `(,odd? b)))
+(define-values (part1 part2) (dataframe-partition df10 (lambda (b) (odd? b)) 'b))
 (test-assert (dataframe-equal? part1 df16))
 (test-assert (dataframe-equal? part2 df17))
-(test-error (dataframe-partition 'A `(,odd? b)))
-(test-error (dataframe-partition df10 `(,odd? d)))
-(test-error (dataframe-partition df10 10))
+(test-error (dataframe-partition 'A (lambda (b) (odd? b)) 'b))
+(test-error (dataframe-partition df10 (lambda (b) (odd? b)) 'd))
+(test-error (dataframe-partition df10 10 'b))
 (test-end "dataframe-partition-test")
 
 (test-begin "df-read-write-test")
@@ -199,6 +211,20 @@
 (test-error (dataframe-append df1 df19))
 (test-error (dataframe-append-all df3 df4 '(1 2 3)))
 (test-end "dataframe-append-test")
+
+(test-begin "dataframe->listtable-test")
+(test-error (dataframe->listtable 100))
+(test-equal '((a b c) (100 4 700) (300 6 900)) (dataframe->listtable df17))
+(test-equal '((c) (1) (2) (3)) (dataframe->listtable df19))
+(test-end "dataframe->listtable-test")
+
+(define df20 (make-dataframe '((trt (A A A B B B)) (grp (A B A B A B)) (resp (1 2 3 4 5 6)))))
+(define df21 (make-dataframe '((trt (A A B B)) (grp (B A A B)))))
+
+(test-begin "dataframe-unique-test")
+(test-error (dataframe-unique '((a (1 2 3)))))
+(test-assert (dataframe-equal? df21 (dataframe-unique (dataframe-select df20 'trt 'grp))))
+(test-end "dataframe-unique-test")
 
 ;; random-variates
 

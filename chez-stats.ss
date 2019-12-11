@@ -6,8 +6,7 @@
    write-csv
    ;; dataframe
    ->
-   and2
-   or2
+   dataframe->listtable
    dataframe?
    dataframe-add
    dataframe-append
@@ -25,6 +24,7 @@
    dataframe-rename
    dataframe-read
    dataframe-select
+   dataframe-unique
    dataframe-update
    dataframe-values
    dataframe-write

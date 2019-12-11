@@ -16,7 +16,7 @@
    check-new-names
    check-name-pairs
    check-alist
-   check-values/expr
+   ;; check-values/expr
    check-procedure
    remove-duplicates)
 
@@ -114,9 +114,9 @@
       (unless (for-all (lambda (col) (same-length? num-rows (cadr col))) alist)
 	(assertion-violation who "columns not all same length"))))
 
-  (define (check-values/expr values/expr who)
-    (unless (list? values/expr)
-      (assertion-violation who "values/expr not a list")))
+  ;; (define (check-values/expr values/expr who)
+  ;;   (unless (list? values/expr)
+  ;;     (assertion-violation who "values/expr not a list")))
 
   (define (check-procedure proc who)
     (unless (procedure? proc)
