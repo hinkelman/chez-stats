@@ -24,6 +24,7 @@
    dataframe-rename
    dataframe-read
    dataframe-select
+   dataframe-tail
    dataframe-unique
    dataframe-update
    dataframe-values
