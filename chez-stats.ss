@@ -6,6 +6,8 @@
    write-csv
    ;; dataframe
    ->
+   ->>
+   listtable->dataframe
    dataframe->listtable
    dataframe?
    dataframe-add

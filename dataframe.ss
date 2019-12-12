@@ -1,6 +1,8 @@
 (library (chez-stats dataframe)
   (export
    ->
+   ->>
+   listtable->dataframe
    dataframe->listtable
    dataframe?
    dataframe-add
@@ -135,7 +137,7 @@
          (map (lambda (col) (list (car col) (list-tail (cadr col) (- rows n))))
               (dataframe-alist df))))))
   
-  ;; --------------------------- rename columns --------------------------------------------------------
+  ;; --------------------------- rename columns ------------------------------------------------------
 
   ;; name-pairs is of form '((old-name1 new-name1) (old-name2 new-name2))
   (define (dataframe-rename df name-pairs)
@@ -192,12 +194,9 @@
             (map (lambda (df) (dataframe-names df))
                  dfs))))
 
-  ;; thread-last doesn't work with dataframe-append
-  ;;  (->> (list df df) (apply dataframe-append))
+  ;; thread-last works with dataframe-append
+  ;; (->> (list df df) (apply dataframe-append))
   ;; can't use quote to create the list because then df becomes a symbol
-
-  ;; thread-last doesn't work with apply
-  ;; (->> '((1 2 3) (4 5 6)) (apply map list))
 
   ;; --------------------------- read/write ---------------------------------------------------
 
@@ -330,7 +329,7 @@
               (loop (cdr ls-bool) (map cdr ls-col) (cons-acc ls-col results))
               (loop (cdr ls-bool) (map cdr ls-col) results)))))
   
-  ;; --------------------------- unique  ---------------------------------------------
+  ;; --------------------------- unique ---------------------------------------------
 
   (define (dataframe-unique df)
     (check-dataframe df "(dataframe-unique df)")
@@ -358,7 +357,7 @@
   ;;              (list 'val (random-poisson (inexact->exact 1e7) 10))))
   ;; (time (alist-unique b))
 
-  ;; --------------------------- group-by  ---------------------------------------------
+  ;; --------------------------- group-by ---------------------------------------------
 
   (define (dataframe-group-by df . names)
     (let* ([df-unique (dataframe-unique (apply dataframe-select df names))])
@@ -392,15 +391,20 @@
            [ls-values (apply dataframe-values-map df names)])
       (cons names (transpose ls-values))))
 
-  (define (listtable? ls)
-    (and (list? ls)
-         (for-all (lambda (row) (= (length row) (length (car ls)))) ls)))
-
   (define (listtable->dataframe ls header?)
-    (map list
-         (car ls)
-         (apply map list (cdr ls)))) ;; transpose
-  
+    (check-listtable ls "(listtable->dataframe ls header?)")
+    (let ([names (if header?
+                     (car ls)
+                     (map string->symbol
+                          (map string-append
+                               (make-list (length (car ls)) "V")
+                               (map number->string
+                                    (enumerate (car ls))))))]
+          [ls-values (if header?
+                         (transpose (cdr ls))
+                         (transpose ls))])
+      (make-dataframe (map list names ls-values))))
+      
   )
 
 

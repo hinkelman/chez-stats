@@ -8,7 +8,7 @@
    check-real
    check-positive-real
    check-real-gte-zero
-   ;check-list-of-lists
+   check-listtable
    check-names-unique
    check-names-symbol
    check-names
@@ -16,7 +16,6 @@
    check-new-names
    check-name-pairs
    check-alist
-   ;; check-values/expr
    check-procedure
    remove-duplicates)
 
@@ -114,28 +113,15 @@
       (unless (for-all (lambda (col) (same-length? num-rows (cadr col))) alist)
 	(assertion-violation who "columns not all same length"))))
 
-  ;; (define (check-values/expr values/expr who)
-  ;;   (unless (list? values/expr)
-  ;;     (assertion-violation who "values/expr not a list")))
-
   (define (check-procedure proc who)
     (unless (procedure? proc)
       (assertion-violation who "proc is not a procedure")))
 
-    ;; (define (check-list-of-lists ls who)
-  ;;   (unless (and (list? ls) (list? (car ls)))
-  ;;     (assertion-violation who "ls is not a list of lists")))
-
-  ;; (define (check-indices row1 indices who)
-  ;;   (define all-idx (enumerate row1))
-  ;;   (unless (for-all (lambda (index) (member index all-idx)) indices)
-  ;;     (assertion-violation who "column indices are out of range")))
-
-  ;; (define (check-names-in-header row1 names who)
-  ;;   (unless (for-all (lambda (name) (member name row1)) names)
-  ;;     (assertion-violation who "names not found in header")))
-
-
+  (define (check-listtable ls who)
+    (unless (and (list? ls)
+                 (for-all (lambda (row) (= (length row) (length (car ls)))) ls))
+      (assertion-violation who "ls is not a listtable")))
+  
   )
 
 

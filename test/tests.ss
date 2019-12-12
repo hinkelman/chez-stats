@@ -138,14 +138,6 @@
 (test-error (dataframe-values df10 'a 'b))
 (test-end "dataframe-values-test")
 
-;; (test-begin "$-test")
-;; (test-equal '(100 200 300) ($ df10 'a))
-;; (test-equal '(4 5 6) ($ df10 'b))
-;; (test-error ($ df10 'd))
-;; (test-error ($ 100 'a))
-;; (test-error ($ df10 'a 'b))
-;; (test-end "$-test")
-
 (test-begin "make-dataframe-test")
 (test-error (make-dataframe 100))
 (test-error (make-dataframe '()))
@@ -153,7 +145,6 @@
 (test-error (make-dataframe '(("a" (1 2 3)))))
 (test-error (make-dataframe '((a (1 2 3)) (a (1 2 3)))))
 (test-error (make-dataframe '((a 10))))
-;; (test-error (make-dataframe '((a (1 (2) 3)))))
 (test-error (make-dataframe '((a (1 2 3)) (b (1 2 3 4)))))
 (test-end "make-dataframe-test")
 
@@ -224,6 +215,16 @@
 (test-equal '((a b c) (100 4 700) (300 6 900)) (dataframe->listtable df17))
 (test-equal '((c) (1) (2) (3)) (dataframe->listtable df19))
 (test-end "dataframe->listtable-test")
+
+(test-begin "listtable->dataframe-test")
+(test-assert (dataframe-equal? df2 (listtable->dataframe '((a b c) (1 4 7) (2 5 8) (3 6 9)) #t)))
+(test-assert (dataframe-equal? df17 (listtable->dataframe '((a b c) (100 4 700) (300 6 900)) #t)))
+(test-assert (dataframe-equal? df19 (listtable->dataframe '((c) (1) (2) (3)) #t)))
+(test-assert (dataframe-equal? (make-dataframe '((V0 (1 2)) (V1 (3 4))))
+                               (listtable->dataframe '((1 3) (2 4)) #f)))
+(test-error (listtable->dataframe '(("a" b c) (1 4 7) (2 5 8) (3 6 9)) #t))
+(test-error (listtable->dataframe '((a b) (1 4 7))))
+(test-end "listtable->dataframe-test")
 
 (define df20 (make-dataframe '((trt (A A A B B B)) (grp (A B A B A B)) (resp (1 2 3 4 5 6)))))
 (define df21 (make-dataframe '((trt (A A B B)) (grp (B A A B)))))
