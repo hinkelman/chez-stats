@@ -9,7 +9,7 @@ on:
        - master
 
 jobs:
-  build:
+  macos:
 
     runs-on: macos-latest
 
@@ -19,6 +19,26 @@ jobs:
            brew install chezscheme
            cd /usr/local/bin
            cp chez scheme
+    - name: install raven
+      run: curl -L http://ravensc.com/install | scheme
+    - name : test
+      run: |
+            git clone https://github.com/hinkelman/chez-stats
+            cd ./chez-stats
+            raven install srfi@1.0.0
+            cd ./lib
+            git clone https://github.com/hinkelman/chez-stats
+            cd ../
+            raven run ./test/tests.ss    
+            
+  ubuntu:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: install chez scheme
+      run:  apt get chezscheme
+
     - name: install raven
       run: curl -L http://ravensc.com/install | scheme
     - name : test
