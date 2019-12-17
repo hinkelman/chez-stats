@@ -29,4 +29,4 @@ jobs:
             cd ./lib
             git clone https://github.com/hinkelman/chez-stats
             cd ../
-            raven run ./test/test.sc
+            raven run ./test/tests.ss
