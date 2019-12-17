@@ -24,12 +24,12 @@ jobs:
     - name : test
       run: |
             git clone https://github.com/hinkelman/chez-stats
-            cd ./chez-stats
+            cd chez-stats
             raven install srfi@1.0.0
-            cd ./lib
+            cd lib
             git clone https://github.com/hinkelman/chez-stats
-            cd ../
-            raven run ./test/tests.ss    
+            cd ..
+            raven run test/tests.ss    
             
   ubuntu:
 
@@ -44,9 +44,9 @@ jobs:
     - name : test
       run: |
             git clone https://github.com/hinkelman/chez-stats
-            cd ./chez-stats
+            cd chez-stats
             raven install srfi@1.0.0
-            cd ./lib
+            cd lib
             git clone https://github.com/hinkelman/chez-stats
-            cd ../
-            raven run ./test/tests.ss
+            cd ..
+            raven run test/tests.ss
