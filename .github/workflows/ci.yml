@@ -37,7 +37,7 @@ jobs:
 
     steps:
     - name: install chez scheme
-      run:  apt get chezscheme
+      run:  apt install chezscheme
 
     - name: install raven
       run: curl -L http://ravensc.com/install | scheme
