@@ -7,10 +7,11 @@
    ;; dataframe
    ->
    ->>
+   $
    listtable->dataframe
    dataframe->listtable
    dataframe?
-   dataframe-add
+  ; dataframe-add
    dataframe-append
    dataframe-append-all
    dataframe-alist
@@ -19,16 +20,20 @@
    dataframe-drop
    dataframe-equal?
    dataframe-filter
+   dataframe-group-by
    dataframe-groups
    dataframe-head
+  ; dataframe-map
    dataframe-names
+   dataframe-names-update
    dataframe-partition
    dataframe-rename
    dataframe-read
    dataframe-select
    dataframe-tail
+   dataframe-ungroup
    dataframe-unique
-   dataframe-update
+   ;dataframe-update
    dataframe-values
    dataframe-write
    make-dataframe
