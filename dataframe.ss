@@ -50,10 +50,10 @@
 
   (define-syntax ->>
     (syntax-rules ()
-      ((_ value) value)
-      ((_ value (f1 . body) next ...)
-       (->> (thread-last-helper f1 value . body) next ...))))
-
+      [(_ value) value]
+      [(_ value (f1 . body) next ...)
+       (->> (thread-last-helper f1 value . body) next ...)]))
+  
   ;; dataframe record type ---------------------------------------------------------------------
 
   (define (drt-df-helper new alist groups)
@@ -604,25 +604,30 @@
 
 
 ;; ;; https://www.reddit.com/r/scheme/comments/e0lj08/lambda_eval_and_macros/
-;; (define (handle-expr df expr who)
+;; (define (handle-expr alist expr)
 ;;   (let* ([f (car expr)]
 ;;          [args (cdr expr)])
 ;;     (apply map f (map (lambda (x)
-;;                         (handle-item df x who))
+;;                         (handle-item alist x))
 ;;                       args))))
 
-;; (define (handle-item df item who)
+;; (define (handle-item alist item)
 ;;   (cond
 ;;    [(pair? item)
-;;     (handle-expr df item who)]
-;;    [(and (symbol? item) (member item (dataframe-names df)))
-;;     (dataframe-values df item)]
+;;     (handle-expr alist item)]
+;;    [(and (symbol? item) (assoc item alist))
+;;     (cadr (assoc item alist))]
 ;;    [(or (number? item) (string? item) (symbol? item))
-;;     (make-list (car (dataframe-dim df)) item)]
+;;     (make-list (length (cadar alist)) item)]
 ;;    [else
-;;     (assertion-violation who "expr is invalid")]))
+;;     (assertion-violation "(handle-item alist item)" "expr is invalid")]))
 
 
 
+;; (define (and-f . args)
+;;   (cond
+;;    ((null? args) #t)
+;;    ((not (car args)) #f)
+;;    (else (apply and-f (cdr args)))))
 
 

@@ -24,7 +24,7 @@
 	  result
 	  (iterate (cons (proc) result) (add1 i))))
     (iterate '() 0))
-
+ 
   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-bernoulli n p)
     (define (rbern p)
@@ -33,7 +33,7 @@
       (check-positive-integer n "n" proc-string)
       (check-p p proc-string))
     (build-random-list n (lambda () (rbern p))))
-
+  
   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pd
   (define (random-binomial n trials p)
     (define (rbinom trials p)
