@@ -53,6 +53,60 @@
       [(_ value) value]
       [(_ value (f1 . body) next ...)
        (->> (thread-last-helper f1 value . body) next ...)]))
+
+  ;; handle expressions -------------------------------------------------------------
+
+  ;; https://www.reddit.com/r/scheme/comments/e0lj08/lambda_eval_and_macros/
+  ;; (define (handle-expr alist expr)
+  ;;   (let* ([proc (car expr)]
+  ;;          [args (cdr expr)])
+  ;;     (apply map proc (map (lambda (x)
+  ;;                         (handle-item alist x))
+  ;;                       args))))
+
+  ;; (define (handle-item alist item)
+  ;;   (cond
+  ;;    [(pair? item)
+  ;;     (handle-expr alist item)]
+  ;;    [(and (symbol? item) (assoc item alist))
+  ;;     (cadr (assoc item alist))]
+  ;;    [(or (number? item) (string? item) (symbol? item))
+  ;;     (make-list (length (cadar alist)) item)]
+  ;;    [else
+  ;;     (assertion-violation "(handle-item alist item)" "expr is invalid")]))
+
+  (define (handle-expr df expr who)
+    (let* ([proc (car expr)]
+           [args (cdr expr)])
+      (apply map proc (map (lambda (x)
+                          (handle-item df x who))
+                        args))))
+
+  (define (handle-item df item who)
+    (cond
+     [(pair? item)
+      (handle-expr df item who)]
+     [(and (symbol? item) (member item (dataframe-names df)))
+      (dataframe-values df item)]
+     [(or (number? item) (string? item) (symbol? item))
+      (make-list (car (dataframe-dim df)) item)]
+     [else
+      (assertion-violation who "expr is invalid")]))
+
+  (define (and-proc . args)
+    (cond
+     ((null? args) #t)
+     ((not (car args)) #f)
+     (else (apply and-proc (cdr args)))))
+
+  (define (or-proc . args)
+    (cond
+     ((null? args) #t)
+     ((not (car args)) #f)
+     (else (apply or-proc (cdr args)))))
+
+  (define (if-proc test consequent alternative)
+    (if test consequent alternative))
   
   ;; dataframe record type ---------------------------------------------------------------------
 
@@ -444,6 +498,12 @@
            [new-ls-col (filter-ls-col ls-bool (map cadr alist))])
       (add-names-ls-col all-names new-ls-col)))
 
+  (define (alist-filter alist expr who)
+    (let* ([all-names (map car alist)]
+           [ls-bool (handle-expr alist expr who)]
+           [new-ls-col (filter-ls-col ls-bool (map cadr alist))])
+      (add-names-ls-col all-names new-ls-col)))
+
   ;; filter list of columns, ls-col, based on list of boolean values, ls-bool
   ;; where each sub-list is same length as ls-bool
   ;; could just call (partition-ls-col) and return only the first value
@@ -603,31 +663,15 @@
 ;; (system "gnuplot -e 'set terminal dumb; plot sin(x)'")
 
 
-;; ;; https://www.reddit.com/r/scheme/comments/e0lj08/lambda_eval_and_macros/
-;; (define (handle-expr alist expr)
-;;   (let* ([f (car expr)]
-;;          [args (cdr expr)])
-;;     (apply map f (map (lambda (x)
-;;                         (handle-item alist x))
-;;                       args))))
+;; handle-expr approach has the pros of simplifying the expression syntax b/c not required to pass column names outside of expression
+;; handle-expr approach has the downside of not using eager evaluation so an expression would always need to work on full column
+;; handle-expr might not have same problems with lexical scope as I had with lambda but probably not worth the trouble given #2 on this list
 
-;; (define (handle-item alist item)
-;;   (cond
-;;    [(pair? item)
-;;     (handle-expr alist item)]
-;;    [(and (symbol? item) (assoc item alist))
-;;     (cadr (assoc item alist))]
-;;    [(or (number? item) (string? item) (symbol? item))
-;;     (make-list (length (cadar alist)) item)]
-;;    [else
-;;     (assertion-violation "(handle-item alist item)" "expr is invalid")]))
+;; probably should scale back the problem that I'm trying to solve to push this forward (b/c it has stalled out lately)
+;; drop ability to make group-by work with mutate and filter
+;; focus on group-by + aggregate (and work backwards?)
 
 
 
-;; (define (and-f . args)
-;;   (cond
-;;    ((null? args) #t)
-;;    ((not (car args)) #f)
-;;    (else (apply and-f (cdr args)))))
 
 

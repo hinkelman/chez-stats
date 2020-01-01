@@ -2,7 +2,9 @@
   (export
    ;; csv
    preview-csv
+   preview-tsv
    read-csv
+   read-tsv
    write-csv
    ;; dataframe
    ->
