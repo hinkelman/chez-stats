@@ -146,17 +146,25 @@
     (unless (for-all dataframe? dfs)
       (assertion-violation who "dfs are not all dataframes")))
 
-  ;; comparing at column level because column order doesn't matter for equality of dataframes
+  ;; ;; comparing at column level because column order doesn't matter for equality of dataframes
+  ;; (define (dataframe-equal? . dfs)
+  ;;   (check-all-dataframes dfs "(dataframe-equal? dfs)")
+  ;;   (let ([names (dataframe-names (car dfs))])
+  ;;     (for-all (lambda (name)
+  ;;                (let ([ls-values (dataframe-values (car dfs) name)])
+  ;;                  (for-all (lambda (df)
+  ;;                             (and (member name (dataframe-names df))
+  ;;                                  (equal? ls-values (dataframe-values df name))))
+  ;;                           dfs)))
+  ;;              names)))
+
   (define (dataframe-equal? . dfs)
     (check-all-dataframes dfs "(dataframe-equal? dfs)")
-    (let ([names (dataframe-names (car dfs))])
-      (for-all (lambda (name)
-                 (let ([ls-values (dataframe-values (car dfs) name)])
-                   (for-all (lambda (df)
-                              (and (member name (dataframe-names df))
-                                   (equal? ls-values (dataframe-values df name))))
-                            dfs)))
-               names)))
+    (let* ([alists (map dataframe-alist dfs)]
+           [first-alist (car alists)])
+      (for-all (lambda (alist)
+                 (equal? alist first-alist))
+               alists)))
 
   ;; check dataframe attributes -------------------------------------------------------------
   
@@ -257,12 +265,12 @@
   
   (define (shared-names . dfs)
     (let ([first-names (dataframe-names (car dfs))]
-          [rest-names (apply combine-names (cdr dfs))])
+          [rest-names (apply all-unique-names (cdr dfs))])
       (filter (lambda (name) (member name rest-names)) first-names)))
 
   (define (dataframe-append-all missing-value . dfs)
     (check-all-dataframes dfs "(dataframe-append-all missing-value dfs)")
-    (let* ([names (apply combine-names dfs)]
+    (let* ([names (apply combine-names-ordered dfs)]
            [alist (map (lambda (name)
                          (list name (apply append-columns name missing-value dfs)))
                        names)])
@@ -276,12 +284,23 @@
                       (make-list (car (dataframe-dim df)) missing-value))) 
                 dfs)))
 
-  (define (combine-names . dfs)
-    (remove-duplicates
-     (apply append
-            (map (lambda (df) (dataframe-names df))
-                 dfs))))
+  (define (all-names . dfs)
+    (apply append (map (lambda (df) (dataframe-names df)) dfs)))
 
+  (define (all-unique-names . dfs)
+    (remove-duplicates (apply all-names dfs)))
+
+  ;; combine names such that they stay in the order that they appear in each dataframe
+  (define (combine-names-ordered . dfs)
+    (define (loop all-names results)
+      (cond [(null? all-names)
+             (reverse results)]
+            [(member (car all-names) results)
+             (loop (cdr all-names) results)]
+            [else
+             (loop (cdr all-names) (cons (car all-names) results))]))
+    (loop (apply all-names dfs) '()))
+  
   ;; thread-last works with dataframe-append
   ;; (->> (list df df) (apply dataframe-append))
   ;; can't use quote to create the list because then df becomes a symbol
@@ -326,7 +345,7 @@
     (make-dataframe (alist-select (dataframe-alist df) names)))
 
   (define (alist-select alist names)
-    (filter (lambda (column) (member (car column) names)) alist))
+    (map (lambda (name) (assoc name alist)) names))
 
   (define (dataframe-drop df . names)
     (apply check-df-names df "(dataframe-drop df names)" names)
@@ -517,6 +536,51 @@
           (if (car ls-bool)
               (loop (cdr ls-bool) (map cdr ls-col) (cons-acc ls-col results))
               (loop (cdr ls-bool) (map cdr ls-col) results)))))
+
+  (define (filter-ls-col2 ls-values ls-col procedure)
+    (let ([ls-bool (apply map procedure ls-values)])
+      (let loop ([ls-bool ls-bool]
+                 [ls-col ls-col]
+                 [results '()])
+        (if (null? ls-bool)
+            (map reverse results)
+            (if (car ls-bool)
+                (loop (cdr ls-bool) (map cdr ls-col) (cons-acc ls-col results))
+                (loop (cdr ls-bool) (map cdr ls-col) results)))))
+    (void))
+
+  (define (filter-ls-col3 ls-col procedure)
+    (let ([ls-rows (transpose ls-col)])
+      (transpose (filter procedure ls-rows)))
+    (void))
+
+  (define (filter-ls-row ls-row procedure)
+    (filter procedure ls-row)
+    (void))
+
+  ;; using built-in filter function is only slightly slower than recursive version
+  ;; built-in version requires switching to row-wise and back to col-wise
+  ;; i.e., it would be faster if dataframe use row-wise structure
+
+  ;; select, mutate, aggregate are obviously better as column-wise
+  ;; filter on a single column would be faster using row-wise
+  ;; but want flexibility of filtering on multiple columns
+
+  ;; don't know how to do column-wise sort without using indices, which would be slow and not idiomatic
+  ;; not even sure how to execute column-wise sort with indices
+  
+  ;; simplest thing for multi-column sort is probably
+  ;; (1) group
+  ;; (2) transpose
+  ;; (3) sort
+  ;; (4) ungroup  ;; might be faster to transpose and then ungroup
+  ;; (5) transpose
+
+  ;; unique also uses transpose
+
+  ;; not obvious (yet?) how to sort on multiple columns; already only able to sort on numeric characters
+  ;; just need to push this forward and make a list of potential future features
+    
   
   ;; unique ------------------------------------------------------------------------
 

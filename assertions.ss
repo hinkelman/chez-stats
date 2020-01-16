@@ -87,11 +87,11 @@
   ;; https://stackoverflow.com/questions/8382296/scheme-remove-duplicated-numbers-from-list
   (define (remove-duplicates ls)
     (cond [(null? ls)
-	   '()]
-	  [(member (car ls) (cdr ls))
-	   (remove-duplicates (cdr ls))]
-	  [else
-	   (cons (car ls) (remove-duplicates (cdr ls)))]))
+           '()]
+          [(member (car ls) (cdr ls))
+           (remove-duplicates (cdr ls))]
+          [else
+           (cons (car ls) (remove-duplicates (cdr ls)))]))
 
   (define (same-length? len ls)
     (= len (length ls)))
