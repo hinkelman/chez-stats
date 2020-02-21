@@ -28,7 +28,7 @@ $ git clone git://github.com/hinkelman/chez-stats.git
 $ git clone -b dev git://github.com/hinkelman/chez-stats.git
 ```
 
-For more information on installing Chez Scheme libraries, see this [blog post](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/).
+For more information on installing Chez Scheme libraries, see blog posts for [macOS and Windows](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/) or [Ubuntu](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs-ubuntu/).
 
 ### Import 
 
