@@ -21,8 +21,8 @@
 
 ;; dataframe
 
-(define df1 (make-dataframe '((a (1 2 3)) (b (4 5 6)))))
-(define df2 (make-dataframe '((a (1 2 3)) (b (4 5 6)) (c (7 8 9)))))
+(define df1 (make-dataframe '((a 1 2 3) (b 4 5 6))))
+(define df2 (make-dataframe '((a 1 2 3) (b 4 5 6) (c 7 8 9))))
 
 (test-begin "thread-test")
 (test-equal 12 (-> '(1 2 3) (mean) (+ 10)))
@@ -36,16 +36,16 @@
 
 (test-begin "dataframe?-test")
 (test-assert (dataframe? df1))
-(test-assert (not (dataframe? '((a (1 2 3)) (b (4 5 6))))))
+(test-assert (not (dataframe? '((a 1 2 3) (b 4 5 6)))))
 (test-end "dataframe?-test")
 
 (test-begin "dataframe-alist-test")
-(test-equal '((a (1 2 3)) (b (4 5 6))) (dataframe-alist df1))
-(test-error (dataframe-alist '((a (1 2 3)) (b (4 5 6)))))
+(test-equal '((a 1 2 3) (b 4 5 6)) (dataframe-alist df1))
+(test-error (dataframe-alist '((a 1 2 3) (b 4 5 6))))
 (test-end "dataframe-alist-test")
 
-(define df3 (make-dataframe '((a (1 2 3 1 2 3)) (b (4 5 6 4 5 6)) (c (-999 -999 -999 7 8 9)))))
-(define df4 (make-dataframe '((a (1 2 3 1 2 3)) (b (4 5 6 4 5 6)) (c (7 8 9 -999 -999 -999)))))
+(define df3 (make-dataframe '((a 1 2 3 1 2 3) (b 4 5 6 4 5 6) (c -999 -999 -999 7 8 9))))
+(define df4 (make-dataframe '((a 1 2 3 1 2 3) (b 4 5 6 4 5 6) (c 7 8 9 -999 -999 -999))))
 
 (test-begin "dataframe-append-all-test")
 (test-assert (dataframe-equal? df3 (dataframe-append-all -999 df1 df2)))
@@ -66,9 +66,9 @@
 (test-error (dataframe-dim '(1 2 3)))
 (test-end "dataframe-dim-test")
 
-(define df5 (make-dataframe '((a (1 2 3)) (b (4 5 6)) (c (7 8 9)))))
-(define df6 (make-dataframe '((b (4 5 6)) (c (7 8 9)))))
-(define df7 (make-dataframe '((c (7 8 9)))))
+(define df5 (make-dataframe '((a 1 2 3) (b 4 5 6) (c 7 8 9))))
+(define df6 (make-dataframe '((b 4 5 6) (c 7 8 9))))
+(define df7 (make-dataframe '((c 7 8 9))))
 
 (test-begin "dataframe-drop-test")
 (test-error (dataframe-drop df5 'd))
@@ -80,7 +80,7 @@
 (test-assert (dataframe-equal? df2))
 (test-assert (dataframe-equal? df2 df5))
 (test-assert (not (dataframe-equal? df5 df6)))
-(test-error (dataframes-equal df2 '((a (1 2 3)))))
+(test-error (dataframes-equal df2 '((a 1 2 3))))
 (test-end "dataframe-equal?-test")
 
 (test-begin "dataframe-head-test")
@@ -91,7 +91,7 @@
 (test-end "dataframe-head-test")
 
 (test-begin "dataframe-tail-test")
-(test-assert (dataframe-equal? (make-dataframe '((b (5 6)) (c (8 9)))) (dataframe-tail df6 2)))
+(test-assert (dataframe-equal? (make-dataframe '((b 5 6) (c 8 9))) (dataframe-tail df6 2)))
 (test-error (dataframe-tail '(1 2 3) 3))
 (test-error (dataframe-tail df2 10))
 (test-error (dataframe-tail df2 0.5))
@@ -103,8 +103,8 @@
 (test-equal '(c) (dataframe-names df7))
 (test-end "dataframe-names-test")
 
-(define df8 (make-dataframe '((a (1 2 3)) (b (4 5 6)) (scary7 (7 8 9)))))
-(define df9 (make-dataframe '((A (1 2 3)) (b (4 5 6)) (scary7 (7 8 9)))))
+(define df8 (make-dataframe '((a 1 2 3) (b 4 5 6) (scary7 7 8 9))))
+(define df9 (make-dataframe '((A 1 2 3) (b 4 5 6) (scary7 7 8 9))))
 
 (test-begin "dataframe-rename-test")
 (test-assert (dataframe-equal? df8 (dataframe-rename df5 '((c scary7)))))
@@ -130,7 +130,7 @@
 (test-assert (dataframe-equal? df7 (dataframe-select df2 'c)))
 (test-end "dataframe-select-test")
 
-(define df10 (make-dataframe '((a (100 200 300)) (b (4 5 6)) (c (700 800 900)))))
+(define df10 (make-dataframe '((a 100 200 300) (b 4 5 6) (c 700 800 900))))
 
 ;; (test-begin "dataframe-update-test")
 ;; (test-error (dataframe-update df5 (lambda (x) (* x 100)) 'd))
@@ -151,15 +151,15 @@
 (test-error (make-dataframe 100))
 (test-error (make-dataframe '()))
 (test-error (make-dataframe '(1 2 3)))
-(test-error (make-dataframe '(("a" (1 2 3)))))
-(test-error (make-dataframe '((a (1 2 3)) (a (1 2 3)))))
-(test-error (make-dataframe '((a 10))))
-(test-error (make-dataframe '((a (1 2 3)) (b (1 2 3 4)))))
+(test-error (make-dataframe '((a (1 2 3))))) 
+(test-error (make-dataframe '(("a" 1 2 3))))
+(test-error (make-dataframe '((a 1 2 3) (a 1 2 3))))
+(test-error (make-dataframe '((a 1 2 3) (b 1 2 3 4))))
 (test-end "make-dataframe-test")
 
-(define df11 (make-dataframe '((a (100 200 300)) (b (4 5 6)) (c (700 800 900)) (d (104 205 306)))))
-(define df12 (make-dataframe '((a (100 200 300)) (b (4 5 6)) (c (700 800 900)) (d (400 500 600)))))
-(define df13 (make-dataframe '((a (100 200 300)) (b (4 5 6)) (c (700 800 900)) (d ("100_4" "200_5" "300_6")))))
+(define df11 (make-dataframe '((a 100 200 300) (b 4 5 6) (c 700 800 900) (d 104 205 306))))
+(define df12 (make-dataframe '((a 100 200 300) (b 4 5 6) (c 700 800 900) (d 400 500 600))))
+(define df13 (make-dataframe '((a 100 200 300) (b 4 5 6) (c 700 800 900) (d "100_4" "200_5" "300_6"))))
 
 ;; (test-begin "dataframe-add-test")
 ;; (test-error (dataframe-add df10 'c (lambda (a b) (+ a b)) 'a 'b 'c))
@@ -178,8 +178,8 @@
 ;;                                                    'a 'b)))
 ;; (test-end "dataframe-add-test")
 
-(define df14 (make-dataframe '((a (200 300)) (b (5 6)) (c (800 900)))))
-(define df15 (make-dataframe '((a (200)) (b (5)) (c (800)))))
+(define df14 (make-dataframe '((a 200 300) (b 5 6) (c 800 900))))
+(define df15 (make-dataframe '((a 200) (b 5) (c 800))))
 
 (test-begin "dataframe-filter-test")
 (test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (a) (> a 100)) 'a)))
@@ -190,8 +190,8 @@
 (test-error (dataframe-filter df10 10 'a))
 (test-end "dataframe-filter-test")
 
-(define df16 (make-dataframe '((a (200)) (b (5)) (c (800)))))
-(define df17 (make-dataframe '((a (100 300)) (b (4 6)) (c (700 900)))))
+(define df16 (make-dataframe '((a 200) (b 5) (c 800))))
+(define df17 (make-dataframe '((a 100 300) (b 4 6) (c 700 900))))
 
 (test-begin "dataframe-partition-test")
 (define-values (part1 part2) (dataframe-partition df10 (lambda (b) (odd? b)) 'b))
@@ -209,8 +209,8 @@
 (delete-file "example.scm")
 (test-end "df-read-write-test")
 
-(define df18 (make-dataframe '((a (1 2 3 1 2 3)) (b (4 5 6 4 5 6)))))
-(define df19 (make-dataframe '((c (1 2 3)))))
+(define df18 (make-dataframe '((a 1 2 3 1 2 3) (b 4 5 6 4 5 6))))
+(define df19 (make-dataframe '((c 1 2 3))))
 
 (test-begin "dataframe-append-test")
 (test-assert (dataframe-equal? df18 (dataframe-append df1 df2)))
@@ -229,14 +229,14 @@
 (test-assert (dataframe-equal? df2 (listtable->dataframe '((a b c) (1 4 7) (2 5 8) (3 6 9)) #t)))
 (test-assert (dataframe-equal? df17 (listtable->dataframe '((a b c) (100 4 700) (300 6 900)) #t)))
 (test-assert (dataframe-equal? df19 (listtable->dataframe '((c) (1) (2) (3)) #t)))
-(test-assert (dataframe-equal? (make-dataframe '((V0 (1 2)) (V1 (3 4))))
+(test-assert (dataframe-equal? (make-dataframe '((V0 1 2) (V1 3 4)))
                                (listtable->dataframe '((1 3) (2 4)) #f)))
 (test-error (listtable->dataframe '(("a" b c) (1 4 7) (2 5 8) (3 6 9)) #t))
 (test-error (listtable->dataframe '((a b) (1 4 7))))
 (test-end "listtable->dataframe-test")
 
-(define df20 (make-dataframe '((trt (A A A B B B)) (grp (A B A B A B)) (resp (1 2 3 4 5 6)))))
-(define df21 (make-dataframe '((trt (A A B B)) (grp (B A A B)))))
+(define df20 (make-dataframe '((trt A A A B B B) (grp A B A B A B) (resp 1 2 3 4 5 6))))
+(define df21 (make-dataframe '((trt A A B B) (grp B A A B))))
 
 (test-begin "dataframe-unique-test")
 (test-error (dataframe-unique '((a (1 2 3)))))

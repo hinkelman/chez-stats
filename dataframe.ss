@@ -1,3 +1,7 @@
+;; need to rethink how i approached alists as dataframes
+;; can simplify things by using form '((a 1 2 3)) rather than '((a (1 2 3)))
+
+
 (library (chez-stats dataframe)
   (export
    ->
@@ -69,9 +73,9 @@
   ;;    [(pair? item)
   ;;     (handle-expr alist item)]
   ;;    [(and (symbol? item) (assoc item alist))
-  ;;     (cadr (assoc item alist))]
+  ;;     (cdr (assoc item alist))]
   ;;    [(or (number? item) (string? item) (symbol? item))
-  ;;     (make-list (length (cadar alist)) item)]
+  ;;     (make-list (length (cdar alist)) item)]
   ;;    [else
   ;;     (assertion-violation "(handle-item alist item)" "expr is invalid")]))
 
@@ -118,7 +122,7 @@
     (new alist
          groups
          (map car alist)
-         (cons (length (cadar alist)) (length alist))))
+         (cons (length (cdar alist)) (length alist))))
   
   (define-record-type dataframe (fields alist groups names dim)
                       (protocol
@@ -194,7 +198,7 @@
         (assertion-violation proc-string
                              (string-append "index " (number->string n) " is out of range")))
       (make-dataframe
-       (map (lambda (col) (list (car col) (list-head (cadr col) n)))
+       (map (lambda (col) (cons (car col) (list-head (cdr col) n)))
             (dataframe-alist df)))))
 
   ;; dataframe-tail is not same as list-tail in Chez
@@ -208,7 +212,7 @@
           (assertion-violation proc-string
                                (string-append "index " (number->string n) " is out of range")))
         (make-dataframe
-         (map (lambda (col) (list (car col) (list-tail (cadr col) (- rows n))))
+         (map (lambda (col) (cons (car col) (list-tail (cdr col) (- rows n))))
               (dataframe-alist df))))))
   
   ;; rename columns ---------------------------------------------------------------------------------
@@ -220,10 +224,10 @@
       (check-name-pairs (dataframe-names df) name-pairs proc-string))
     (let ([alist (map (lambda (column)
                         (let* ([name (car column)]
-                               [ls-values (cadr column)]
+                               [ls-values (cdr column)]
                                [name-match (assoc name name-pairs)])
                           (if name-match
-                              (list (cadr name-match) ls-values)
+                              (cons (cadr name-match) ls-values)
                               column)))
                       (dataframe-alist df))])
       (make-dataframe alist)))
@@ -241,14 +245,14 @@
                                             ", not "
                                             (number->string num-cols)))))
       (let* ([alist (dataframe-alist df)]
-             [ls-col (map cadr alist)])
+             [ls-col (map cdr alist)])
         (make-dataframe (add-names-ls-col new-names ls-col)))))
 
   ;; add names to list of columns, ls-col, to create association list
   (define (add-names-ls-col names ls-col)
     (if (null? ls-col)
-        (map (lambda (name) (list name '())) names)
-        (map (lambda (name vals) (list name vals)) names ls-col)))
+        (map (lambda (name) (cons name '())) names)
+        (map (lambda (name vals) (cons name vals)) names ls-col)))
   
   ;; append -----------------------------------------------------------------------------------
 
@@ -259,7 +263,7 @@
         (when (null? names) (assertion-violation proc-string "no names in common across dfs"))
         (let ([alist (map (lambda (name)
                             ;; missing-value will not be used so chose arbitrary value (-999)
-                            (list name (apply append-columns name -999 dfs)))
+                            (cons name (apply append-columns name -999 dfs)))
                           names)])
           (make-dataframe alist)))))
   
@@ -272,7 +276,7 @@
     (check-all-dataframes dfs "(dataframe-append-all missing-value dfs)")
     (let* ([names (apply combine-names-ordered dfs)]
            [alist (map (lambda (name)
-                         (list name (apply append-columns name missing-value dfs)))
+                         (cons name (apply append-columns name missing-value dfs)))
                        names)])
       (make-dataframe alist)))
 
@@ -330,7 +334,7 @@
     (dataframe-values df name))
 
   (define (alist-values alist name)
-    (cadr (assoc name alist)))
+    (cdr (assoc name alist)))
 
   (define (dataframe-values-map df names)
     (alist-values-map (dataframe-alist df) names))
@@ -395,7 +399,7 @@
   ;; (define (alist-update-map alist procedure ls-names)
   ;;   (map (lambda (column)
   ;;          (if (member (car column) ls-names)
-  ;;              (list (car column) (map procedure (cadr column)))
+  ;;              (list (car column) (map procedure (cdr column)))
   ;;              column))
   ;;        alist))
 
@@ -439,7 +443,7 @@
       (apply check-df-names df proc-string names))
     (let ([alist (map (lambda (column)
                         (if (member (car column) names)
-                            (list (car column) (map procedure (cadr column)))
+                            (list (car column) (map procedure (cdr column)))
                             column))
                       (dataframe-alist df))])
       (make-dataframe alist)))
@@ -453,7 +457,7 @@
     (let* ([ls-values (dataframe-values-map df names)]
            [ls-bool (apply map procedure ls-values)]
            [names (dataframe-names df)])
-      (let-values ([(keep drop) (partition-ls-col ls-bool (map cadr (dataframe-alist df)))])
+      (let-values ([(keep drop) (partition-ls-col ls-bool (map cdr (dataframe-alist df)))])
         (values (make-dataframe (add-names-ls-col names keep))
                 (make-dataframe (add-names-ls-col names drop))))))
 
@@ -483,7 +487,7 @@
   ;;     (apply check-df-names df proc-string names))
   ;;   (let* ([ls-values (dataframe-values-map df names)]
   ;;          [ls-bool (apply map procedure ls-values)]
-  ;;          [new-ls-col (filter-ls-col ls-bool (map cadr (dataframe-alist df)))]
+  ;;          [new-ls-col (filter-ls-col ls-bool (map cdr (dataframe-alist df)))]
   ;;          [names (dataframe-names df)])
   ;;     (make-dataframe (add-names-ls-col names new-ls-col))))
 
@@ -514,13 +518,13 @@
            [alist (dataframe-alist df)]
            [ls-values (alist-values-map alist names)]
            [ls-bool (apply map procedure ls-values)]
-           [new-ls-col (filter-ls-col ls-bool (map cadr alist))])
+           [new-ls-col (filter-ls-col ls-bool (map cdr alist))])
       (add-names-ls-col all-names new-ls-col)))
 
   (define (alist-filter alist expr who)
     (let* ([all-names (map car alist)]
            [ls-bool (handle-expr alist expr who)]
-           [new-ls-col (filter-ls-col ls-bool (map cadr alist))])
+           [new-ls-col (filter-ls-col ls-bool (map cdr alist))])
       (add-names-ls-col all-names new-ls-col)))
 
   ;; filter list of columns, ls-col, based on list of boolean values, ls-bool
@@ -590,7 +594,7 @@
   
   (define (alist-unique alist)
     (let ([names (map car alist)]
-          [ls-col (map cadr alist)])
+          [ls-col (map cdr alist)])
       (add-names-ls-col names (ls-col-unique ls-col))))
 
   (define (ls-col-unique ls-col)
@@ -639,10 +643,10 @@
 
   (define (group-by-helper ls-obj names-select alist)
     (let ([names (map car alist)]
-          [ls-col (map cadr alist)]
+          [ls-col (map cdr alist)]
           [ls-bool (contains-andmap
                     ls-obj
-                    (map cadr (alist-select alist names-select)))])
+                    (map cdr (alist-select alist names-select)))])
       (let-values ([(keep drop) (partition-ls-col ls-bool ls-col)])
         (values (add-names-ls-col names keep)
                 (add-names-ls-col names drop)))))
@@ -664,7 +668,7 @@
                            results)))]))
     (apply check-df-names df "(dataframe-group-by df names)" names)
     (let* ([alist (dataframe-alist df)]
-           [ls-col-select (map cadr (alist-select alist names))]
+           [ls-col-select (map cdr (alist-select alist names))]
            [ls-row-unique (transpose (ls-col-unique ls-col-select))])
       (loop ls-row-unique alist '())))
 
@@ -715,7 +719,7 @@
           [ls-values (if header?
                          (transpose (cdr ls))
                          (transpose ls))])
-      (make-dataframe (map list names ls-values))))
+      (make-dataframe (map cons names ls-values))))
   
   )
 
