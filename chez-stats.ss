@@ -22,8 +22,8 @@
    dataframe-drop
    dataframe-equal?
    dataframe-filter
-   dataframe-group-by
-   dataframe-groups
+  ; dataframe-group-by
+  ;  dataframe-groups
    dataframe-head
   ; dataframe-map
    dataframe-names
@@ -33,7 +33,7 @@
    dataframe-read
    dataframe-select
    dataframe-tail
-   dataframe-ungroup
+  ; dataframe-ungroup
    dataframe-unique
    ;dataframe-update
    dataframe-values

@@ -15,8 +15,8 @@
    dataframe-drop
    dataframe-equal?
    dataframe-filter
-   dataframe-group-by
-   dataframe-groups
+   ;dataframe-group-by
+   ;dataframe-groups
    dataframe-head
    ;dataframe-map
    dataframe-names
@@ -26,7 +26,7 @@
    dataframe-rename
    dataframe-select
    dataframe-tail
-   dataframe-ungroup
+   ;dataframe-ungroup
    dataframe-unique
    ;dataframe-update
    dataframe-values
@@ -110,31 +110,41 @@
   
   ;; dataframe record type ---------------------------------------------------------------------
 
-  (define (drt-df-helper new alist groups)
-    (let ([proc-string "(make-dataframe alist)"])
-      (check-alist alist proc-string)
-      (unless (null? groups)
-        (check-alist groups proc-string)))
-    (new alist
-         groups
-         (map car alist)
-         (cons (length (cdar alist)) (length alist))))
+  ;; (define (drt-df-helper new alist groups)
+  ;;   (let ([proc-string "(make-dataframe alist)"])
+  ;;     (check-alist alist proc-string)
+  ;;     (unless (null? groups)
+  ;;       (check-alist groups proc-string)))
+  ;;   (new alist
+  ;;        groups
+  ;;        (map car alist)
+  ;;        (cons (length (cdar alist)) (length alist))))
   
-  (define-record-type dataframe (fields alist groups names dim)
+  ;; (define-record-type dataframe (fields alist groups names dim)
+  ;;                     (protocol
+  ;;                      (lambda (new)
+  ;;                        (case-lambda
+  ;;                          [(alist) (drt-df-helper new alist '())]
+  ;;                          [(alist groups) (drt-df-helper new alist groups)]))))
+
+  (define-record-type dataframe (fields alist names dim)
                       (protocol
                        (lambda (new)
-                         (case-lambda
-                           [(alist) (drt-df-helper new alist '())]
-                           [(alist groups) (drt-df-helper new alist groups)]))))
+                         (lambda (alist)
+                           (let ([proc-string "(make-dataframe alist)"])
+                             (check-alist alist proc-string))
+                           (new alist
+                                (map car alist)
+                                (cons (length (cdar alist)) (length alist)))))))
 
   ;; grouped-df record type --------------------------------------------------------------------
 
   ;; no checking because grouped-df is internal only
-  (define-record-type grouped-df (fields ls length)
-                      (protocol
-                       (lambda (new)
-                         (lambda (ls)
-                           (new ls (length ls))))))
+  ;; (define-record-type grouped-df (fields ls length)
+  ;;                     (protocol
+  ;;                      (lambda (new)
+  ;;                        (lambda (ls)
+  ;;                          (new ls (length ls))))))
 
   ;; check dataframes --------------------------------------------------------------------------
   
@@ -165,10 +175,15 @@
     (unless (apply dataframe-contains? df names)
       (assertion-violation who "name(s) not in df")))
 
+  ;; (define (check-df-names df who . names)
+  ;;   (if (grouped-df? df)
+  ;;       (check-all-dataframes (grouped-df-ls df) who)
+  ;;       (check-dataframe df who))
+  ;;   (check-names names who)
+  ;;   (apply check-names-exist df who names))
+
   (define (check-df-names df who . names)
-    (if (grouped-df? df)
-        (check-all-dataframes (grouped-df-ls df) who)
-        (check-dataframe df who))
+    (check-dataframe df who)
     (check-names names who)
     (apply check-names-exist df who names))
 
@@ -478,13 +493,19 @@
   ;;       (make-dataframe (alist-filter (dataframe-alist df) procedure names))))
 
 
+  ;; (define (dataframe-filter df procedure . names)
+  ;;   (let ([proc-string "(dataframe-filter df procedure names)"])
+  ;;     (check-procedure procedure proc-string)
+  ;;     (apply check-df-names df proc-string names))
+  ;;   (if (grouped-df? df)
+  ;;       (make-grouped-df (map (lambda (df-sub) (make-dataframe (df-filter-helper df-sub procedure names))) df))
+  ;;       (make-dataframe (df-filter-helper df procedure names))))
+
   (define (dataframe-filter df procedure . names)
     (let ([proc-string "(dataframe-filter df procedure names)"])
       (check-procedure procedure proc-string)
       (apply check-df-names df proc-string names))
-    (if (grouped-df? df)
-        (make-grouped-df (map (lambda (df-sub) (make-dataframe (df-filter-helper df-sub procedure names))) df))
-        (make-dataframe (df-filter-helper df procedure names))))
+    (make-dataframe (df-filter-helper df procedure names)))
 
   ;; lambda expressions capture environment at time that they are created
   ;; can't include unknown binding in lambda expression (i.e., needs to be in lambda arguments)
@@ -579,60 +600,60 @@
   ;; but needs to be incorporated in overall lambda expression
   ;; maybe use reserved word (e.g., DF) to refer to current df in lambda expression
   
-  ;; returns boolean list of same length as list
-  (define (contains obj ls)
-    (let ([pred (cond
-                 [(number? obj) =]
-                 [(string? obj) string=?]
-                 [(symbol? obj) symbol=?]
-                 [else equal?])])
-      (map (lambda (x) (pred obj x)) ls)))
+  ;; ;; returns boolean list of same length as list
+  ;; (define (contains obj ls)
+  ;;   (let ([pred (cond
+  ;;                [(number? obj) =]
+  ;;                [(string? obj) string=?]
+  ;;                [(symbol? obj) symbol=?]
+  ;;                [else equal?])])
+  ;;     (map (lambda (x) (pred obj x)) ls)))
 
-  ;; list of objects to find in list of columns
-  ;; not a good name but function is not exported
-  (define (contains-andmap ls-obj ls-values)
-    (let* ([ls-bool (map (lambda (obj ls)
-                           (contains obj ls)) ls-obj ls-values)]
-           [ls-row (transpose ls-bool)])
-      (map (lambda (row)
-             (for-all (lambda (x) (equal? x #t)) row))
-           ls-row)))
+  ;; ;; list of objects to find in list of columns
+  ;; ;; not a good name but function is not exported
+  ;; (define (contains-andmap ls-obj ls-values)
+  ;;   (let* ([ls-bool (map (lambda (obj ls)
+  ;;                          (contains obj ls)) ls-obj ls-values)]
+  ;;          [ls-row (transpose ls-bool)])
+  ;;     (map (lambda (row)
+  ;;            (for-all (lambda (x) (equal? x #t)) row))
+  ;;          ls-row)))
 
-  (define (group-by-helper ls-obj names-select alist)
-    (let ([names (map car alist)]
-          [ls-values (map cdr alist)]
-          [ls-bool (contains-andmap
-                    ls-obj
-                    (map cdr (alist-select alist names-select)))])
-      (let-values ([(keep drop) (partition-ls-values ls-bool ls-values)])
-        (values (add-names-ls-values names keep)
-                (add-names-ls-values names drop)))))
+  ;; (define (group-by-helper ls-obj names-select alist)
+  ;;   (let ([names (map car alist)]
+  ;;         [ls-values (map cdr alist)]
+  ;;         [ls-bool (contains-andmap
+  ;;                   ls-obj
+  ;;                   (map cdr (alist-select alist names-select)))])
+  ;;     (let-values ([(keep drop) (partition-ls-values ls-bool ls-values)])
+  ;;       (values (add-names-ls-values names keep)
+  ;;               (add-names-ls-values names drop)))))
   
-  (define (dataframe-group-by df names)
-    (define (loop ls-row-unique alist results)
-      (cond [(null? ls-row-unique)
-             (make-grouped-df (reverse results))]
-            [else
-             (let-values ([(keep drop) (group-by-helper
-                                        (car ls-row-unique)
-                                        names
-                                        alist)])
-               (loop (cdr ls-row-unique)
-                     drop
-                     (cons (make-dataframe
-                            keep
-                            (add-names-ls-values names (transpose (list (car ls-row-unique)))))
-                           results)))]))
-    (apply check-df-names df "(dataframe-group-by df names)" names)
-    (let* ([alist (dataframe-alist df)]
-           [ls-values-select (map cdr (alist-select alist names))]
-           [ls-row-unique (transpose (ls-values-unique ls-values-select))])
-      (loop ls-row-unique alist '())))
+  ;; (define (dataframe-group-by df names)
+  ;;   (define (loop ls-row-unique alist results)
+  ;;     (cond [(null? ls-row-unique)
+  ;;            (make-grouped-df (reverse results))]
+  ;;           [else
+  ;;            (let-values ([(keep drop) (group-by-helper
+  ;;                                       (car ls-row-unique)
+  ;;                                       names
+  ;;                                       alist)])
+  ;;              (loop (cdr ls-row-unique)
+  ;;                    drop
+  ;;                    (cons (make-dataframe
+  ;;                           keep
+  ;;                           (add-names-ls-values names (transpose (list (car ls-row-unique)))))
+  ;;                          results)))]))
+  ;;   (apply check-df-names df "(dataframe-group-by df names)" names)
+  ;;   (let* ([alist (dataframe-alist df)]
+  ;;          [ls-values-select (map cdr (alist-select alist names))]
+  ;;          [ls-row-unique (transpose (ls-values-unique ls-values-select))])
+  ;;     (loop ls-row-unique alist '())))
 
-  (define (dataframe-ungroup grouped-df)
-    (unless (grouped-df? grouped-df)
-      (assertion-violation "(dataframe-ungroup grouped-df)" "not a grouped df"))
-    (apply dataframe-append (grouped-df-ls grouped-df)))
+  ;; (define (dataframe-ungroup grouped-df)
+  ;;   (unless (grouped-df? grouped-df)
+  ;;     (assertion-violation "(dataframe-ungroup grouped-df)" "not a grouped df"))
+  ;;   (apply dataframe-append (grouped-df-ls grouped-df)))
 
   ;; (define df (make-dataframe '((grp (a a b b b)) (trt (a b a b b)) (adult (1 2 3 4 5)) (juv (10 20 30 40 50)))))
 
