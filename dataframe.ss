@@ -1,7 +1,3 @@
-;; need to rethink how i approached alists as dataframes
-;; can simplify things by using form '((a 1 2 3)) rather than '((a (1 2 3)))
-
-
 (library (chez-stats dataframe)
   (export
    ->
@@ -59,8 +55,8 @@
        (->> (thread-last-helper f1 value . body) next ...)]))
 
   ;; handle expressions -------------------------------------------------------------
-
   ;; https://www.reddit.com/r/scheme/comments/e0lj08/lambda_eval_and_macros/
+  
   ;; (define (handle-expr alist expr)
   ;;   (let* ([proc (car expr)]
   ;;          [args (cdr expr)])
@@ -191,29 +187,23 @@
   ;; head/tail -----------------------------------------------------------------------------------
 
   (define (dataframe-head df n)
-    (let ([proc-string "(dataframe-head df n)"])
+    (dataframe-head-tail df n "head"))
+
+  ;; dataframe-tail is based on list-tail, which does not work the same as tail in R
+  (define (dataframe-tail df n)
+    (dataframe-head-tail df n "tail"))
+
+  (define (dataframe-head-tail df n type)
+    (let ([proc-string (string-append "(dataframe-" type " df n)")]
+          [proc (if (string=? type "head") list-head list-tail)])
       (check-dataframe df proc-string)
       (check-positive-integer n "n" proc-string)
       (when (> n (car (dataframe-dim df)))
         (assertion-violation proc-string
                              (string-append "index " (number->string n) " is out of range")))
       (make-dataframe
-       (map (lambda (col) (cons (car col) (list-head (cdr col) n)))
+       (map (lambda (col) (cons (car col) (proc (cdr col) n)))
             (dataframe-alist df)))))
-
-  ;; dataframe-tail is not same as list-tail in Chez
-  ;; instead, works more like tail in R
-  (define (dataframe-tail df n)
-    (let ([proc-string "(dataframe-tail df n)"])
-      (check-dataframe df proc-string)
-      (check-positive-integer n "n" proc-string)
-      (let ([rows (car (dataframe-dim df))])
-        (when (> n rows)
-          (assertion-violation proc-string
-                               (string-append "index " (number->string n) " is out of range")))
-        (make-dataframe
-         (map (lambda (col) (cons (car col) (list-tail (cdr col) (- rows n))))
-              (dataframe-alist df))))))
   
   ;; rename columns ---------------------------------------------------------------------------------
 

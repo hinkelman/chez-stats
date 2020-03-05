@@ -91,7 +91,7 @@
 (test-end "dataframe-head-test")
 
 (test-begin "dataframe-tail-test")
-(test-assert (dataframe-equal? (make-dataframe '((b 5 6) (c 8 9))) (dataframe-tail df6 2)))
+(test-assert (dataframe-equal? (make-dataframe '((b 5 6) (c 8 9))) (dataframe-tail df6 1)))
 (test-error (dataframe-tail '(1 2 3) 3))
 (test-error (dataframe-tail df2 10))
 (test-error (dataframe-tail df2 0.5))
