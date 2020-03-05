@@ -243,6 +243,15 @@
 (test-assert (dataframe-equal? df21 (dataframe-unique (dataframe-select df20 'trt 'grp))))
 (test-end "dataframe-unique-test")
 
+(define df22 (make-dataframe '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 10 20 30 40 50))))
+
+(test-begin "dataframe-split-test")
+(define df-list (dataframe-split df22 'grp))
+(test-assert (dataframe-equal? (car df-list) (dataframe-filter df22 (lambda (x) (symbol=? x 'a)) 'grp)))
+(test-assert (dataframe-equal? (cadr df-list) (dataframe-filter df22 (lambda (x) (symbol=? x 'b)) 'grp)))
+(test-assert (dataframe-equal? df22 (apply dataframe-append df-list)))
+(test-end "dataframe-split-test")
+
 ;; random-variates
 
 (test-begin "bernoulli-test")

@@ -32,6 +32,7 @@
    dataframe-rename
    dataframe-read
    dataframe-select
+   dataframe-split
    dataframe-tail
   ; dataframe-ungroup
    dataframe-unique
