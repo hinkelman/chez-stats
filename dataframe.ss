@@ -223,14 +223,14 @@
                                             ", not "
                                             (number->string num-cols)))))
       (let* ([alist (dataframe-alist df)]
-             [ls-col (map cdr alist)])
-        (make-dataframe (add-names-ls-col new-names ls-col)))))
+             [ls-values (map cdr alist)])
+        (make-dataframe (add-names-ls-values new-names ls-values)))))
 
-  ;; add names to list of columns, ls-col, to create association list
-  (define (add-names-ls-col names ls-col)
-    (if (null? ls-col)
+  ;; add names to list of values, ls-values, to create association list
+  (define (add-names-ls-values names ls-values)
+    (if (null? ls-values)
         (map (lambda (name) (cons name '())) names)
-        (map (lambda (name vals) (cons name vals)) names ls-col)))
+        (map (lambda (name vals) (cons name vals)) names ls-values)))
   
   ;; append -----------------------------------------------------------------------------------
 
@@ -398,7 +398,7 @@
   ;; (define alist-map
   ;;   (case-lambda
   ;;     [(alist procedure names)
-  ;;      (alist-update alist (add-names-ls-col
+  ;;      (alist-update alist (add-names-ls-values
   ;;                     names
   ;;                     (alist-apply-map alist procedure names)))]
   ;;     [(alist procedure names new-name)
@@ -435,29 +435,29 @@
     (let* ([ls-values (dataframe-values-map df names)]
            [ls-bool (apply map procedure ls-values)]
            [names (dataframe-names df)])
-      (let-values ([(keep drop) (partition-ls-col ls-bool (map cdr (dataframe-alist df)))])
-        (values (make-dataframe (add-names-ls-col names keep))
-                (make-dataframe (add-names-ls-col names drop))))))
+      (let-values ([(keep drop) (partition-ls-values ls-bool (map cdr (dataframe-alist df)))])
+        (values (make-dataframe (add-names-ls-values names keep))
+                (make-dataframe (add-names-ls-values names drop))))))
 
-  ;; partition list of columns, ls-col, based on list of boolean values, ls-bool
+  ;; partition list of values, ls-values, based on list of boolean values, ls-bool
   ;; where each sub-list is same length as ls-bool
-  (define (partition-ls-col ls-bool ls-col)
+  (define (partition-ls-values ls-bool ls-values)
     (let loop ([ls-bool ls-bool]
-               [ls-col ls-col]
+               [ls-values ls-values]
                [keep '()]
                [drop '()])
       (if (null? ls-bool)
           (values (map reverse keep)
                   (map reverse drop))
           (if (car ls-bool)  ;; ls is list of boolean values
-              (loop (cdr ls-bool) (map cdr ls-col) (cons-acc ls-col keep) drop)
-              (loop (cdr ls-bool) (map cdr ls-col) keep (cons-acc ls-col drop))))))
+              (loop (cdr ls-bool) (map cdr ls-values) (cons-acc ls-values keep) drop)
+              (loop (cdr ls-bool) (map cdr ls-values) keep (cons-acc ls-values drop))))))
 
-  ;; cons list of columns, ls-col, (usually length one) onto accumulator, acc
-  (define (cons-acc ls-col acc)
+  ;; cons list of values, ls-values, (usually length one) onto accumulator, acc
+  (define (cons-acc ls-values acc)
     (if (null? acc)
-        (map (lambda (x) (list (car x))) ls-col)
-        (map (lambda (x y) (cons x y)) (map car ls-col) acc)))
+        (map (lambda (x) (list (car x))) ls-values)
+        (map (lambda (x y) (cons x y)) (map car ls-values) acc)))
 
   ;; (define (dataframe-filter df procedure . names)
   ;;   (let ([proc-string "(dataframe-filter df procedure names)"])
@@ -465,9 +465,9 @@
   ;;     (apply check-df-names df proc-string names))
   ;;   (let* ([ls-values (dataframe-values-map df names)]
   ;;          [ls-bool (apply map procedure ls-values)]
-  ;;          [new-ls-col (filter-ls-col ls-bool (map cdr (dataframe-alist df)))]
+  ;;          [new-ls-values (filter-ls-values ls-bool (map cdr (dataframe-alist df)))]
   ;;          [names (dataframe-names df)])
-  ;;     (make-dataframe (add-names-ls-col names new-ls-col))))
+  ;;     (make-dataframe (add-names-ls-values names new-ls-values))))
 
   ;; (define (dataframe-filter df procedure . names)
   ;;   (let ([proc-string "(dataframe-filter df procedure names)"])
@@ -496,49 +496,28 @@
            [alist (dataframe-alist df)]
            [ls-values (alist-values-map alist names)]
            [ls-bool (apply map procedure ls-values)]
-           [new-ls-col (filter-ls-col ls-bool (map cdr alist))])
-      (add-names-ls-col all-names new-ls-col)))
+           [new-ls-values (filter-ls-values ls-bool (map cdr alist))])
+      (add-names-ls-values all-names new-ls-values)))
 
   (define (alist-filter alist expr who)
     (let* ([all-names (map car alist)]
            [ls-bool (handle-expr alist expr who)]
-           [new-ls-col (filter-ls-col ls-bool (map cdr alist))])
-      (add-names-ls-col all-names new-ls-col)))
+           [new-ls-values (filter-ls-values ls-bool (map cdr alist))])
+      (add-names-ls-values all-names new-ls-values)))
 
-  ;; filter list of columns, ls-col, based on list of boolean values, ls-bool
+  ;; filter list of values, ls-values, based on list of boolean values, ls-bool
   ;; where each sub-list is same length as ls-bool
-  ;; could just call (partition-ls-col) and return only the first value
+  ;; could just call (partition-ls-values) and return only the first value
   ;; but avoiding potential overhead of accumulating values that aren't used
-  (define (filter-ls-col ls-bool ls-col)
+  (define (filter-ls-values ls-bool ls-values)
     (let loop ([ls-bool ls-bool]
-               [ls-col ls-col]
+               [ls-values ls-values]
                [results '()])
       (if (null? ls-bool)
           (map reverse results)
           (if (car ls-bool)
-              (loop (cdr ls-bool) (map cdr ls-col) (cons-acc ls-col results))
-              (loop (cdr ls-bool) (map cdr ls-col) results)))))
-
-  (define (filter-ls-col2 ls-values ls-col procedure)
-    (let ([ls-bool (apply map procedure ls-values)])
-      (let loop ([ls-bool ls-bool]
-                 [ls-col ls-col]
-                 [results '()])
-        (if (null? ls-bool)
-            (map reverse results)
-            (if (car ls-bool)
-                (loop (cdr ls-bool) (map cdr ls-col) (cons-acc ls-col results))
-                (loop (cdr ls-bool) (map cdr ls-col) results)))))
-    (void))
-
-  (define (filter-ls-col3 ls-col procedure)
-    (let ([ls-rows (transpose ls-col)])
-      (transpose (filter procedure ls-rows)))
-    (void))
-
-  (define (filter-ls-row ls-row procedure)
-    (filter procedure ls-row)
-    (void))
+              (loop (cdr ls-bool) (map cdr ls-values) (cons-acc ls-values results))
+              (loop (cdr ls-bool) (map cdr ls-values) results)))))
 
   ;; using built-in filter function is only slightly slower than recursive version
   ;; built-in version requires switching to row-wise and back to col-wise
@@ -572,13 +551,13 @@
   
   (define (alist-unique alist)
     (let ([names (map car alist)]
-          [ls-col (map cdr alist)])
-      (add-names-ls-col names (ls-col-unique ls-col))))
+          [ls-values (map cdr alist)])
+      (add-names-ls-values names (ls-values-unique ls-values))))
 
-  (define (ls-col-unique ls-col)
+  (define (ls-values-unique ls-values)
     (transpose
      (remove-duplicates
-      (transpose ls-col))))
+      (transpose ls-values))))
 
   (define (transpose ls)
     (apply map list ls))
@@ -611,9 +590,9 @@
 
   ;; list of objects to find in list of columns
   ;; not a good name but function is not exported
-  (define (contains-andmap ls-obj ls-col)
+  (define (contains-andmap ls-obj ls-values)
     (let* ([ls-bool (map (lambda (obj ls)
-                           (contains obj ls)) ls-obj ls-col)]
+                           (contains obj ls)) ls-obj ls-values)]
            [ls-row (transpose ls-bool)])
       (map (lambda (row)
              (for-all (lambda (x) (equal? x #t)) row))
@@ -621,13 +600,13 @@
 
   (define (group-by-helper ls-obj names-select alist)
     (let ([names (map car alist)]
-          [ls-col (map cdr alist)]
+          [ls-values (map cdr alist)]
           [ls-bool (contains-andmap
                     ls-obj
                     (map cdr (alist-select alist names-select)))])
-      (let-values ([(keep drop) (partition-ls-col ls-bool ls-col)])
-        (values (add-names-ls-col names keep)
-                (add-names-ls-col names drop)))))
+      (let-values ([(keep drop) (partition-ls-values ls-bool ls-values)])
+        (values (add-names-ls-values names keep)
+                (add-names-ls-values names drop)))))
   
   (define (dataframe-group-by df names)
     (define (loop ls-row-unique alist results)
@@ -642,12 +621,12 @@
                      drop
                      (cons (make-dataframe
                             keep
-                            (add-names-ls-col names (transpose (list (car ls-row-unique)))))
+                            (add-names-ls-values names (transpose (list (car ls-row-unique)))))
                            results)))]))
     (apply check-df-names df "(dataframe-group-by df names)" names)
     (let* ([alist (dataframe-alist df)]
-           [ls-col-select (map cdr (alist-select alist names))]
-           [ls-row-unique (transpose (ls-col-unique ls-col-select))])
+           [ls-values-select (map cdr (alist-select alist names))]
+           [ls-row-unique (transpose (ls-values-unique ls-values-select))])
       (loop ls-row-unique alist '())))
 
   (define (dataframe-ungroup grouped-df)
@@ -659,9 +638,9 @@
 
   ;; group-by steps
   ;; create unique alist (also used as groups identifier in outer grouped dataframe); this won't work b/c groups could also be length one
-  ;; get values for grouping columns as ls-col
-  ;; loop through unique values (one for each ls-col)
-  ;; map across groups for each ls-col and then map 'down' each column with (lambda (x) (equal? x unique-value))
+  ;; get values for grouping columns as ls-values
+  ;; loop through unique values (one for each ls-values)
+  ;; map across groups for each ls-values and then map 'down' each column with (lambda (x) (equal? x unique-value))
   ;; transpose result
   ;; map for-all (equal? x #t) to get boolean list of same length as original dataframe
   ;; use boolean list to partition original alist
