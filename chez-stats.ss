@@ -10,8 +10,8 @@
    ->
    ->>
    $
-   listtable->dataframe
-   dataframe->listtable
+   rowtable->dataframe
+   dataframe->rowtable
    dataframe?
   ; dataframe-add
    dataframe-append

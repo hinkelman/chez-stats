@@ -3,8 +3,8 @@
    ->
    ->>
    $
-   listtable->dataframe
-   dataframe->listtable
+   rowtable->dataframe
+   dataframe->rowtable
    dataframe?
    ;dataframe-add
    dataframe-append
@@ -145,18 +145,6 @@
   (define (check-all-dataframes dfs who)
     (unless (for-all dataframe? dfs)
       (assertion-violation who "dfs are not all dataframes")))
-
-  ;; ;; comparing at column level because column order doesn't matter for equality of dataframes
-  ;; (define (dataframe-equal? . dfs)
-  ;;   (check-all-dataframes dfs "(dataframe-equal? dfs)")
-  ;;   (let ([names (dataframe-names (car dfs))])
-  ;;     (for-all (lambda (name)
-  ;;                (let ([ls-values (dataframe-values (car dfs) name)])
-  ;;                  (for-all (lambda (df)
-  ;;                             (and (member name (dataframe-names df))
-  ;;                                  (equal? ls-values (dataframe-values df name))))
-  ;;                           dfs)))
-  ;;              names)))
 
   (define (dataframe-equal? . dfs)
     (check-all-dataframes dfs "(dataframe-equal? dfs)")
@@ -301,8 +289,8 @@
 
   ;; read/write ------------------------------------------------------------------------------
 
-  (define (dataframe-write df path overwrite)
-    (when (and (file-exists? path) (not overwrite))
+  (define (dataframe-write df path overwrite?)
+    (when (and (file-exists? path) (not overwrite?))
       (assertion-violation path "file already exists"))
     (delete-file path)
     (with-output-to-file path
@@ -352,7 +340,7 @@
 
   ;; dataframe-add isn't very useful with group-by (and group-by part is not currently working)
   ;; because dataframe-add is only useful for combining multiple columns
-  ;; b/d map is baked in it is too inflexible
+  ;; b/c map is baked in it is too inflexible
   ;; perhaps create a function called dataframe-add that simply adds a column of values
   ;; however, dataframe-update has the same problem (of having map baked in)
 
@@ -687,18 +675,18 @@
   ;; inspired by list columns in R
 
 
-  ;; listtable ------------------------------------------------------------------------
+  ;; rowtable ------------------------------------------------------------------------
 
-  ;; bad name to describe list of rows; as used in read-csv and write-csv
+  ;; bad name to describe list of rows; as used in read-csv and write-csv in (chez-stats csv)
 
-  (define (dataframe->listtable df)
-    (check-dataframe df "(dataframe->listable df)")
+  (define (dataframe->rowtable df)
+    (check-dataframe df "(dataframe->rowtable df)")
     (let* ([names (dataframe-names df)]
            [ls-values (dataframe-values-map df names)])
       (cons names (transpose ls-values))))
 
-  (define (listtable->dataframe ls header?)
-    (check-listtable ls "(listtable->dataframe ls header?)")
+  (define (rowtable->dataframe ls header?)
+    (check-listtable ls "(rowtable->dataframe ls header?)")
     (let ([names (if header?
                      (car ls)
                      (map string->symbol
