@@ -182,11 +182,15 @@
 (define df15 (make-dataframe '((a 200) (b 5) (c 800))))
 
 (test-begin "dataframe-filter-test")
-(test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (a) (> a 100)) 'a)))
-(test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (b) (= b 5)) 'b)))
-(test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (a b) (or (odd? a) (odd? b))) 'a 'b)))
-(test-error (dataframe-filter 'A (lambda (b) (odd? b)) 'b))
-(test-error (dataframe-filter df10 (lambda (d) (odd? d)) 'd))
+(test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (df) (map (lambda (a) (> a 100)) ($ df 'a))))))
+;; (test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (a) (> a 100)) 'a)))
+(test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (df) (map (lambda (b) (= b 5)) ($ df 'b))))))
+;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (b) (= b 5)) 'b)))
+(test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (df) (map (lambda (a b) (or (odd? a) (odd? b))) ($ df 'a) ($ df 'b))))))
+;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (a b) (or (odd? a) (odd? b))) 'a 'b)))
+
+(test-error (dataframe-filter 'A  (lambda (df) (map (lambda (b) (odd? b)) ($ df 'b)))))
+(test-error (dataframe-filter df10 (lambda (df) (map (lambda (d) (odd? d)) ($ df'd)))))
 (test-error (dataframe-filter df10 10 'a))
 (test-end "dataframe-filter-test")
 
@@ -194,12 +198,12 @@
 (define df17 (make-dataframe '((a 100 300) (b 4 6) (c 700 900))))
 
 (test-begin "dataframe-partition-test")
-(define-values (part1 part2) (dataframe-partition df10 (lambda (b) (odd? b)) 'b))
+(define-values (part1 part2) (dataframe-partition df10 (lambda (df) (map (lambda (b) (odd? b)) ($ df 'b)))))
 (test-assert (dataframe-equal? part1 df16))
 (test-assert (dataframe-equal? part2 df17))
-(test-error (dataframe-partition 'A (lambda (b) (odd? b)) 'b))
-(test-error (dataframe-partition df10 (lambda (b) (odd? b)) 'd))
-(test-error (dataframe-partition df10 10 'b))
+(test-error (dataframe-partition 'A (lambda (df) (map (lambda (b) (odd? b)) ($ df 'b)))))
+(test-error (dataframe-partition df10 (lambda (df) (map (lambda (b) (odd? b)) ($ df 'd)))))
+(test-error (dataframe-partition df10 10))
 (test-end "dataframe-partition-test")
 
 (test-begin "df-read-write-test")
@@ -246,9 +250,11 @@
 (define df22 (make-dataframe '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 10 20 30 40 50))))
 
 (test-begin "dataframe-split-test")
-(define df-list (dataframe-split df22 'grp))
-(test-assert (dataframe-equal? (car df-list) (dataframe-filter df22 (lambda (x) (symbol=? x 'a)) 'grp)))
-(test-assert (dataframe-equal? (cadr df-list) (dataframe-filter df22 (lambda (x) (symbol=? x 'b)) 'grp)))
+(define df-list (dataframe-split df22 '(grp)))
+(test-assert (dataframe-equal? (car df-list)
+                               (dataframe-filter df22 (lambda (df) (map (lambda (x) (symbol=? x 'a)) ($ df 'grp))))))
+(test-assert (dataframe-equal? (cadr df-list)
+                               (dataframe-filter df22 (lambda (df) (map (lambda (x) (symbol=? x 'b)) ($ df 'grp))))))
 (test-assert (dataframe-equal? df22 (apply dataframe-append df-list)))
 (test-end "dataframe-split-test")
 

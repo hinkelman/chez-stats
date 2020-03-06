@@ -8,7 +8,7 @@
    check-real
    check-positive-real
    check-real-gte-zero
-   check-listtable
+   check-rowtable
    check-names-unique
    check-names-symbol
    check-names
@@ -115,14 +115,14 @@
       (unless (for-all (lambda (col) (same-length? num-rows (cdr col))) alist)
 	(assertion-violation who "columns not all same length"))))
 
-  (define (check-procedure proc who)
-    (unless (procedure? proc)
-      (assertion-violation who "proc is not a procedure")))
+  (define (check-procedure procedure who)
+    (unless (procedure? procedure)
+      (assertion-violation who "procedure is not valid")))
 
-  (define (check-listtable ls who)
-    (unless (and (list? ls)
-                 (for-all (lambda (row) (= (length row) (length (car ls)))) ls))
-      (assertion-violation who "ls is not a listtable")))
+  (define (check-rowtable rt who)
+    (unless (and (list? rt)
+                 (for-all (lambda (row) (= (length row) (length (car rt)))) rt))
+      (assertion-violation who "rt is not a rowtable")))
   
   )
 
