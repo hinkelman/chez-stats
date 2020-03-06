@@ -22,8 +22,6 @@
    dataframe-drop
    dataframe-equal?
    dataframe-filter
-  ; dataframe-group-by
-  ;  dataframe-groups
    dataframe-head
   ; dataframe-map
    dataframe-names
@@ -34,7 +32,6 @@
    dataframe-select
    dataframe-split
    dataframe-tail
-  ; dataframe-ungroup
    dataframe-unique
    ;dataframe-update
    dataframe-values

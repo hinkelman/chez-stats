@@ -15,8 +15,6 @@
    dataframe-drop
    dataframe-equal?
    dataframe-filter
-   ;dataframe-group-by
-   ;dataframe-groups
    dataframe-head
    ;dataframe-map
    dataframe-names
@@ -27,7 +25,6 @@
    dataframe-select
    dataframe-split
    dataframe-tail
-   ;dataframe-ungroup
    dataframe-unique
    ;dataframe-update
    dataframe-values
@@ -111,23 +108,6 @@
   
   ;; dataframe record type ---------------------------------------------------------------------
 
-  ;; (define (drt-df-helper new alist groups)
-  ;;   (let ([proc-string "(make-dataframe alist)"])
-  ;;     (check-alist alist proc-string)
-  ;;     (unless (null? groups)
-  ;;       (check-alist groups proc-string)))
-  ;;   (new alist
-  ;;        groups
-  ;;        (map car alist)
-  ;;        (cons (length (cdar alist)) (length alist))))
-  
-  ;; (define-record-type dataframe (fields alist groups names dim)
-  ;;                     (protocol
-  ;;                      (lambda (new)
-  ;;                        (case-lambda
-  ;;                          [(alist) (drt-df-helper new alist '())]
-  ;;                          [(alist groups) (drt-df-helper new alist groups)]))))
-
   (define-record-type dataframe (fields alist names dim)
                       (protocol
                        (lambda (new)
@@ -137,15 +117,6 @@
                            (new alist
                                 (map car alist)
                                 (cons (length (cdar alist)) (length alist)))))))
-
-  ;; grouped-df record type --------------------------------------------------------------------
-
-  ;; no checking because grouped-df is internal only
-  ;; (define-record-type grouped-df (fields ls length)
-  ;;                     (protocol
-  ;;                      (lambda (new)
-  ;;                        (lambda (ls)
-  ;;                          (new ls (length ls))))))
 
   ;; check dataframes --------------------------------------------------------------------------
   
@@ -175,13 +146,6 @@
   (define (check-names-exist df who . names)
     (unless (apply dataframe-contains? df names)
       (assertion-violation who "name(s) not in df")))
-
-  ;; (define (check-df-names df who . names)
-  ;;   (if (grouped-df? df)
-  ;;       (check-all-dataframes (grouped-df-ls df) who)
-  ;;       (check-dataframe df who))
-  ;;   (check-names names who)
-  ;;   (apply check-names-exist df who names))
 
   (define (check-df-names df who . names)
     (check-dataframe df who)
@@ -574,28 +538,17 @@
   (define (alist-unique alist)
     (let ([names (map car alist)]
           [ls-values (map cdr alist)])
-      (add-names-ls-values names (ls-values-unique ls-values))))
+      (add-names-ls-values names (ls-values-unique ls-values #f))))
 
-  (define (ls-values-unique ls-values)
-    (transpose
-     (remove-duplicates
-      (transpose ls-values))))
+  (define (ls-values-unique ls-values row-wise?)
+    (let ([row-wise (remove-duplicates (transpose ls-values))])
+      (if row-wise? row-wise (transpose row-wise))))
 
   (define (transpose ls)
     (apply map list ls))
 
-  ;; (define a (list (list 'trt (append (make-list 5 'A)
-  ;;                                 (make-list 5 'B)))
-  ;;              (list 'val (random-binomial 10 1 0.5))))
-  ;; (alist-unique a)
-  
-  ;; (define b (list (list 'trt (append (make-list (inexact->exact 5e6) 'A)
-  ;;                                 (make-list (inexact->exact 5e6) 'B)))
-  ;;              (list 'val (random-poisson (inexact->exact 1e7) 10))))
-  ;; (time (alist-unique b))
 
   ;; split ------------------------------------------------------------------------
-
 
   ;; returns boolean list of same length as list
   (define (contains obj ls)
@@ -610,7 +563,9 @@
   ;; not a good name but function is not exported
   (define (contains-andmap ls-obj ls-values)
     (let* ([ls-bool (map (lambda (obj ls)
-                           (contains obj ls)) ls-obj ls-values)]
+                           (contains obj ls))
+                         ls-obj
+                         ls-values)]
            [ls-row (transpose ls-bool)])
       (map (lambda (row)
              (for-all (lambda (x) (equal? x #t)) row))
@@ -626,109 +581,30 @@
         (values (add-names-ls-values names keep)
                 (add-names-ls-values names drop)))))
   
-  (define (dataframe-split df . names)
-    (define (loop ls-row-unique alist results)
+  (define (alist-split alist names)
+    (define (loop ls-row-unique alist results groups)
       (cond [(null? ls-row-unique)
-             (reverse results)]
+             (values (reverse groups)
+                     (reverse results))]
             [else
-             (let-values ([(keep drop) (split-helper
-                                        (car ls-row-unique)
-                                        names
-                                        alist)])
-               (loop (cdr ls-row-unique)
-                     drop
-                     (cons (make-dataframe keep) results)))]))
+             (let ([group-values (car ls-row-unique)]) ; row of values for each unique grouping combination
+               (let-values ([(keep drop) (split-helper group-values names alist)])
+                 (loop (cdr ls-row-unique)
+                       drop
+                       (cons keep results)
+                       (cons (add-names-ls-values names (transpose (list group-values))) groups))))])) 
+    (let* ([ls-values-select (map cdr (alist-select alist names))]
+           [ls-row-unique (ls-values-unique ls-values-select #t)])
+      (loop ls-row-unique alist '() '())))
+
+  (define (dataframe-split df . names)
     (apply check-df-names df "(dataframe-group-by df names)" names)
-    (let* ([alist (dataframe-alist df)]
-           [ls-values-select (map cdr (alist-select alist names))]
-           [ls-row-unique (transpose (ls-values-unique ls-values-select))])
-      (loop ls-row-unique alist '())))
-  
-  ;; group-by ------------------------------------------------------------------------
-
-  ;; if grouped; need to pass a separate lambda expression that will represent an outer map
-  ;; only needed if doing something based on dataframe attributes
-  ;; but needs to be incorporated in overall lambda expression
-  ;; maybe use reserved word (e.g., DF) to refer to current df in lambda expression
-  
-  ;; ;; returns boolean list of same length as list
-  ;; (define (contains obj ls)
-  ;;   (let ([pred (cond
-  ;;                [(number? obj) =]
-  ;;                [(string? obj) string=?]
-  ;;                [(symbol? obj) symbol=?]
-  ;;                [else equal?])])
-  ;;     (map (lambda (x) (pred obj x)) ls)))
-
-  ;; ;; list of objects to find in list of columns
-  ;; ;; not a good name but function is not exported
-  ;; (define (contains-andmap ls-obj ls-values)
-  ;;   (let* ([ls-bool (map (lambda (obj ls)
-  ;;                          (contains obj ls)) ls-obj ls-values)]
-  ;;          [ls-row (transpose ls-bool)])
-  ;;     (map (lambda (row)
-  ;;            (for-all (lambda (x) (equal? x #t)) row))
-  ;;          ls-row)))
-
-  ;; (define (group-by-helper ls-obj names-select alist)
-  ;;   (let ([names (map car alist)]
-  ;;         [ls-values (map cdr alist)]
-  ;;         [ls-bool (contains-andmap
-  ;;                   ls-obj
-  ;;                   (map cdr (alist-select alist names-select)))])
-  ;;     (let-values ([(keep drop) (partition-ls-values ls-bool ls-values)])
-  ;;       (values (add-names-ls-values names keep)
-  ;;               (add-names-ls-values names drop)))))
-  
-  ;; (define (dataframe-group-by df names)
-  ;;   (define (loop ls-row-unique alist results)
-  ;;     (cond [(null? ls-row-unique)
-  ;;            (make-grouped-df (reverse results))]
-  ;;           [else
-  ;;            (let-values ([(keep drop) (group-by-helper
-  ;;                                       (car ls-row-unique)
-  ;;                                       names
-  ;;                                       alist)])
-  ;;              (loop (cdr ls-row-unique)
-  ;;                    drop
-  ;;                    (cons (make-dataframe
-  ;;                           keep
-  ;;                           (add-names-ls-values names (transpose (list (car ls-row-unique)))))
-  ;;                          results)))]))
-  ;;   (apply check-df-names df "(dataframe-group-by df names)" names)
-  ;;   (let* ([alist (dataframe-alist df)]
-  ;;          [ls-values-select (map cdr (alist-select alist names))]
-  ;;          [ls-row-unique (transpose (ls-values-unique ls-values-select))])
-  ;;     (loop ls-row-unique alist '())))
-
-  ;; (define (dataframe-ungroup grouped-df)
-  ;;   (unless (grouped-df? grouped-df)
-  ;;     (assertion-violation "(dataframe-ungroup grouped-df)" "not a grouped df"))
-  ;;   (apply dataframe-append (grouped-df-ls grouped-df)))
-
-  ;; (define df (make-dataframe '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 10 20 30 40 50))))
-
-  ;; group-by steps
-  ;; create unique alist (also used as groups identifier in outer grouped dataframe); this won't work b/c groups could also be length one
-  ;; get values for grouping columns as ls-values
-  ;; loop through unique values (one for each ls-values)
-  ;; map across groups for each ls-values and then map 'down' each column with (lambda (x) (equal? x unique-value))
-  ;; transpose result
-  ;; map for-all (equal? x #t) to get boolean list of same length as original dataframe
-  ;; use boolean list to partition original alist
-  ;; return 'keep' alist and pass 'drop' alist back to group-by
-
-  ;; a grouped dataframe could be a dataframe where the alist contains the sub-dataframes
-  ;; the overall dataframe would contain all groups in dataframe-groups
-  ;; and each sub-dataframe would contain only groups for that sub-dataframe
-  ;; solves the problem of what is passed to each function
-  ;; and each function only needs to test if dataframe is grouped (rather than parsing whether it is a list of one etc)
-  ;; inspired by list columns in R
-
-
+    (let-values ([(groups alists) (alist-split (dataframe-alist df) names)])
+      (map make-dataframe alists)))
+    
   ;; rowtable ------------------------------------------------------------------------
 
-  ;; bad name to describe list of rows; as used in read-csv and write-csv in (chez-stats csv)
+  ;; rowtable is a bad name to describe list of rows; as used in read-csv and write-csv in (chez-stats csv)
 
   (define (dataframe->rowtable df)
     (check-dataframe df "(dataframe->rowtable df)")
