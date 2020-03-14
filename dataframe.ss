@@ -29,7 +29,8 @@
    ;;dataframe-update
    dataframe-values
    dataframe-write
-   make-dataframe)
+   make-dataframe
+   with-df-map)
 
   (import (chezscheme)
           (chez-stats assertions))
@@ -77,14 +78,16 @@
       [(_ value (f1 . body) next ...)
        (->> (thread-last-helper f1 value . body) next ...)]))
 
-  (define-syntax with-df
+  (define-syntax with-df-map
     (lambda (x)
       (syntax-case x ()
         [(_ df names expr)
          #'(let ([df-local df]
                  [names-list (map syntax->datum (syntax->list #'names))])
-             (apply map (lambda names expr)
-                    (map (lambda (name) ($ df-local name)) names-list)))])))
+             (apply check-df-names df-local "(with-df-map df names expr)" names-list)
+             (cons df-local
+                   (apply map (lambda names expr)
+                          (map (lambda (name) ($ df-local name)) names-list))))])))
   
   ;; handle expressions -------------------------------------------------------------
   ;; https://www.reddit.com/r/scheme/comments/e0lj08/lambda_eval_and_macros/
@@ -472,18 +475,26 @@
         (map (lambda (x) (list (car x))) ls-values)
         (map (lambda (x y) (cons x y)) (map car ls-values) acc)))
 
-  (define (dataframe-filter df procedure)
-    (let ([proc-string "(dataframe-filter df procedure)"])
-      (check-procedure procedure proc-string)
-      (check-dataframe df proc-string))
-    (make-dataframe (df-filter-helper df procedure)))
-
-  (define (df-filter-helper df procedure)
-    (let* ([all-names (dataframe-names df)]
+  (define (dataframe-filter with-df-map-expr)
+    (let* ([df (car with-df-map-expr)]
+           [bools (cdr with-df-map-expr)]
+           [all-names (dataframe-names df)]
            [dflist (dataframe-dflist df)]
-           [bools (procedure df)]
            [new-ls-values (filter-ls-values bools (map cdr dflist))])
-      (add-names-ls-values all-names new-ls-values)))
+      (make-dataframe (add-names-ls-values all-names new-ls-values))))
+           
+  ;; (define (dataframe-filter df procedure)
+  ;;   (let ([proc-string "(dataframe-filter df procedure)"])
+  ;;     (check-procedure procedure proc-string)
+  ;;     (check-dataframe df proc-string))
+  ;;   (make-dataframe (df-filter-helper df procedure)))
+
+  ;; (define (df-filter-helper df procedure)
+  ;;   (let* ([all-names (dataframe-names df)]
+  ;;          [dflist (dataframe-dflist df)]
+  ;;          [bools (procedure df)]
+  ;;          [new-ls-values (filter-ls-values bools (map cdr dflist))])
+  ;;     (add-names-ls-values all-names new-ls-values)))
 
   ;; filter list of values, ls-values, based on list of boolean values, bools
   ;; where each sub-list is same length as bools

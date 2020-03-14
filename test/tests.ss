@@ -182,16 +182,19 @@
 (define df15 (make-dataframe '((a 200) (b 5) (c 800))))
 
 (test-begin "dataframe-filter-test")
-(test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (df) (map (lambda (a) (> a 100)) ($ df 'a))))))
+;; (test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (df) (map (lambda (a) (> a 100)) ($ df 'a))))))
+(test-assert (dataframe-equal? df14 (dataframe-filter (with-df-map df10 (a) (> a 100)))))
 ;; (test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (a) (> a 100)) 'a)))
-(test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (df) (map (lambda (b) (= b 5)) ($ df 'b))))))
+;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (df) (map (lambda (b) (= b 5)) ($ df 'b))))))
+(test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (b) (= b 5)))))
 ;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (b) (= b 5)) 'b)))
-(test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (df) (map (lambda (a b) (or (odd? a) (odd? b))) ($ df 'a) ($ df 'b))))))
+;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (df) (map (lambda (a b) (or (odd? a) (odd? b))) ($ df 'a) ($ df 'b))))))
+(test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (a b) (or (odd? a) (odd? b))))))
 ;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (a b) (or (odd? a) (odd? b))) 'a 'b)))
 
-(test-error (dataframe-filter 'A  (lambda (df) (map (lambda (b) (odd? b)) ($ df 'b)))))
-(test-error (dataframe-filter df10 (lambda (df) (map (lambda (d) (odd? d)) ($ df'd)))))
-(test-error (dataframe-filter df10 10 'a))
+;; (test-error (dataframe-filter 'A  (lambda (df) (map (lambda (b) (odd? b)) ($ df 'b)))))
+;; (test-error (dataframe-filter df10 (lambda (df) (map (lambda (d) (odd? d)) ($ df'd)))))
+;; (test-error (dataframe-filter df10 10 'a))
 (test-end "dataframe-filter-test")
 
 (define df16 (make-dataframe '((a 200) (b 5) (c 800))))
@@ -251,10 +254,8 @@
 
 (test-begin "dataframe-split-test")
 (define df-list (dataframe-split df22 '(grp)))
-(test-assert (dataframe-equal? (car df-list)
-                               (dataframe-filter df22 (lambda (df) (map (lambda (x) (symbol=? x 'a)) ($ df 'grp))))))
-(test-assert (dataframe-equal? (cadr df-list)
-                               (dataframe-filter df22 (lambda (df) (map (lambda (x) (symbol=? x 'b)) ($ df 'grp))))))
+(test-assert (dataframe-equal? (car df-list) (dataframe-filter (with-df-map df22 (grp) (symbol=? grp 'a)))))
+(test-assert (dataframe-equal? (cadr df-list) (dataframe-filter (with-df-map df22 (grp) (symbol=? grp 'b)))))
 (test-assert (dataframe-equal? df22 (apply dataframe-append df-list)))
 (test-end "dataframe-split-test")
 

@@ -37,6 +37,7 @@
    dataframe-values
    dataframe-write
    make-dataframe
+   with-df-map
    ;; random-variates
    random-bernoulli
    random-beta
