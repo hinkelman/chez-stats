@@ -9,7 +9,7 @@
    ;;dataframe-add
    dataframe-append
    dataframe-append-all
-   dataframe-dflist
+   dataframe-alist
    dataframe-contains?
    dataframe-dim
    dataframe-drop
@@ -38,11 +38,11 @@
   ;; naming conventions ----------------------------------------------------------------------
 
   ;; dataframe: a record-type comprised of an association list that meets specified criteria
-  ;; dflist: list at the core of a dataframe; form is '((a 1 2 3) (b "this" "that" "other"))
-  ;; dflists: list of dflists
+  ;; alist: list at the core of a dataframe; form is '((a 1 2 3) (b "this" "that" "other"))
+  ;; alists: list of alists
   ;; column: one of the lists in the alist, includes name as first element
   ;; values: one of the lists in the alist, but with the name excluded
-  ;; ls-values: values from a dflist packaged into a list, e.g., '((1 2 3) ("this" "that" "other"))
+  ;; ls-values: values from a alist packaged into a list, e.g., '((1 2 3) ("this" "that" "other"))
   ;; name: column name
   ;; names: list of column names
   ;; group-names: list of column names used for grouping
@@ -92,23 +92,23 @@
   ;; handle expressions -------------------------------------------------------------
   ;; https://www.reddit.com/r/scheme/comments/e0lj08/lambda_eval_and_macros/
   
-  ;; (define (handle-expr dflist expr)
+  ;; (define (handle-expr alist expr)
   ;;   (let* ([proc (car expr)]
   ;;          [args (cdr expr)])
   ;;     (apply map proc (map (lambda (x)
-  ;;                         (handle-item dflist x))
+  ;;                         (handle-item alist x))
   ;;                       args))))
 
-  ;; (define (handle-item dflist item)
+  ;; (define (handle-item alist item)
   ;;   (cond
   ;;    [(pair? item)
-  ;;     (handle-expr dflist item)]
-  ;;    [(and (symbol? item) (assoc item dflist))
-  ;;     (cdr (assoc item dflist))]
+  ;;     (handle-expr alist item)]
+  ;;    [(and (symbol? item) (assoc item alist))
+  ;;     (cdr (assoc item alist))]
   ;;    [(or (number? item) (string? item) (symbol? item))
-  ;;     (make-list (length (cdar dflist)) item)]
+  ;;     (make-list (length (cdar alist)) item)]
   ;;    [else
-  ;;     (assertion-violation "(handle-item dflist item)" "expr is invalid")]))
+  ;;     (assertion-violation "(handle-item alist item)" "expr is invalid")]))
 
   ;; (define (handle-expr df expr who)
   ;;   (let* ([proc (car expr)]
@@ -145,15 +145,15 @@
   
   ;; dataframe record type ---------------------------------------------------------------------
 
-  (define-record-type dataframe (fields dflist names dim)
+  (define-record-type dataframe (fields alist names dim)
                       (protocol
                        (lambda (new)
-                         (lambda (dflist)
-                           (let ([proc-string "(make-dataframe dflist)"])
-                             (check-dflist dflist proc-string))
-                           (new dflist
-                                (map car dflist)
-                                (cons (length (cdar dflist)) (length dflist)))))))
+                         (lambda (alist)
+                           (let ([proc-string "(make-dataframe alist)"])
+                             (check-alist alist proc-string))
+                           (new alist
+                                (map car alist)
+                                (cons (length (cdar alist)) (length alist)))))))
 
   ;; check dataframes --------------------------------------------------------------------------
   
@@ -167,11 +167,11 @@
 
   (define (dataframe-equal? . dfs)
     (check-all-dataframes dfs "(dataframe-equal? dfs)")
-    (let* ([dflists (map dataframe-dflist dfs)]
-           [first-dflist (car dflists)])
-      (for-all (lambda (dflist)
-                 (equal? dflist first-dflist))
-               dflists)))
+    (let* ([alists (map dataframe-alist dfs)]
+           [first-alist (car alists)])
+      (for-all (lambda (alist)
+                 (equal? alist first-alist))
+               alists)))
 
   ;; check dataframe attributes -------------------------------------------------------------
   
@@ -208,7 +208,7 @@
                              (string-append "index " (number->string n) " is out of range")))
       (make-dataframe
        (map (lambda (col) (cons (car col) (proc (cdr col) n)))
-            (dataframe-dflist df)))))
+            (dataframe-alist df)))))
   
   ;; rename columns ---------------------------------------------------------------------------------
 
@@ -217,15 +217,15 @@
     (let ([proc-string "(dataframe df name-pairs)"])
       (check-dataframe df proc-string)
       (check-name-pairs (dataframe-names df) name-pairs proc-string))
-    (let ([dflist (map (lambda (column)
+    (let ([alist (map (lambda (column)
                         (let* ([name (car column)]
                                [ls-values (cdr column)]
                                [name-match (assoc name name-pairs)])
                           (if name-match
                               (cons (cadr name-match) ls-values)
                               column)))
-                      (dataframe-dflist df))])
-      (make-dataframe dflist)))
+                      (dataframe-alist df))])
+      (make-dataframe alist)))
 
   (define (dataframe-names-update df names)
     (let ([proc-string "(dataframe-names-update df names)"])
@@ -239,8 +239,8 @@
                                             (number->string names-length)
                                             ", not "
                                             (number->string num-cols)))))
-      (let* ([dflist (dataframe-dflist df)]
-             [ls-values (map cdr dflist)])
+      (let* ([alist (dataframe-alist df)]
+             [ls-values (map cdr alist)])
         (make-dataframe (add-names-ls-values names ls-values)))))
 
   ;; add names to list of values, ls-values, to create association list
@@ -256,11 +256,11 @@
       (check-all-dataframes dfs proc-string)
       (let ([names (apply shared-names dfs)])
         (when (null? names) (assertion-violation proc-string "no names in common across dfs"))
-        (let ([dflist (map (lambda (name)
+        (let ([alist (map (lambda (name)
                             ;; missing-value will not be used so chose arbitrary value (-999)
                             (cons name (apply append-columns name -999 dfs)))
                           names)])
-          (make-dataframe dflist)))))
+          (make-dataframe alist)))))
   
   (define (shared-names . dfs)
     (let ([first-names (dataframe-names (car dfs))]
@@ -270,10 +270,10 @@
   (define (dataframe-append-all missing-value . dfs)
     (check-all-dataframes dfs "(dataframe-append-all missing-value dfs)")
     (let* ([names (apply combine-names-ordered dfs)]
-           [dflist (map (lambda (name)
+           [alist (map (lambda (name)
                          (cons name (apply append-columns name missing-value dfs)))
                        names)])
-      (make-dataframe dflist)))
+      (make-dataframe alist)))
 
   (define (append-columns name missing-value . dfs)
     (apply append
@@ -311,7 +311,7 @@
       (assertion-violation path "file already exists"))
     (delete-file path)
     (with-output-to-file path
-      (lambda () (write (dataframe-dflist df)))))
+      (lambda () (write (dataframe-alist df)))))
 
   (define (dataframe-read path)
     (make-dataframe (with-input-from-file path read)))
@@ -323,35 +323,35 @@
     (let ([proc-string "(dataframe-values df name)"])
       (check-dataframe df proc-string)
       (check-names-exist df proc-string name))
-    (dflist-values (dataframe-dflist df) name))
+    (alist-values (dataframe-alist df) name))
 
   (define ($ df name)
     (dataframe-values df name))
 
-  (define (dflist-values dflist name)
-    (cdr (assoc name dflist)))
+  (define (alist-values alist name)
+    (cdr (assoc name alist)))
 
   (define (dataframe-values-map df names)
-    (dflist-values-map (dataframe-dflist df) names))
+    (alist-values-map (dataframe-alist df) names))
 
-  (define (dflist-values-map dflist names)
-    (map (lambda (name) (dflist-values dflist name)) names))
+  (define (alist-values-map alist names)
+    (map (lambda (name) (alist-values alist name)) names))
 
   ;; select/drop columns ------------------------------------------------------------------------
 
   (define (dataframe-select df . names)
     (apply check-df-names df "(dataframe-select df names)" names)
-    (make-dataframe (dflist-select (dataframe-dflist df) names)))
+    (make-dataframe (alist-select (dataframe-alist df) names)))
 
-  (define (dflist-select dflist names)
-    (map (lambda (name) (assoc name dflist)) names))
+  (define (alist-select alist names)
+    (map (lambda (name) (assoc name alist)) names))
 
   (define (dataframe-drop df . names)
     (apply check-df-names df "(dataframe-drop df names)" names)
-    (let ([dflist (filter (lambda (column)
+    (let ([alist (filter (lambda (column)
                            (not (member (car column) names)))
-                         (dataframe-dflist df))])
-      (make-dataframe dflist)))
+                         (dataframe-alist df))])
+      (make-dataframe alist)))
 
   ;; update/add columns ------------------------------------------------------------------------
 
@@ -369,15 +369,15 @@
   ;;   (if (grouped-df? df)
   ;;       (apply dataframe-append (map (lambda (df-sub)
   ;;                                      (make-dataframe
-  ;;                                       (dflist-add
-  ;;                                        (dataframe-dflist df-sub)
+  ;;                                       (alist-add
+  ;;                                        (dataframe-alist df-sub)
   ;;                                        new-name
   ;;                                        procedure
   ;;                                        names)))
   ;;                                    df))
-  ;;       (make-dataframe (dflist-add (dataframe-dflist df) new-name procedure names))))
+  ;;       (make-dataframe (alist-add (dataframe-alist df) new-name procedure names))))
   ;; (let ([ls-values (dataframe-values-map df names)])
-  ;;   (make-dataframe (cons-end (dataframe-dflist df)
+  ;;   (make-dataframe (cons-end (dataframe-alist df)
   ;;                             (list new-name (apply map procedure ls-values))))))
 
   ;; (define dataframe-map
@@ -386,48 +386,48 @@
   ;;     [(df procedure names new-name) (df-add-map df procedure names new-name)]))
 
   ;; (define (df-update-map df procedure names)
-  ;;   (make-dataframe (dflist-update-map (dataframe-dflist df) procedure names)))
+  ;;   (make-dataframe (alist-update-map (dataframe-alist df) procedure names)))
   
   ;; (define (df-add-map df procedure names new-name)
-  ;;   (make-dataframe (dflist-update-map (dataframe-dflist df) procedure names new-name)))
+  ;;   (make-dataframe (alist-update-map (dataframe-alist df) procedure names new-name)))
 
-  ;; (define (dflist-update-map dflist procedure ls-names)
+  ;; (define (alist-update-map alist procedure ls-names)
   ;;   (map (lambda (column)
   ;;          (if (member (car column) ls-names)
   ;;              (list (car column) (map procedure (cdr column)))
   ;;              column))
-  ;;        dflist))
+  ;;        alist))
 
-  ;; dflist is original dflist; dflist-new is subset of dflist, which has been updated
-  (define (dflist-update dflist dflist-new)
-    (let ([names (map car dflist-new)])
+  ;; alist is original alist; alist-new is subset of alist, which has been updated
+  (define (alist-update alist alist-new)
+    (let ([names (map car alist-new)])
       (map (lambda (column)
              (let ([name (car column)])
                (if (member name names)
-                   (assoc name dflist-new)
+                   (assoc name alist-new)
                    column)))
-           dflist)))
+           alist)))
 
-  (define (dflist-apply-map dflist procedure names)
+  (define (alist-apply-map alist procedure names)
     (apply map procedure
-           (dflist-values-map dflist names)))
+           (alist-values-map alist names)))
 
-  ;; (define dflist-map
+  ;; (define alist-map
   ;;   (case-lambda
-  ;;     [(dflist procedure names)
-  ;;      (dflist-update dflist (add-names-ls-values
+  ;;     [(alist procedure names)
+  ;;      (alist-update alist (add-names-ls-values
   ;;                     names
-  ;;                     (dflist-apply-map dflist procedure names)))]
-  ;;     [(dflist procedure names new-name)
-  ;;      (cons-end dflist (list new-name
-  ;;                            (dflist-apply-map dflist procedure names new-name)))]))
+  ;;                     (alist-apply-map alist procedure names)))]
+  ;;     [(alist procedure names new-name)
+  ;;      (cons-end alist (list new-name
+  ;;                            (alist-apply-map alist procedure names new-name)))]))
   
   
-  ;; (define (dflist-add-map dflist procedure ls-names new-name)
-  ;;   (cons-end dflist
+  ;; (define (alist-add-map alist procedure ls-names new-name)
+  ;;   (cons-end alist
   ;;             (list new-name
   ;;                   (apply map procedure
-  ;;                          (dflist-values-map dflist ls-names)))))
+  ;;                          (alist-values-map alist ls-names)))))
 
   (define (cons-end ls x)
     (reverse (cons x (reverse ls))))
@@ -436,12 +436,12 @@
     (let ([proc-string "(dataframe-update df procedure names)"])
       (check-procedure procedure proc-string)
       (apply check-df-names df proc-string names))
-    (let ([dflist (map (lambda (column)
+    (let ([alist (map (lambda (column)
                         (if (member (car column) names)
                             (list (car column) (map procedure (cdr column)))
                             column))
-                      (dataframe-dflist df))])
-      (make-dataframe dflist)))
+                      (dataframe-alist df))])
+      (make-dataframe alist)))
 
   ;; filter/partition ------------------------------------------------------------------------
 
@@ -451,7 +451,7 @@
       (check-dataframe df proc-string))
     (let* ([bools (procedure df)]
            [names (dataframe-names df)])
-      (let-values ([(keep drop) (partition-ls-values bools (map cdr (dataframe-dflist df)))])
+      (let-values ([(keep drop) (partition-ls-values bools (map cdr (dataframe-alist df)))])
         (values (make-dataframe (add-names-ls-values names keep))
                 (make-dataframe (add-names-ls-values names drop))))))
 
@@ -479,8 +479,8 @@
     (let* ([df (car with-df-map-expr)]
            [bools (cdr with-df-map-expr)]
            [all-names (dataframe-names df)]
-           [dflist (dataframe-dflist df)]
-           [new-ls-values (filter-ls-values bools (map cdr dflist))])
+           [alist (dataframe-alist df)]
+           [new-ls-values (filter-ls-values bools (map cdr alist))])
       (make-dataframe (add-names-ls-values all-names new-ls-values))))
            
   ;; (define (dataframe-filter df procedure)
@@ -491,9 +491,9 @@
 
   ;; (define (df-filter-helper df procedure)
   ;;   (let* ([all-names (dataframe-names df)]
-  ;;          [dflist (dataframe-dflist df)]
+  ;;          [alist (dataframe-alist df)]
   ;;          [bools (procedure df)]
-  ;;          [new-ls-values (filter-ls-values bools (map cdr dflist))])
+  ;;          [new-ls-values (filter-ls-values bools (map cdr alist))])
   ;;     (add-names-ls-values all-names new-ls-values)))
 
   ;; filter list of values, ls-values, based on list of boolean values, bools
@@ -538,11 +538,11 @@
 
   (define (dataframe-unique df)
     (check-dataframe df "(dataframe-unique df)")
-    (make-dataframe (dflist-unique (dataframe-dflist df))))
+    (make-dataframe (alist-unique (dataframe-alist df))))
   
-  (define (dflist-unique dflist)
-    (let ([names (map car dflist)]
-          [ls-values (map cdr dflist)])
+  (define (alist-unique alist)
+    (let ([names (map car alist)]
+          [ls-values (map cdr alist)])
       (add-names-ls-values names (ls-values-unique ls-values #f))))
 
   (define (ls-values-unique ls-values row-based?)
@@ -577,36 +577,36 @@
              (for-all (lambda (x) (equal? x #t)) row))
            ls-row)))
 
-  (define (dflist-split-helper ls group-names dflist)
-    (let ([names (map car dflist)]
-          [ls-values (map cdr dflist)]
+  (define (alist-split-helper ls group-names alist)
+    (let ([names (map car alist)]
+          [ls-values (map cdr alist)]
           [bools (andmap-equal?
                   ls
-                  (map cdr (dflist-select dflist group-names)))])
+                  (map cdr (alist-select alist group-names)))])
       (let-values ([(keep drop) (partition-ls-values bools ls-values)])
         (values (add-names-ls-values names keep)
                 (add-names-ls-values names drop)))))
   
-  (define (dflist-split dflist group-names)
-    (define (loop ls-row-unique dflist dflists groups)
+  (define (alist-split alist group-names)
+    (define (loop ls-row-unique alist alists groups)
       (cond [(null? ls-row-unique)
-             (values (reverse dflists)
+             (values (reverse alists)
                      (reverse groups))]
             [else
              (let ([group-values (car ls-row-unique)]) ; single row of values representing one unique grouping combination
-               (let-values ([(keep drop) (dflist-split-helper group-values group-names dflist)])
+               (let-values ([(keep drop) (alist-split-helper group-values group-names alist)])
                  (loop (cdr ls-row-unique)
                        drop
-                       (cons keep dflists)
+                       (cons keep alists)
                        (cons (add-names-ls-values group-names (transpose (list group-values))) groups))))])) 
-    (let* ([ls-values-select (map cdr (dflist-select dflist group-names))]
+    (let* ([ls-values-select (map cdr (alist-select alist group-names))]
            [ls-row-unique (ls-values-unique ls-values-select #t)])
-      (loop ls-row-unique dflist '() '())))
+      (loop ls-row-unique alist '() '())))
 
   (define (dataframe-split-helper df group-names return-groups?)
     (apply check-df-names df "(dataframe-split df group-names)" group-names)
-    (let-values ([(dflists groups) (dflist-split (dataframe-dflist df) group-names)])
-      (let ([dfs (map make-dataframe dflists)])
+    (let-values ([(alists groups) (alist-split (dataframe-alist df) group-names)])
+      (let ([dfs (map make-dataframe alists)])
         (if return-groups?
             (values dfs groups)
             dfs))))
@@ -618,11 +618,11 @@
   
   ;; aggregate  ------------------------------------------------------------------------
 
-  ;; can't use dflist-aggregate because user will be passing dataframe specific procedures
+  ;; can't use alist-aggregate because user will be passing dataframe specific procedures
   
-  (define (dflist-aggregate dflist group-names procs new-names)
-    (let-values ([(groups dflists) (dflist-split dflist group-names)])
-      (map (lambda (dflist) (map (lambda (proc) (proc dflist)) procs)) dflists)))
+  (define (alist-aggregate alist group-names procs new-names)
+    (let-values ([(groups alists) (alist-split alist group-names)])
+      (map (lambda (alist) (map (lambda (proc) (proc alist)) procs)) alists)))
   
   ;; rowtable ------------------------------------------------------------------------
 
