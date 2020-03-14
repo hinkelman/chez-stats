@@ -182,31 +182,18 @@
 (define df15 (make-dataframe '((a 200) (b 5) (c 800))))
 
 (test-begin "dataframe-filter-test")
-;; (test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (df) (map (lambda (a) (> a 100)) ($ df 'a))))))
 (test-assert (dataframe-equal? df14 (dataframe-filter (with-df-map df10 (a) (> a 100)))))
-;; (test-assert (dataframe-equal? df14 (dataframe-filter df10 (lambda (a) (> a 100)) 'a)))
-;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (df) (map (lambda (b) (= b 5)) ($ df 'b))))))
 (test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (b) (= b 5)))))
-;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (b) (= b 5)) 'b)))
-;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (df) (map (lambda (a b) (or (odd? a) (odd? b))) ($ df 'a) ($ df 'b))))))
 (test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (a b) (or (odd? a) (odd? b))))))
-;; (test-assert (dataframe-equal? df15 (dataframe-filter df10 (lambda (a b) (or (odd? a) (odd? b))) 'a 'b)))
-
-;; (test-error (dataframe-filter 'A  (lambda (df) (map (lambda (b) (odd? b)) ($ df 'b)))))
-;; (test-error (dataframe-filter df10 (lambda (df) (map (lambda (d) (odd? d)) ($ df'd)))))
-;; (test-error (dataframe-filter df10 10 'a))
 (test-end "dataframe-filter-test")
 
 (define df16 (make-dataframe '((a 200) (b 5) (c 800))))
 (define df17 (make-dataframe '((a 100 300) (b 4 6) (c 700 900))))
 
 (test-begin "dataframe-partition-test")
-(define-values (part1 part2) (dataframe-partition df10 (lambda (df) (map (lambda (b) (odd? b)) ($ df 'b)))))
+(define-values (part1 part2) (dataframe-partition (with-df-map df10 (b) (odd? b))))
 (test-assert (dataframe-equal? part1 df16))
 (test-assert (dataframe-equal? part2 df17))
-(test-error (dataframe-partition 'A (lambda (df) (map (lambda (b) (odd? b)) ($ df 'b)))))
-(test-error (dataframe-partition df10 (lambda (df) (map (lambda (b) (odd? b)) ($ df 'd)))))
-(test-error (dataframe-partition df10 10))
 (test-end "dataframe-partition-test")
 
 (test-begin "df-read-write-test")

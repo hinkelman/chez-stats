@@ -445,13 +445,12 @@
 
   ;; filter/partition ------------------------------------------------------------------------
 
-  (define (dataframe-partition df procedure)
-    (let ([proc-string "(dataframe-partition df procedure)"])
-      (check-procedure procedure proc-string)
-      (check-dataframe df proc-string))
-    (let* ([bools (procedure df)]
-           [names (dataframe-names df)])
-      (let-values ([(keep drop) (partition-ls-values bools (map cdr (dataframe-alist df)))])
+  (define (dataframe-partition with-df-map-expr)
+    (let* ([df (car with-df-map-expr)]
+           [bools (cdr with-df-map-expr)]
+           [names (dataframe-names df)]
+           [alist (dataframe-alist df)])
+      (let-values ([(keep drop) (partition-ls-values bools (map cdr alist))])
         (values (make-dataframe (add-names-ls-values names keep))
                 (make-dataframe (add-names-ls-values names drop))))))
 
@@ -478,24 +477,11 @@
   (define (dataframe-filter with-df-map-expr)
     (let* ([df (car with-df-map-expr)]
            [bools (cdr with-df-map-expr)]
-           [all-names (dataframe-names df)]
+           [names (dataframe-names df)]
            [alist (dataframe-alist df)]
            [new-ls-values (filter-ls-values bools (map cdr alist))])
-      (make-dataframe (add-names-ls-values all-names new-ls-values))))
+      (make-dataframe (add-names-ls-values names new-ls-values))))
            
-  ;; (define (dataframe-filter df procedure)
-  ;;   (let ([proc-string "(dataframe-filter df procedure)"])
-  ;;     (check-procedure procedure proc-string)
-  ;;     (check-dataframe df proc-string))
-  ;;   (make-dataframe (df-filter-helper df procedure)))
-
-  ;; (define (df-filter-helper df procedure)
-  ;;   (let* ([all-names (dataframe-names df)]
-  ;;          [alist (dataframe-alist df)]
-  ;;          [bools (procedure df)]
-  ;;          [new-ls-values (filter-ls-values bools (map cdr alist))])
-  ;;     (add-names-ls-values all-names new-ls-values)))
-
   ;; filter list of values, ls-values, based on list of boolean values, bools
   ;; where each sub-list is same length as bools
   ;; could just call (partition-ls-values) and return only the first value
