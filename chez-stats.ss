@@ -16,7 +16,7 @@
   ; dataframe-add
    dataframe-append
    dataframe-append-all
-   dataframe-alist
+   dataframe-dflist
    dataframe-contains?
    dataframe-dim
    dataframe-drop

@@ -15,7 +15,7 @@
    check-names-duplicate
    check-new-names
    check-name-pairs
-   check-alist
+   check-dflist
    check-procedure
    remove-duplicates)
 
@@ -97,22 +97,22 @@
     (= len (length ls)))
   
   ;; lots of checking that will be performed every time a dataframe is created
-  (define (check-alist alist who)
-    (when (null? alist)
-      (assertion-violation who "alist is empty"))
-    (unless (list? alist)
-      (assertion-violation who "alist is not a list"))
-    (unless (list? (car alist))
-      (assertion-violation who "(car alist) is not a list"))
-    (when (list? (cadar alist))
-      (assertion-violation who "(cadar alist) is a list"))
-    (let ([names (map car alist)])
+  (define (check-dflist dflist who)
+    (when (null? dflist)
+      (assertion-violation who "dflist is empty"))
+    (unless (list? dflist)
+      (assertion-violation who "dflist is not a list"))
+    (unless (list? (car dflist))
+      (assertion-violation who "(car dflist) is not a list"))
+    (when (list? (cadar dflist))
+      (assertion-violation who "(cadar dflist) is a list"))
+    (let ([names (map car dflist)])
       (check-names-symbol names who)
       (check-names-unique names who))
-    (unless (for-all (lambda (col) (list? (cdr col))) alist)
+    (unless (for-all (lambda (col) (list? (cdr col))) dflist)
       (assertion-violation who "values are not a list"))
-    (let ([num-rows (length (cdar alist))])
-      (unless (for-all (lambda (col) (same-length? num-rows (cdr col))) alist)
+    (let ([num-rows (length (cdar dflist))])
+      (unless (for-all (lambda (col) (same-length? num-rows (cdr col))) dflist)
 	(assertion-violation who "columns not all same length"))))
 
   (define (check-procedure procedure who)

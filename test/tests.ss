@@ -39,10 +39,10 @@
 (test-assert (not (dataframe? '((a 1 2 3) (b 4 5 6)))))
 (test-end "dataframe?-test")
 
-(test-begin "dataframe-alist-test")
-(test-equal '((a 1 2 3) (b 4 5 6)) (dataframe-alist df1))
-(test-error (dataframe-alist '((a 1 2 3) (b 4 5 6))))
-(test-end "dataframe-alist-test")
+(test-begin "dataframe-dflist-test")
+(test-equal '((a 1 2 3) (b 4 5 6)) (dataframe-dflist df1))
+(test-error (dataframe-dflist '((a 1 2 3) (b 4 5 6))))
+(test-end "dataframe-dflist-test")
 
 (define df3 (make-dataframe '((a 1 2 3 1 2 3) (b 4 5 6 4 5 6) (c -999 -999 -999 7 8 9))))
 (define df4 (make-dataframe '((a 1 2 3 1 2 3) (b 4 5 6 4 5 6) (c 7 8 9 -999 -999 -999))))
