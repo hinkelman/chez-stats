@@ -16,7 +16,7 @@
    dataframe-equal?
    dataframe-filter
    dataframe-head
-   ;;dataframe-map
+   dataframe-modify
    dataframe-names
    dataframe-names-update
    dataframe-partition
@@ -81,67 +81,42 @@
   (define-syntax with-df-map
     (lambda (x)
       (syntax-case x ()
-        [(_ df names expr)
+        [(_ df names expr/values)
          #'(let ([df-local df]
-                 [names-list (map syntax->datum (syntax->list #'names))])
-             (apply check-df-names df-local "(with-df-map df names expr)" names-list)
-             (cons df-local
-                   (apply map (lambda names expr)
-                          (map (lambda (name) ($ df-local name)) names-list))))])))
-  
-  ;; handle expressions -------------------------------------------------------------
-  ;; https://www.reddit.com/r/scheme/comments/e0lj08/lambda_eval_and_macros/
-  
-  ;; (define (handle-expr alist expr)
-  ;;   (let* ([proc (car expr)]
-  ;;          [args (cdr expr)])
-  ;;     (apply map proc (map (lambda (x)
-  ;;                         (handle-item alist x))
-  ;;                       args))))
+                 [names-list (map syntax->datum (syntax->list #'names))]
+                 [proc-string "(with-df-map df names expr)"])
+                   (cond [(null? names-list)
+                          (cons df-local (with-df-map-helper df-local expr/values proc-string))]
+                         [else
+                          (apply check-df-names df-local proc-string names-list)
+                          (cons df-local
+                                (apply map (lambda names expr/values)
+                                       (map (lambda (name) (dataframe-values df-local name)) names-list)))]))])))
 
-  ;; (define (handle-item alist item)
-  ;;   (cond
-  ;;    [(pair? item)
-  ;;     (handle-expr alist item)]
-  ;;    [(and (symbol? item) (assoc item alist))
-  ;;     (cdr (assoc item alist))]
-  ;;    [(or (number? item) (string? item) (symbol? item))
-  ;;     (make-list (length (cdar alist)) item)]
-  ;;    [else
-  ;;     (assertion-violation "(handle-item alist item)" "expr is invalid")]))
+  (define (with-df-map-helper df values who)
+    (let ([df-length (car (dataframe-dim df))])
+      (cond [(not (list? values))
+             (make-list df-length values)]
+            [(= (length values) df-length)
+             values]
+            [else
+             (assertion-violation
+              who
+              (string-append "value(s) must be scalar or list of length "
+                             (number->string df-length)
+                             ", not "
+                             (number->string (length values))))])))
 
-  ;; (define (handle-expr df expr who)
-  ;;   (let* ([proc (car expr)]
-  ;;          [args (cdr expr)])
-  ;;     (apply map proc (map (lambda (x)
-  ;;                         (handle-item df x who))
-  ;;                       args))))
-
-  ;; (define (handle-item df item who)
-  ;;   (cond
-  ;;    [(pair? item)
-  ;;     (handle-expr df item who)]
-  ;;    [(and (symbol? item) (member item (dataframe-names df)))
-  ;;     (dataframe-values df item)]
-  ;;    [(or (number? item) (string? item) (symbol? item))
-  ;;     (make-list (car (dataframe-dim df)) item)]
-  ;;    [else
-  ;;     (assertion-violation who "expr is invalid")]))
-
-  ;; (define (and-proc . args)
-  ;;   (cond
-  ;;    ((null? args) #t)
-  ;;    ((not (car args)) #f)
-  ;;    (else (apply and-proc (cdr args)))))
-
-  ;; (define (or-proc . args)
-  ;;   (cond
-  ;;    ((null? args) #t)
-  ;;    ((not (car args)) #f)
-  ;;    (else (apply or-proc (cdr args)))))
-
-  ;; (define (if-proc test consequent alternative)
-  ;;   (if test consequent alternative))
+  ;; (define-syntax with-df
+  ;;   (lambda (x)
+  ;;     (syntax-case x ()
+  ;;       [(_ df names expr)
+  ;;        #'(let ([df-local df]
+  ;;                [names-list (map syntax->datum (syntax->list #'names))])
+  ;;            ;; (apply check-df-names df-local "(with-df-map df names expr)" names-list)
+  ;;            ;; (cons df-local
+  ;;                  ((lambda names expr)
+  ;;                         (map (lambda (name) ($ df-local name)) names-list)) ])))
   
   ;; dataframe record type ---------------------------------------------------------------------
 
@@ -353,7 +328,20 @@
                          (dataframe-alist df))])
       (make-dataframe alist)))
 
-  ;; update/add columns ------------------------------------------------------------------------
+  ;; modify/add columns ------------------------------------------------------------------------
+
+  (define (dataframe-modify with-df-map-expr name)
+    (let* ([df (car with-df-map-expr)]
+           [col (cons name (cdr with-df-map-expr))]
+           [alist (dataframe-alist df)]
+           [all-names (dataframe-names df)])
+      (if (member name all-names)
+          (make-dataframe (map
+                           (lambda (x) (if (symbol=? x name) col (assoc x alist)))
+                           all-names))                            
+          (make-dataframe (cons-end alist col)))))
+      
+      
 
   ;; dataframe-add isn't very useful with group-by (and group-by part is not currently working)
   ;; because dataframe-add is only useful for combining multiple columns

@@ -23,7 +23,7 @@
    dataframe-equal?
    dataframe-filter
    dataframe-head
-  ; dataframe-map
+   dataframe-modify
    dataframe-names
    dataframe-names-update
    dataframe-partition

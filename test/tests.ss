@@ -246,6 +246,14 @@
 (test-assert (dataframe-equal? df22 (apply dataframe-append df-list)))
 (test-end "dataframe-split-test")
 
+(test-begin "with-df-map-test")
+(test-equal '(10 10 10 10 10) (cdr (with-df-map df22 () 10)))
+(test-equal '(1 2 3 4 5) (cdr (with-df-map df22 () '(1 2 3 4 5))))
+(test-equal '(11 22 33 44 55) (cdr (with-df-map df22 (adult juv) (+ adult juv))))
+(test-equal '(11 22 33 44 55) (cdr (with-df-map df22 (juv adult) (+ adult juv))))
+(test-equal '(10 10 10 10 10) (cdr (with-df-map df22 (adult juv) (/ juv adult))))
+(test-end "with-df-map-test")
+
 ;; random-variates
 
 (test-begin "bernoulli-test")
