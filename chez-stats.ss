@@ -13,7 +13,6 @@
    rowtable->dataframe
    dataframe->rowtable
    dataframe?
-  ; dataframe-add
    dataframe-append
    dataframe-append-all
    dataframe-alist
@@ -33,7 +32,6 @@
    dataframe-split
    dataframe-tail
    dataframe-unique
-   ;dataframe-update
    dataframe-values
    dataframe-write
    make-dataframe

@@ -6,7 +6,6 @@
    rowtable->dataframe
    dataframe->rowtable
    dataframe?
-   ;;dataframe-add
    dataframe-append
    dataframe-append-all
    dataframe-alist
@@ -26,7 +25,6 @@
    dataframe-split
    dataframe-tail
    dataframe-unique
-   ;;dataframe-update
    dataframe-values
    dataframe-write
    make-dataframe
@@ -78,13 +76,15 @@
       [(_ value (f1 . body) next ...)
        (->> (thread-last-helper f1 value . body) next ...)]))
 
+  ;; with-df-map -------------------------------------------------------------
+
   (define-syntax with-df-map
     (lambda (x)
       (syntax-case x ()
         [(_ df names expr/values)
          #'(let ([df-local df]
                  [names-list (map syntax->datum (syntax->list #'names))]
-                 [proc-string "(with-df-map df names expr)"])
+                 [proc-string "(with-df-map df names expr/values)"])
                    (cond [(null? names-list)
                           (cons df-local (with-df-map-helper df-local expr/values proc-string))]
                          [else
@@ -93,30 +93,22 @@
                                 (apply map (lambda names expr/values)
                                        (map (lambda (name) (dataframe-values df-local name)) names-list)))]))])))
 
+  ;; this helper procedure creates a with-df-map-expr from a scalar or list of same length as number of df rows
   (define (with-df-map-helper df values who)
     (let ([df-length (car (dataframe-dim df))])
-      (cond [(not (list? values))
+      (cond [(scalar? values)
              (make-list df-length values)]
-            [(= (length values) df-length)
+            [(and (list? values) (= (length values) df-length))
              values]
             [else
              (assertion-violation
               who
-              (string-append "value(s) must be scalar or list of length "
-                             (number->string df-length)
-                             ", not "
-                             (number->string (length values))))])))
+              (string-append
+               "value(s) must be scalar or list of length "
+               (number->string df-length)))])))
 
-  ;; (define-syntax with-df
-  ;;   (lambda (x)
-  ;;     (syntax-case x ()
-  ;;       [(_ df names expr)
-  ;;        #'(let ([df-local df]
-  ;;                [names-list (map syntax->datum (syntax->list #'names))])
-  ;;            ;; (apply check-df-names df-local "(with-df-map df names expr)" names-list)
-  ;;            ;; (cons df-local
-  ;;                  ((lambda names expr)
-  ;;                         (map (lambda (name) ($ df-local name)) names-list)) ])))
+    (define (scalar? obj)
+      (or (symbol? obj) (char? obj) (string? obj) (number? obj)))
   
   ;; dataframe record type ---------------------------------------------------------------------
 
@@ -275,10 +267,6 @@
              (loop (cdr all-names) (cons (car all-names) results))]))
     (loop (apply all-names dfs) '()))
   
-  ;; thread-last works with dataframe-append
-  ;; (->> (list df df) (apply dataframe-append))
-  ;; can't use quote to create the list because then df becomes a symbol
-
   ;; read/write ------------------------------------------------------------------------------
 
   (define (dataframe-write df path overwrite?)
@@ -341,95 +329,20 @@
                            all-names))                            
           (make-dataframe (cons-end alist col)))))
       
-      
-
-  ;; dataframe-add isn't very useful with group-by (and group-by part is not currently working)
-  ;; because dataframe-add is only useful for combining multiple columns
-  ;; b/c map is baked in it is too inflexible
-  ;; perhaps create a function called dataframe-add that simply adds a column of values
-  ;; however, dataframe-update has the same problem (of having map baked in)
-
-  ;; (define (dataframe-add df new-name procedure names)
-  ;;   (let ([proc-string "(dataframe-update df name procedure names)"])
-  ;;     (check-new-names (dataframe-names df) '(new-name) proc-string)
-  ;;     (check-procedure procedure proc-string))
-  ;;   ;;  (check-df-names df names proc-string))
-  ;;   (if (grouped-df? df)
-  ;;       (apply dataframe-append (map (lambda (df-sub)
-  ;;                                      (make-dataframe
-  ;;                                       (alist-add
-  ;;                                        (dataframe-alist df-sub)
-  ;;                                        new-name
-  ;;                                        procedure
-  ;;                                        names)))
-  ;;                                    df))
-  ;;       (make-dataframe (alist-add (dataframe-alist df) new-name procedure names))))
-  ;; (let ([ls-values (dataframe-values-map df names)])
-  ;;   (make-dataframe (cons-end (dataframe-alist df)
-  ;;                             (list new-name (apply map procedure ls-values))))))
-
-  ;; (define dataframe-map
-  ;;   (case-lambda
-  ;;     [(df procedure names) (df-update-map df procedure names)]
-  ;;     [(df procedure names new-name) (df-add-map df procedure names new-name)]))
-
-  ;; (define (df-update-map df procedure names)
-  ;;   (make-dataframe (alist-update-map (dataframe-alist df) procedure names)))
-  
-  ;; (define (df-add-map df procedure names new-name)
-  ;;   (make-dataframe (alist-update-map (dataframe-alist df) procedure names new-name)))
-
-  ;; (define (alist-update-map alist procedure ls-names)
-  ;;   (map (lambda (column)
-  ;;          (if (member (car column) ls-names)
-  ;;              (list (car column) (map procedure (cdr column)))
-  ;;              column))
-  ;;        alist))
-
-  ;; alist is original alist; alist-new is subset of alist, which has been updated
-  (define (alist-update alist alist-new)
-    (let ([names (map car alist-new)])
-      (map (lambda (column)
-             (let ([name (car column)])
-               (if (member name names)
-                   (assoc name alist-new)
-                   column)))
-           alist)))
-
-  (define (alist-apply-map alist procedure names)
-    (apply map procedure
-           (alist-values-map alist names)))
-
-  ;; (define alist-map
-  ;;   (case-lambda
-  ;;     [(alist procedure names)
-  ;;      (alist-update alist (add-names-ls-values
-  ;;                     names
-  ;;                     (alist-apply-map alist procedure names)))]
-  ;;     [(alist procedure names new-name)
-  ;;      (cons-end alist (list new-name
-  ;;                            (alist-apply-map alist procedure names new-name)))]))
-  
-  
-  ;; (define (alist-add-map alist procedure ls-names new-name)
-  ;;   (cons-end alist
-  ;;             (list new-name
-  ;;                   (apply map procedure
-  ;;                          (alist-values-map alist ls-names)))))
-
   (define (cons-end ls x)
-    (reverse (cons x (reverse ls))))
+    (reverse (cons x (reverse ls))))  
 
-  (define (dataframe-update df procedure . names)
-    (let ([proc-string "(dataframe-update df procedure names)"])
-      (check-procedure procedure proc-string)
-      (apply check-df-names df proc-string names))
-    (let ([alist (map (lambda (column)
-                        (if (member (car column) names)
-                            (list (car column) (map procedure (cdr column)))
-                            column))
-                      (dataframe-alist df))])
-      (make-dataframe alist)))
+  ;; procedure like this seems useful  but the "API" is not consistent with dataframe-modify
+  ;; (define (dataframe-modify-selected df procedure . names)
+  ;;   (let ([proc-string "(dataframe-update df procedure names)"])
+  ;;     (check-procedure procedure proc-string)
+  ;;     (apply check-df-names df proc-string names))
+  ;;   (let ([alist (map (lambda (column)
+  ;;                       (if (member (car column) names)
+  ;;                           (list (car column) (map procedure (cdr column)))
+  ;;                           column))
+  ;;                     (dataframe-alist df))])
+  ;;     (make-dataframe alist)))
 
   ;; filter/partition ------------------------------------------------------------------------
 
@@ -526,7 +439,6 @@
   (define (transpose ls)
     (apply map list ls))
 
-
   ;; split ------------------------------------------------------------------------
 
   ;; returns boolean list of same length as ls
@@ -577,6 +489,7 @@
            [ls-row-unique (ls-values-unique ls-values-select #t)])
       (loop ls-row-unique alist '() '())))
 
+  ;; for use in aggregate
   (define (dataframe-split-helper df group-names return-groups?)
     (apply check-df-names df "(dataframe-split df group-names)" group-names)
     (let-values ([(alists groups) (alist-split (dataframe-alist df) group-names)])
@@ -585,17 +498,15 @@
             (values dfs groups)
             dfs))))
 
-  (define dataframe-split
-    (case-lambda
-      [(df group-names) (dataframe-split-helper df group-names #f)]
-      [(df group-names return-groups?) (dataframe-split-helper df group-names return-groups?)]))
+  (define (dataframe-split df . group-names)
+     (dataframe-split-helper df group-names #f))
   
   ;; aggregate  ------------------------------------------------------------------------
 
   ;; can't use alist-aggregate because user will be passing dataframe specific procedures
   
   (define (alist-aggregate alist group-names procs new-names)
-    (let-values ([(groups alists) (alist-split alist group-names)])
+    (let-values ([(alists groups) (alist-split alist group-names)])
       (map (lambda (alist) (map (lambda (proc) (proc alist)) procs)) alists)))
   
   ;; rowtable ------------------------------------------------------------------------
