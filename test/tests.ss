@@ -172,21 +172,18 @@
 (define df15 (make-dataframe '((a 200) (b 5) (c 800))))
 
 (test-begin "dataframe-filter-test")
-(test-assert (dataframe-equal? df14 (dataframe-filter (with-df-map df10 (npl ((a) (> a 100)))))))
-(test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (npl ((b) (= b 5)))))))
-(test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (npl ((a b) (or (odd? a) (odd? b))))))))
-(test-assert (dataframe-equal? df10 (dataframe-filter (with-df-map df10 (npl (() 2)))))) ;; any non-false values are treated as true
-(test-error (dataframe-filter (with-df-map df10 (npl ((a) (> a 100)) ((b) (= b 5))))))
+(test-assert (dataframe-equal? df14 (dataframe-filter df10 (filter-expr (a) (> a 100)))))
+(test-assert (dataframe-equal? df15 (dataframe-filter df10 (filter-expr (b) (= b 5)))))
+(test-assert (dataframe-equal? df15 (dataframe-filter df10 (filter-expr (a b) (or (odd? a) (odd? b))))))
 (test-end "dataframe-filter-test")
 
 (define df16 (make-dataframe '((a 200) (b 5) (c 800))))
 (define df17 (make-dataframe '((a 100 300) (b 4 6) (c 700 900))))
 
 (test-begin "dataframe-partition-test")
-(define-values (part1 part2) (dataframe-partition (with-df-map df10 (npl ((b) (odd? b))))))
+(define-values (part1 part2) (dataframe-partition df10 (filter-expr (b) (odd? b))))
 (test-assert (dataframe-equal? part1 df16))
 (test-assert (dataframe-equal? part2 df17))
-(test-error (dataframe-filter (with-df-map df10 (npl ((a) (> a 100)) ((b) (= b 5))))))
 (test-end "dataframe-partition-test")
 
 (test-begin "df-read-write-test")
@@ -235,9 +232,9 @@
 (test-begin "dataframe-split-test")
 (define df-list (dataframe-split df22 'grp))
 (test-assert (dataframe-equal? (car df-list)
-                               (dataframe-filter (with-df-map df22 (npl ((grp) (symbol=? grp 'a)))))))
+                               (dataframe-filter df22 (filter-expr (grp) (symbol=? grp 'a)))))
 (test-assert (dataframe-equal? (cadr df-list)
-                               (dataframe-filter (with-df-map df22 (npl ((grp) (symbol=? grp 'b)))))))
+                               (dataframe-filter df22 (filter-expr (grp) (symbol=? grp 'b)))))
 (test-assert (dataframe-equal? df22 (apply dataframe-append df-list)))
 (test-end "dataframe-split-test")
 
@@ -330,8 +327,7 @@
                                                 (with-df-map df (npl (() (mean ($ df 'juv)))))
                                                 'juv-mean))))
                                    (->> (apply dataframe-append))
-                                   (with-df-map (npl ((juv juv-mean) (> juv juv-mean))))
-                                   (dataframe-filter))))
+                                   (dataframe-filter (filter-expr (juv juv-mean) (> juv juv-mean))))))
 (test-error (-> '(4 3 5 1) (sort <)))
 (test-end "thread-test")
 

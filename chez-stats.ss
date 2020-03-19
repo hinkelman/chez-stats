@@ -34,6 +34,7 @@
    dataframe-unique
    dataframe-values
    dataframe-write
+   filter-expr
    make-dataframe
    with-df-map
    npl

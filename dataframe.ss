@@ -27,6 +27,7 @@
    dataframe-unique
    dataframe-values
    dataframe-write
+   filter-expr
    make-dataframe
    with-df-map
    npl)
@@ -50,8 +51,8 @@
   ;; name-pairs: alist used in dataframe-rename; form is '((old-name1 new-name1) (old-name2 new-name2))
   ;; ls: generic list
   ;; x: generic object
-  ;; procedure: lambda procedure
-  ;; procedures: list of lambda procedures
+  ;; procedure:  procedure
+  ;; procedures: list of procedures
   ;; bools: list of boolean values '(#t, #f)
   ;; row-based: describes orientation of list of lists; row-based example: '((a b) (1 "this") (2 "that") (3 "other))
   ;; rowtable: name used to describe a row-based list of lists where the first row represents column names
@@ -83,6 +84,8 @@
   ;; for filter want to write (identifier df (names) (expr))
   ;; for modify (and aggregate) want to write multiple expressions that are bound to name
   ;; (identifier df ((new-name (names) (expr)) (new-name (names) (expr))))
+
+
   
   ;; normally don't like such short names
   ;; but hopefully this is memorable acronym
@@ -94,7 +97,7 @@
         (list (quote names) ...)
         (list (lambda names expr) ...))]))
 
-  ;; now that this isn't a macro; it doesn't need to be exposed
+  ;; now that this isn't a macro; it doesn't need to be exposed to user
   (define (with-df-map df names-proc-list)
     (let ([names-list (car names-proc-list)]
           [proc-list (cadr names-proc-list)]
@@ -374,12 +377,8 @@
 
   ;; filter/partition ------------------------------------------------------------------------
 
-  (define (dataframe-partition with-df-map-out)
-    (let* ([df (car with-df-map-out)]
-           [bools (if (> (length (cdr with-df-map-out)) 1)
-                      (assertion-violation "(dataframe-partition with-df-map-out)"
-                                           "only accepts one procedure in with-df-map-out")
-                      (cadr with-df-map-out))]
+  (define (dataframe-partition df filter-expr)
+    (let* ([bools (filter-map df filter-expr)]
            [names (dataframe-names df)]
            [alist (dataframe-alist df)])
       (let-values ([(keep drop) (partition-ls-values bools (map cdr alist))])
@@ -406,12 +405,19 @@
         (map (lambda (x) (list (car x))) ls-values)
         (map (lambda (x y) (cons x y)) (map car ls-values) acc)))
 
-  (define (dataframe-filter with-df-map-out)
-    (let* ([df (car with-df-map-out)]
-           [bools (if (> (length (cdr with-df-map-out)) 1)
-                      (assertion-violation "(dataframe-filter with-df-map-out)"
-                                           "only accepts one procedure in with-df-map-out")
-                      (cadr with-df-map-out))]
+  (define-syntax filter-expr
+    (syntax-rules ()
+      [(_ names expr)
+       (list (quote names) (lambda names expr))]))
+
+  (define (filter-map df filter-expr)
+    (let ([names (car filter-expr)]
+          [proc (cadr filter-expr)])
+      (apply check-df-names df "(dataframe-filter df filter-expr)" names)
+      (apply map proc (map (lambda (name) ($ df name)) names))))
+
+  (define (dataframe-filter df filter-expr)
+    (let* ([bools (filter-map df filter-expr)]
            [names (dataframe-names df)]
            [alist (dataframe-alist df)]
            [new-ls-values (filter-ls-values bools (map cdr alist))])
