@@ -28,7 +28,8 @@
    dataframe-values
    dataframe-write
    make-dataframe
-   with-df-map)
+   with-df-map
+   npl)
 
   (import (chezscheme)
           (chez-stats assertions))
@@ -78,20 +79,35 @@
 
   ;; with-df-map -------------------------------------------------------------
 
-  (define-syntax with-df-map
-    (lambda (x)
-      (syntax-case x ()
-        [(_ df names expr/values)
-         #'(let ([df-local df]
-                 [names-list (map syntax->datum (syntax->list #'names))]
-                 [proc-string "(with-df-map df names expr/values)"])
-                   (cond [(null? names-list)
-                          (cons df-local (with-df-map-helper df-local expr/values proc-string))]
+  ;; don't need multiple expressions for filter
+  ;; for filter want to write (identifier df (names) (expr))
+  ;; for modify (and aggregate) want to write multiple expressions that are bound to name
+  ;; (identifier df ((new-name (names) (expr)) (new-name (names) (expr))))
+  
+  ;; normally don't like such short names
+  ;; but hopefully this is memorable acronym
+  ;; npl = names-proc-list
+  (define-syntax npl
+    (syntax-rules ()
+      [(_ (names expr) ...)
+       (list 
+        (list (quote names) ...)
+        (list (lambda names expr) ...))]))
+
+  ;; now that this isn't a macro; it doesn't need to be exposed
+  (define (with-df-map df names-proc-list)
+    (let ([names-list (car names-proc-list)]
+          [proc-list (cadr names-proc-list)]
+          [proc-string "(with-df-map df names-proc-list)"])
+      (cons df
+            (map (lambda (names proc)
+                   (cond [(null? names)
+                          (with-df-map-helper df (proc) proc-string)]
                          [else
-                          (apply check-df-names df-local proc-string names-list)
-                          (cons df-local
-                                (apply map (lambda names expr/values)
-                                       (map (lambda (name) (dataframe-values df-local name)) names-list)))]))])))
+                          (apply check-df-names df proc-string names)
+                          (apply map proc
+                                 (map (lambda (name) ($ df name)) names))]))
+                 names-list proc-list))))
 
   ;; this helper procedure creates a with-df-map-expr from a scalar or list of same length as number of df rows
   (define (with-df-map-helper df values who)
@@ -318,17 +334,29 @@
 
   ;; modify/add columns ------------------------------------------------------------------------
 
-  (define (dataframe-modify with-df-map-expr name)
-    (let* ([df (car with-df-map-expr)]
-           [col (cons name (cdr with-df-map-expr))]
+  (define (dataframe-modify with-df-map-out . names)
+    (define (loop alist names ls-values)
+      (if (null? names)
+          alist
+          (loop (alist-modify alist (car names) (car ls-values)) (cdr names) (cdr ls-values))))
+    (let* ([df (car with-df-map-out)]
+           [ls-values (cdr with-df-map-out)]
            [alist (dataframe-alist df)]
-           [all-names (dataframe-names df)])
+           [proc-string "(dataframe-modify with-df-map-out names)"])
+      (check-names names proc-string)
+      (unless (= (length names) (length ls-values))
+        (assertion-violation proc-string "number of names not equal to number of procedures in with-df-map-out"))
+      (make-dataframe (loop alist names ls-values))))
+
+  (define (alist-modify alist name values)
+    (let ([col (cons name values)]
+          [all-names (map car alist)])
       (if (member name all-names)
-          (make-dataframe (map
-                           (lambda (x) (if (symbol=? x name) col (assoc x alist)))
-                           all-names))                            
-          (make-dataframe (cons-end alist col)))))
-      
+          (map (lambda (x)
+                 (if (symbol=? x name) col (assoc x alist)))
+               all-names)                            
+          (cons-end alist col))))
+    
   (define (cons-end ls x)
     (reverse (cons x (reverse ls))))  
 
@@ -346,9 +374,12 @@
 
   ;; filter/partition ------------------------------------------------------------------------
 
-  (define (dataframe-partition with-df-map-expr)
-    (let* ([df (car with-df-map-expr)]
-           [bools (cdr with-df-map-expr)]
+  (define (dataframe-partition with-df-map-out)
+    (let* ([df (car with-df-map-out)]
+           [bools (if (> (length (cdr with-df-map-out)) 1)
+                      (assertion-violation "(dataframe-partition with-df-map-out)"
+                                           "only accepts one procedure in with-df-map-out")
+                      (cadr with-df-map-out))]
            [names (dataframe-names df)]
            [alist (dataframe-alist df)])
       (let-values ([(keep drop) (partition-ls-values bools (map cdr alist))])
@@ -375,9 +406,12 @@
         (map (lambda (x) (list (car x))) ls-values)
         (map (lambda (x y) (cons x y)) (map car ls-values) acc)))
 
-  (define (dataframe-filter with-df-map-expr)
-    (let* ([df (car with-df-map-expr)]
-           [bools (cdr with-df-map-expr)]
+  (define (dataframe-filter with-df-map-out)
+    (let* ([df (car with-df-map-out)]
+           [bools (if (> (length (cdr with-df-map-out)) 1)
+                      (assertion-violation "(dataframe-filter with-df-map-out)"
+                                           "only accepts one procedure in with-df-map-out")
+                      (cadr with-df-map-out))]
            [names (dataframe-names df)]
            [alist (dataframe-alist df)]
            [new-ls-values (filter-ls-values bools (map cdr alist))])
@@ -417,9 +451,6 @@
   ;; (5) transpose
 
   ;; unique also uses transpose
-
-  ;; not obvious (yet?) how to sort on multiple columns; already only able to sort on numeric characters
-  ;; just need to push this forward and make a list of potential future features
     
   ;; unique ------------------------------------------------------------------------
 
@@ -472,7 +503,10 @@
       (let-values ([(keep drop) (partition-ls-values bools ls-values)])
         (values (add-names-ls-values names keep)
                 (add-names-ls-values names drop)))))
-  
+
+  ;; returns two values
+  ;; first value is list of alists representing all columns in the dataframe
+  ;; second value is a list of alists representing the grouping columns in the dataframe
   (define (alist-split alist group-names)
     (define (loop ls-row-unique alist alists groups)
       (cond [(null? ls-row-unique)
@@ -489,7 +523,7 @@
            [ls-row-unique (ls-values-unique ls-values-select #t)])
       (loop ls-row-unique alist '() '())))
 
-  ;; for use in aggregate
+  ;; for use in aggregate???
   (define (dataframe-split-helper df group-names return-groups?)
     (apply check-df-names df "(dataframe-split df group-names)" group-names)
     (let-values ([(alists groups) (alist-split (dataframe-alist df) group-names)])
@@ -541,14 +575,5 @@
 ;; (system "curl https://raw.githubusercontent.com/pandas-dev/pandas/master/doc/data/tips.csv >> tips.csv")
 ;; (define tips (read-csv "tips.csv"))
 ;; (system "gnuplot -e 'set terminal dumb; plot sin(x)'")
-
-
-;; handle-expr approach has the pros of simplifying the expression syntax b/c not required to pass column names outside of expression
-;; handle-expr approach has the downside of not using eager evaluation so an expression would always need to work on full column
-;; handle-expr might not have same problems with lexical scope as I had with lambda but probably not worth the trouble given #2 on this list
-
-;; probably should scale back the problem that I'm trying to solve to push this forward (b/c it has stalled out lately)
-;; drop ability to make group-by work with mutate and filter
-;; focus on group-by + aggregate (and work backwards?)
 
 

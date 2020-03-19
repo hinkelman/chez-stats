@@ -172,18 +172,21 @@
 (define df15 (make-dataframe '((a 200) (b 5) (c 800))))
 
 (test-begin "dataframe-filter-test")
-(test-assert (dataframe-equal? df14 (dataframe-filter (with-df-map df10 (a) (> a 100)))))
-(test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (b) (= b 5)))))
-(test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (a b) (or (odd? a) (odd? b))))))
+(test-assert (dataframe-equal? df14 (dataframe-filter (with-df-map df10 (npl ((a) (> a 100)))))))
+(test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (npl ((b) (= b 5)))))))
+(test-assert (dataframe-equal? df15 (dataframe-filter (with-df-map df10 (npl ((a b) (or (odd? a) (odd? b))))))))
+(test-assert (dataframe-equal? df10 (dataframe-filter (with-df-map df10 (npl (() 2)))))) ;; any non-false values are treated as true
+(test-error (dataframe-filter (with-df-map df10 (npl ((a) (> a 100)) ((b) (= b 5))))))
 (test-end "dataframe-filter-test")
 
 (define df16 (make-dataframe '((a 200) (b 5) (c 800))))
 (define df17 (make-dataframe '((a 100 300) (b 4 6) (c 700 900))))
 
 (test-begin "dataframe-partition-test")
-(define-values (part1 part2) (dataframe-partition (with-df-map df10 (b) (odd? b))))
+(define-values (part1 part2) (dataframe-partition (with-df-map df10 (npl ((b) (odd? b))))))
 (test-assert (dataframe-equal? part1 df16))
 (test-assert (dataframe-equal? part2 df17))
+(test-error (dataframe-filter (with-df-map df10 (npl ((a) (> a 100)) ((b) (= b 5))))))
 (test-end "dataframe-partition-test")
 
 (test-begin "df-read-write-test")
@@ -231,32 +234,61 @@
 
 (test-begin "dataframe-split-test")
 (define df-list (dataframe-split df22 'grp))
-(test-assert (dataframe-equal? (car df-list) (dataframe-filter (with-df-map df22 (grp) (symbol=? grp 'a)))))
-(test-assert (dataframe-equal? (cadr df-list) (dataframe-filter (with-df-map df22 (grp) (symbol=? grp 'b)))))
+(test-assert (dataframe-equal? (car df-list)
+                               (dataframe-filter (with-df-map df22 (npl ((grp) (symbol=? grp 'a)))))))
+(test-assert (dataframe-equal? (cadr df-list)
+                               (dataframe-filter (with-df-map df22 (npl ((grp) (symbol=? grp 'b)))))))
 (test-assert (dataframe-equal? df22 (apply dataframe-append df-list)))
 (test-end "dataframe-split-test")
 
 (test-begin "with-df-map-test")
-(test-equal (make-list 5 10) (cdr (with-df-map df22 () 10)))
-(test-equal (make-list 5 "a") (cdr (with-df-map df22 () "a")))
-(test-equal (make-list 5 'a) (cdr (with-df-map df22 () 'a)))
-(test-equal '(1 2 3 4 5) (cdr (with-df-map df22 () '(1 2 3 4 5))))
-(test-equal '(11 22 33 44 55) (cdr (with-df-map df22 (adult juv) (+ adult juv))))
-(test-equal '(11 22 33 44 55) (cdr (with-df-map df22 (juv adult) (+ adult juv))))
-(test-equal (make-list 5 10) (cdr (with-df-map df22 (adult juv) (/ juv adult))))
-(test-error (with-df-map df22 (adult) (/ juv adult)))
-(test-error (with-df-map df22 () (+ adult juv)))
-(test-error (with-df-map df22 () '#(10)))
+(test-equal (make-list 5 10) (cadr (with-df-map df22 (npl (() 10)))))
+(test-equal (make-list 5 "a") (cadr (with-df-map df22 (npl (() "a")))))
+(test-equal (make-list 5 'a) (cadr (with-df-map df22 (npl (() 'a)))))
+(test-equal '(1 2 3 4 5) (cadr (with-df-map df22 (npl (() '(1 2 3 4 5))))))
+(test-equal '(11 22 33 44 55) (cadr (with-df-map df22 (npl ((adult juv) (+ adult juv))))))
+(test-equal '(11 22 33 44 55) (cadr (with-df-map df22 (npl ((juv adult) (+ adult juv))))))
+(test-equal (make-list 5 10) (cadr (with-df-map df22 (npl ((adult juv) (/ juv adult))))))
+(test-error (with-df-map df22 (npl ((adult) (/ juv adult)))))
+(test-error (with-df-map df22 (npl (() (+ adult juv)))))
+(test-error (with-df-map df22 (npl (() '#(10)))))
 (test-end "with-df-map-test")
 
-(define df23 (make-dataframe '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 10 20 30 40 50) (total 11 22 33 44 55))))
-(define df24 (make-dataframe '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 5 10 15 20 25))))
-(define df25 (make-dataframe '((grp a b) (trt b b) (adult 2 5) (juv 20 50) (juv-mean 15 40))))
+(define df23 (make-dataframe '((grp a a b b b)
+                               (trt a b a b b)
+                               (adult 1 2 3 4 5)
+                               (juv 10 20 30 40 50)
+                               (total 11 22 33 44 55))))
+(define df24 (make-dataframe '((grp a a b b b)
+                               (trt a b a b b)
+                               (adult 1 2 3 4 5)
+                               (juv 5 10 15 20 25))))
+(define df25 (make-dataframe '((grp a b)
+                               (trt b b)
+                               (adult 2 5)
+                               (juv 20 50)
+                               (juv-mean 15 40))))
+(define df26 (make-dataframe '((grp a a b b b)
+                               (trt a b a b b)
+                               (adult 1 2 3 4 5)
+                               (juv 5 10 15 20 25)
+                               (total 11 22 33 44 55))))
 
 (test-begin "dataframe-modify-test")
-(test-assert (dataframe-equal? df23 (dataframe-modify (with-df-map df22 (adult juv) (+ adult juv)) 'total)))
-(test-assert (dataframe-equal? df24 (dataframe-modify (with-df-map df22 (juv) (/ juv 2)) 'juv)))
-(test-error (dataframe-modify (with-df-map df22 (juv) (/ juv 2)) "test"))
+(test-assert (dataframe-equal? df23
+                               (dataframe-modify
+                                (with-df-map
+                                 df22
+                                 (npl ((adult juv) (+ adult juv))))
+                                'total)))
+(test-assert (dataframe-equal? df24
+                               (dataframe-modify
+                                (with-df-map
+                                 df22
+                                 (npl ((juv) (/ juv 2))))
+                                'juv)))
+(test-error (dataframe-modify (with-df-map df22 (npl ((juv) (/ juv 2)))) 'juv 'total))
+(test-error (dataframe-modify (with-df-map df22 (npl ((juv) (/ juv 2)))) "test"))
 (test-end "dataframe-modify-test")
 
 (test-begin "thread-test")
@@ -264,25 +296,30 @@
 (test-approximate 0 (-> (random-binomial 1e5 10 0.5) (variance) (- 2.5)) 0.125)
 (test-assert (dataframe-equal? df1
                                (-> df1
-                                   (with-df-map () '(7 8 9))
+                                   (with-df-map (npl (() '(7 8 9))))
                                    (dataframe-modify 'c)
                                    (dataframe-drop 'c))))
 (test-assert (dataframe-equal? df23
                                (-> '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 10 20 30 40 50))
                                    (make-dataframe)
-                                   (with-df-map (adult juv) (+ adult juv))
+                                   (with-df-map (npl ((adult juv) (+ adult juv))))
                                    (dataframe-modify 'total))))
 (test-assert (dataframe-equal? df24
                                (-> '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 10 20 30 40 50))
                                    (make-dataframe)
-                                   (with-df-map (juv) (/ juv 2))
+                                   (with-df-map (npl ((juv) (/ juv 2))))
                                    (dataframe-modify 'juv))))
+(test-assert (dataframe-equal? df26
+                               (-> df22
+                                   (with-df-map (npl ((juv) (/ juv 2))
+                                                     ((adult juv) (+ adult juv))))
+                                   (dataframe-modify 'juv 'total))))
 (test-assert (dataframe-equal? df23   
                                (-> df22
                                    (dataframe-split 'grp)
                                    (->> (map (lambda (df)
                                                (dataframe-modify
-                                                (with-df-map df (adult juv) (+ adult juv))
+                                                (with-df-map df (npl ((adult juv) (+ adult juv))))
                                                 'total))))
                                    (->> (apply dataframe-append)))))
 (test-assert (dataframe-equal? df25
@@ -290,10 +327,10 @@
                                    (dataframe-split 'grp)
                                    (->> (map (lambda (df)
                                                (dataframe-modify
-                                                (with-df-map df () (mean ($ df 'juv)))
+                                                (with-df-map df (npl (() (mean ($ df 'juv)))))
                                                 'juv-mean))))
                                    (->> (apply dataframe-append))
-                                   (with-df-map (juv juv-mean) (> juv juv-mean))
+                                   (with-df-map (npl ((juv juv-mean) (> juv juv-mean))))
                                    (dataframe-filter))))
 (test-error (-> '(4 3 5 1) (sort <)))
 (test-end "thread-test")

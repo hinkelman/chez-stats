@@ -36,6 +36,7 @@
    dataframe-write
    make-dataframe
    with-df-map
+   npl
    ;; random-variates
    random-bernoulli
    random-beta
@@ -73,5 +74,4 @@
 	  (chez-stats dataframe)
 	  (chez-stats random-variates)
 	  (chez-stats statistics))
-
   )
