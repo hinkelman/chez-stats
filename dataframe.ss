@@ -15,6 +15,7 @@
    dataframe-equal?
    dataframe-filter
    dataframe-head
+   dataframe-list-modify
    dataframe-modify
    dataframe-names
    dataframe-names-update
@@ -29,8 +30,7 @@
    dataframe-write
    filter-expr
    make-dataframe
-   with-df-map
-   npl)
+   modify-expr)
 
   (import (chezscheme)
           (chez-stats assertions))
@@ -47,7 +47,7 @@
   ;; names: list of column names
   ;; group-names: list of column names used for grouping
   ;; df: single dataframe
-  ;; dfs: list of dataframes
+  ;; dfs (or df-list): list of dataframes
   ;; name-pairs: alist used in dataframe-rename; form is '((old-name1 new-name1) (old-name2 new-name2))
   ;; ls: generic list
   ;; x: generic object
@@ -78,57 +78,6 @@
       [(_ value (f1 . body) next ...)
        (->> (thread-last-helper f1 value . body) next ...)]))
 
-  ;; with-df-map -------------------------------------------------------------
-
-  ;; don't need multiple expressions for filter
-  ;; for filter want to write (identifier df (names) (expr))
-  ;; for modify (and aggregate) want to write multiple expressions that are bound to name
-  ;; (identifier df ((new-name (names) (expr)) (new-name (names) (expr))))
-
-
-  
-  ;; normally don't like such short names
-  ;; but hopefully this is memorable acronym
-  ;; npl = names-proc-list
-  (define-syntax npl
-    (syntax-rules ()
-      [(_ (names expr) ...)
-       (list 
-        (list (quote names) ...)
-        (list (lambda names expr) ...))]))
-
-  ;; now that this isn't a macro; it doesn't need to be exposed to user
-  (define (with-df-map df names-proc-list)
-    (let ([names-list (car names-proc-list)]
-          [proc-list (cadr names-proc-list)]
-          [proc-string "(with-df-map df names-proc-list)"])
-      (cons df
-            (map (lambda (names proc)
-                   (cond [(null? names)
-                          (with-df-map-helper df (proc) proc-string)]
-                         [else
-                          (apply check-df-names df proc-string names)
-                          (apply map proc
-                                 (map (lambda (name) ($ df name)) names))]))
-                 names-list proc-list))))
-
-  ;; this helper procedure creates a with-df-map-expr from a scalar or list of same length as number of df rows
-  (define (with-df-map-helper df values who)
-    (let ([df-length (car (dataframe-dim df))])
-      (cond [(scalar? values)
-             (make-list df-length values)]
-            [(and (list? values) (= (length values) df-length))
-             values]
-            [else
-             (assertion-violation
-              who
-              (string-append
-               "value(s) must be scalar or list of length "
-               (number->string df-length)))])))
-
-    (define (scalar? obj)
-      (or (symbol? obj) (char? obj) (string? obj) (number? obj)))
-  
   ;; dataframe record type ---------------------------------------------------------------------
 
   (define-record-type dataframe (fields alist names dim)
@@ -337,18 +286,18 @@
 
   ;; modify/add columns ------------------------------------------------------------------------
 
-  (define (dataframe-modify with-df-map-out . names)
+  (define (dataframe-list-modify df-list modify-expr)
+    (apply dataframe-append (map (lambda (df) (dataframe-modify df modify-expr)) df-list)))
+
+  (define (dataframe-modify df modify-expr)
     (define (loop alist names ls-values)
       (if (null? names)
           alist
           (loop (alist-modify alist (car names) (car ls-values)) (cdr names) (cdr ls-values))))
-    (let* ([df (car with-df-map-out)]
-           [ls-values (cdr with-df-map-out)]
-           [alist (dataframe-alist df)]
-           [proc-string "(dataframe-modify with-df-map-out names)"])
-      (check-names names proc-string)
-      (unless (= (length names) (length ls-values))
-        (assertion-violation proc-string "number of names not equal to number of procedures in with-df-map-out"))
+    (let* ([names (car modify-expr)]
+           [ls-values (modify-map df (cadr modify-expr) (caddr modify-expr))]
+           [alist (dataframe-alist df)])
+      (check-names names "(dataframe-modify df modify-expr)")
       (make-dataframe (loop alist names ls-values))))
 
   (define (alist-modify alist name values)
@@ -361,7 +310,43 @@
           (cons-end alist col))))
     
   (define (cons-end ls x)
-    (reverse (cons x (reverse ls))))  
+    (reverse (cons x (reverse ls))))
+
+  (define-syntax modify-expr
+    (syntax-rules ()
+      [(_ (new-name names expr) ...)
+       (list
+        (list (quote new-name) ...)
+        (list (quote names) ...)
+        (list (lambda names expr) ...))]))
+
+  (define (modify-map df names-list proc-list)
+    (let ([proc-string "(with-df-map df names-proc-list)"])
+      (map (lambda (names proc)
+             (cond [(null? names)
+                    (modify-map-helper df (proc) proc-string)]
+                   [else
+                    (apply check-df-names df proc-string names)
+                    (apply map proc
+                           (map (lambda (name) ($ df name)) names))]))
+           names-list proc-list)))
+
+  ;; this helper procedure returns values for a column from a scalar or list of same length as number of df rows
+  (define (modify-map-helper df values who)
+    (let ([df-length (car (dataframe-dim df))])
+      (cond [(scalar? values)
+             (make-list df-length values)]
+            [(and (list? values) (= (length values) df-length))
+             values]
+            [else
+             (assertion-violation
+              who
+              (string-append
+               "value(s) must be scalar or list of length "
+               (number->string df-length)))])))
+
+    (define (scalar? obj)
+      (or (symbol? obj) (char? obj) (string? obj) (number? obj)))
 
   ;; procedure like this seems useful  but the "API" is not consistent with dataframe-modify
   ;; (define (dataframe-modify-selected df procedure . names)

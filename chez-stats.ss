@@ -22,6 +22,7 @@
    dataframe-equal?
    dataframe-filter
    dataframe-head
+   dataframe-list-modify
    dataframe-modify
    dataframe-names
    dataframe-names-update
@@ -36,8 +37,7 @@
    dataframe-write
    filter-expr
    make-dataframe
-   with-df-map
-   npl
+   modify-expr
    ;; random-variates
    random-bernoulli
    random-beta
