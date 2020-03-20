@@ -10,9 +10,10 @@
    ->
    ->>
    $
-   rowtable->dataframe
+   aggregate-expr
    dataframe->rowtable
    dataframe?
+   dataframe-aggregate
    dataframe-append
    dataframe-append-all
    dataframe-alist
@@ -38,6 +39,7 @@
    filter-expr
    make-dataframe
    modify-expr
+   rowtable->dataframe
    ;; random-variates
    random-bernoulli
    random-beta
