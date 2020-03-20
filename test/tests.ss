@@ -147,29 +147,24 @@
 (test-error (make-dataframe '((a 1 2 3) (b 1 2 3 4))))
 (test-end "make-dataframe-test")
 
-(define df11 (make-dataframe '((a 100 200 300) (b 4 5 6) (c 700 800 900) (d 104 205 306))))
-(define df12 (make-dataframe '((a 100 200 300) (b 4 5 6) (c 700 800 900) (d 400 500 600))))
-(define df13 (make-dataframe '((a 100 200 300) (b 4 5 6) (c 700 800 900) (d "100_4" "200_5" "300_6"))))
-
-;; (test-begin "dataframe-add-test")
-;; (test-error (dataframe-add df10 'c (lambda (a b) (+ a b)) 'a 'b 'c))
-;; (test-error (dataframe-add df10 'd (lambda (a b) (+ a b)) 'a 'd))
-;; (test-error (dataframe-add df10 'c (lambda (a b) (+ a b)) 'a 'b))
-;; (test-error (dataframe-add df10 "d" (lambda (a b) (+ a b)) 'a 'b))
-;; (test-error (dataframe-add 10 'd (lambda (a b) (+ a b)) 'a 'b))
-;; (test-assert (dataframe-equal? df11 (dataframe-add df10 'd (lambda (a b) (+ a b)) 'a 'b)))
-;; (test-assert (dataframe-equal? df12 (dataframe-add df10 'd (lambda (a c) (/ (+ a c) 2)) 'a 'c)))
-;; (test-assert (dataframe-equal? df13 (dataframe-add df10
-;;                                                    'd
-;;                                                    (lambda (a b)
-;;                                                      (string-append
-;;                                                       (number->string a) "_"
-;;                                                       (number->string b)))
-;;                                                    'a 'b)))
-;; (test-end "dataframe-add-test")
-
-(define df14 (make-dataframe '((a 200 300) (b 5 6) (c 800 900))))
-(define df15 (make-dataframe '((a 200) (b 5) (c 800))))
+(define df11 (make-dataframe '((a 100 200 300)
+                               (b 4 5 6)
+                               (c 700 800 900)
+                               (d 104 205 306))))
+(define df12 (make-dataframe '((a 100 200 300)
+                               (b 4 5 6)
+                               (c 700 800 900)
+                               (d 400 500 600))))
+(define df13 (make-dataframe '((a 100 200 300)
+                               (b 4 5 6)
+                               (c 700 800 900)
+                               (d "100_4" "200_5" "300_6"))))
+(define df14 (make-dataframe '((a 200 300)
+                               (b 5 6)
+                               (c 800 900))))
+(define df15 (make-dataframe '((a 200)
+                               (b 5)
+                               (c 800))))
 
 (test-begin "dataframe-filter-test")
 (test-assert (dataframe-equal? df14 (dataframe-filter df10 (filter-expr (a) (> a 100)))))
@@ -177,8 +172,12 @@
 (test-assert (dataframe-equal? df15 (dataframe-filter df10 (filter-expr (a b) (or (odd? a) (odd? b))))))
 (test-end "dataframe-filter-test")
 
-(define df16 (make-dataframe '((a 200) (b 5) (c 800))))
-(define df17 (make-dataframe '((a 100 300) (b 4 6) (c 700 900))))
+(define df16 (make-dataframe '((a 200)
+                               (b 5)
+                               (c 800))))
+(define df17 (make-dataframe '((a 100 300)
+                               (b 4 6)
+                               (c 700 900))))
 
 (test-begin "dataframe-partition-test")
 (define-values (part1 part2) (dataframe-partition df10 (filter-expr (b) (odd? b))))
@@ -193,7 +192,8 @@
 (delete-file "example.scm")
 (test-end "df-read-write-test")
 
-(define df18 (make-dataframe '((a 1 2 3 1 2 3) (b 4 5 6 4 5 6))))
+(define df18 (make-dataframe '((a 1 2 3 1 2 3)
+                               (b 4 5 6 4 5 6))))
 (define df19 (make-dataframe '((c 1 2 3))))
 
 (test-begin "dataframe-append-test")
@@ -219,15 +219,21 @@
 (test-error (rowtable->dataframe '((a b) (1 4 7))))
 (test-end "rowtable->dataframe-test")
 
-(define df20 (make-dataframe '((trt A A A B B B) (grp A B A B A B) (resp 1 2 3 4 5 6))))
-(define df21 (make-dataframe '((trt A A B B) (grp B A A B))))
+(define df20 (make-dataframe '((trt A A A B B B)
+                               (grp A B A B A B)
+                               (resp 1 2 3 4 5 6))))
+(define df21 (make-dataframe '((trt A A B B)
+                               (grp B A A B))))
 
 (test-begin "dataframe-unique-test")
 (test-error (dataframe-unique '((a (1 2 3)))))
 (test-assert (dataframe-equal? df21 (dataframe-unique (dataframe-select df20 'trt 'grp))))
 (test-end "dataframe-unique-test")
 
-(define df22 (make-dataframe '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 10 20 30 40 50))))
+(define df22 (make-dataframe '((grp a a b b b)
+                               (trt a b a b b)
+                               (adult 1 2 3 4 5)
+                               (juv 10 20 30 40 50))))
 
 (test-begin "dataframe-split-test")
 (define df-list (dataframe-split df22 'grp))
