@@ -357,6 +357,11 @@
   ;; filter on a single column would be faster using row-wise
   ;; but want flexibility of filtering on multiple columns
 
+  ;; sort ------------------------------------------------------------------------
+
+  (define (sort-lol pred ls)
+    (sort (lambda (x y)(pred (car x)(car y))) ls))
+
   ;; don't know how to do column-wise sort without using indices, which would be slow and not idiomatic
   ;; not even sure how to execute column-wise sort with indices
   

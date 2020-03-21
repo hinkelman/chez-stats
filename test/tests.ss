@@ -343,6 +343,15 @@
 (test-error (-> '(4 3 5 1) (sort <)))
 (test-end "thread-test")
 
+(test-begin "dataframe-aggregate-test")
+(test-assert (dataframe-equal? (make-dataframe '((grp a b) (adult-sum 3 12) (juv-sum 30 120)))
+                               (dataframe-aggregate df22 '(grp) (aggregate-expr (adult-sum (adult) (apply + adult))
+                                                                                (juv-sum (juv) (apply + juv))))))
+(test-assert (dataframe-equal? (make-dataframe '((grp a a b b) (trt a b a b) (adult-sum 1 2 3 9) (juv-sum 10 20 30 90)))
+                               (dataframe-aggregate df22 '(grp trt) (aggregate-expr (adult-sum (adult) (apply + adult))
+                                                                                    (juv-sum (juv) (apply + juv))))))
+(test-end "dataframe-aggregate-test")
+
 ;; random-variates
 
 (test-begin "bernoulli-test")
