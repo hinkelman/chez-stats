@@ -281,10 +281,10 @@
 
   (define (dataframe-drop df . names)
     (apply check-df-names df "(dataframe-drop df names)" names)
-    (let ([alist (filter (lambda (column)
-                           (not (member (car column) names)))
-                         (dataframe-alist df))])
-      (make-dataframe alist)))
+    (make-dataframe (alist-drop (dataframe-alist df) names)))
+
+  (define (alist-drop alist names)
+    (filter (lambda (column) (not (member (car column) names))) alist))
 
   ;; filter/partition ------------------------------------------------------------------------
 
@@ -359,20 +359,42 @@
 
   ;; sort ------------------------------------------------------------------------
 
-  (define (sort-lol pred ls)
-    (sort (lambda (x y)(pred (car x)(car y))) ls))
+  (define-syntax sort-expr
+    (syntax-rules ()
+      [(_ (predicate name) ...)
+       (list
+        (list predicate ...)
+        (list (quote name) ...))]))
 
-  ;; don't know how to do column-wise sort without using indices, which would be slow and not idiomatic
-  ;; not even sure how to execute column-wise sort with indices
-  
-  ;; simplest thing for multi-column sort is probably
-  ;; (1) group
-  ;; (2) transpose
-  ;; (3) sort
-  ;; (4) ungroup  ;; might be faster to transpose and then ungroup
-  ;; (5) transpose
+  (define (dataframe-sort df sort-expr)
+    (let* ([preds (car sort-expr)]
+           [names (cadr sort-expr)])
+      (make-dataframe (alist-sort (dataframe-alist df) (car preds) (car names)))))
 
-  ;; unique also uses transpose
+  (define (alist-sort-split alists predicate name)
+    (let* ([alists-sorted (map (lambda (alist) (alist-sort alist predicate name)) alists)]
+           [alists-split (map (lambda (alist) (alist-split alist (list name) #f)) alists-sorted)])
+      (apply map (lambda (alist) (alist-drop alist (list name))) alists-split)))
+
+  (define (alist-sort alist predicate name)
+    (let* ([all-names (map car alist)]
+           [new-names (cons name (other-names name all-names))]
+           [new-alist (alist-select alist new-names)]
+           [ls-values (map cdr new-alist)]
+           [ls-row (transpose ls-values)]
+           [ls-row-sorted (sort-ls-row predicate ls-row)])
+      (add-names-ls-values new-names (transpose ls-row-sorted))))
+
+  (define (other-names name names)
+    (filter (lambda (x) (not (symbol=? name x))) names))
+
+  (define (sort-ls-row predicate ls-row)
+    (sort (lambda (x y) (predicate (car x)(car y))) ls-row))
+
+    (define (alist-contains? alist names)
+    (let ([all-names (map car alist)])
+      (if (for-all (lambda (name) (member name all-names)) names) #t #f)))
+
   
   ;; unique ------------------------------------------------------------------------
 
@@ -429,7 +451,7 @@
   ;; returns two values
   ;; first value is list of alists representing all columns in the dataframe
   ;; second value is a list of alists representing the grouping columns in the dataframe
-  (define (alist-split alist group-names)
+  (define (alist-split alist group-names return-groups)
     (define (loop ls-row-unique alist alists groups)
       (cond [(null? ls-row-unique)
              (values (reverse alists)
@@ -447,13 +469,16 @@
                              groups))))])) 
     (let* ([ls-values-select (map cdr (alist-select alist group-names))]
            [ls-row-unique (ls-values-unique ls-values-select #t)])
-      (loop ls-row-unique alist '() '())))
+      (let-values ([(alists groups) (loop ls-row-unique alist '() '())])
+        (if return-groups
+            (values alists groups)
+            alists))))
 
-  (define (dataframe-split-helper df group-names return-groups?)
+  (define (dataframe-split-helper df group-names return-groups)
     (apply check-df-names df "(dataframe-split df group-names)" group-names)
-    (let-values ([(alists groups) (alist-split (dataframe-alist df) group-names)])
+    (let-values ([(alists groups) (alist-split (dataframe-alist df) group-names #t)])
       (let ([dfs (map make-dataframe alists)])
-        (if return-groups?
+        (if return-groups
             (values dfs groups)
             dfs))))
 
