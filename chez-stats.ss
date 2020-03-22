@@ -31,6 +31,7 @@
    dataframe-rename
    dataframe-read
    dataframe-select
+   dataframe-sort
    dataframe-split
    dataframe-tail
    dataframe-unique
@@ -40,6 +41,7 @@
    make-dataframe
    modify-expr
    rowtable->dataframe
+   sort-expr
    ;; random-variates
    random-bernoulli
    random-beta

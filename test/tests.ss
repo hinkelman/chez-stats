@@ -244,18 +244,6 @@
 (test-assert (dataframe-equal? df22 (apply dataframe-append df-list)))
 (test-end "dataframe-split-test")
 
-;; (test-begin "with-df-map-test")
-;; (test-equal (make-list 5 10) (cadr (with-df-map df22 (npl (() 10)))))
-;; (test-equal (make-list 5 "a") (cadr (with-df-map df22 (npl (() "a")))))
-;; (test-equal (make-list 5 'a) (cadr (with-df-map df22 (npl (() 'a)))))
-;; (test-equal '(1 2 3 4 5) (cadr (with-df-map df22 (npl (() '(1 2 3 4 5))))))
-;; (test-equal '(11 22 33 44 55) (cadr (with-df-map df22 (npl ((adult juv) (+ adult juv))))))
-;; (test-equal '(11 22 33 44 55) (cadr (with-df-map df22 (npl ((juv adult) (+ adult juv))))))
-;; (test-equal (make-list 5 10) (cadr (with-df-map df22 (npl ((adult juv) (/ juv adult))))))
-;; (test-error (with-df-map df22 (npl ((adult) (/ juv adult)))))
-;; (test-error (with-df-map df22 (npl (() (+ adult juv)))))
-;; (test-error (with-df-map df22 (npl (() '#(10)))))
-;; (test-end "with-df-map-test")
 
 (define df23 (make-dataframe '((grp a a b b b)
                                (trt a b a b b)
@@ -296,12 +284,18 @@
                                     (modify-expr (c () '(7 8 9))))
                                    (dataframe-drop 'c))))
 (test-assert (dataframe-equal? df23
-                               (-> '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 10 20 30 40 50))
+                               (-> '((grp a a b b b)
+                                     (trt a b a b b)
+                                     (adult 1 2 3 4 5)
+                                     (juv 10 20 30 40 50))
                                    (make-dataframe)
                                    (dataframe-modify
                                     (modify-expr (total (adult juv) (+ adult juv)))))))
 (test-assert (dataframe-equal? df24
-                               (-> '((grp a a b b b) (trt a b a b b) (adult 1 2 3 4 5) (juv 10 20 30 40 50))
+                               (-> '((grp a a b b b)
+                                     (trt a b a b b)
+                                     (adult 1 2 3 4 5)
+                                     (juv 10 20 30 40 50))
                                    (make-dataframe)
                                    (dataframe-modify
                                     (modify-expr (juv (juv) (/ juv 2)))))))
@@ -344,13 +338,42 @@
 (test-end "thread-test")
 
 (test-begin "dataframe-aggregate-test")
-(test-assert (dataframe-equal? (make-dataframe '((grp a b) (adult-sum 3 12) (juv-sum 30 120)))
-                               (dataframe-aggregate df22 '(grp) (aggregate-expr (adult-sum (adult) (apply + adult))
-                                                                                (juv-sum (juv) (apply + juv))))))
-(test-assert (dataframe-equal? (make-dataframe '((grp a a b b) (trt a b a b) (adult-sum 1 2 3 9) (juv-sum 10 20 30 90)))
-                               (dataframe-aggregate df22 '(grp trt) (aggregate-expr (adult-sum (adult) (apply + adult))
-                                                                                    (juv-sum (juv) (apply + juv))))))
+(test-assert (dataframe-equal?
+              (make-dataframe '((grp a b)
+                                (adult-sum 3 12)
+                                (juv-sum 30 120)))
+              (dataframe-aggregate df22 '(grp)
+                                   (aggregate-expr (adult-sum (adult) (apply + adult))
+                                                   (juv-sum (juv) (apply + juv))))))
+(test-assert (dataframe-equal?
+              (make-dataframe '((grp a a b b)
+                                (trt a b a b)
+                                (adult-sum 1 2 3 9)
+                                (juv-sum 10 20 30 90)))
+              (dataframe-aggregate df22 '(grp trt)
+                                   (aggregate-expr (adult-sum (adult) (apply + adult))
+                                                   (juv-sum (juv) (apply + juv))))))
 (test-end "dataframe-aggregate-test")
+
+(define df27 (make-dataframe '((grp "a" "a" "b" "b" "b")
+                               (trt "a" "b" "a" "b" "b")
+                               (adult 1 2 3 4 5)
+                               (juv 10 20 30 40 50))))
+
+(test-begin "dataframe-sort-test")
+(test-assert (dataframe-equal?
+              (make-dataframe '((grp "a" "b" "b" "a" "b")
+                                (trt "b" "b" "b" "a" "a")
+                                (adult 2 4 5 1 3)
+                                (juv 20 40 50 10 30)))
+              (dataframe-sort df27 (sort-expr (string<? trt)))))
+(test-assert (dataframe-equal?
+              (make-dataframe '((grp "b" "b" "a" "b" "a")
+                                (trt "b" "b" "b" "a" "a")
+                                (adult 5 4 2 3 1)
+                                (juv 50 40 20 30 10)))
+              (dataframe-sort df27 (sort-expr (string<? trt) (< adult)))))
+(test-end "dataframe-sort-test")
 
 ;; random-variates
 

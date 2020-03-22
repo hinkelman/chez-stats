@@ -24,6 +24,7 @@
    dataframe-read
    dataframe-rename
    dataframe-select
+   dataframe-sort
    dataframe-split
    dataframe-tail
    dataframe-unique
@@ -32,7 +33,8 @@
    filter-expr
    make-dataframe
    modify-expr
-   rowtable->dataframe)
+   rowtable->dataframe
+   sort-expr)
 
   (import (chezscheme)
           (chez-stats assertions))
@@ -59,7 +61,7 @@
   ;; row-based: describes orientation of list of lists; row-based example: '((a b) (1 "this") (2 "that") (3 "other))
   ;; rowtable: name used to describe a row-based list of lists where the first row represents column names
   ;; rt: single rowtable
-  ;; ls-row: generic row-based list of lists
+  ;; ls-rows: generic row-based list of lists
   
   
   ;; thread-first and thread-last -------------------------------------------------------------
@@ -367,35 +369,40 @@
         (list (quote name) ...))]))
 
   (define (dataframe-sort df sort-expr)
-    (let* ([preds (car sort-expr)]
-           [names (cadr sort-expr)])
-      (make-dataframe (alist-sort (dataframe-alist df) (car preds) (car names)))))
+    (let* ([predicates (car sort-expr)]
+           [names (cadr sort-expr)]
+           [alist (dataframe-alist df)]
+           [all-names (map car alist)]
+           [ranks (sum-col-ranks alist predicates names)]
+           [ls-values-sorted (ls-values-sort > (cons ranks (map cdr alist)))])
+      (make-dataframe (add-names-ls-values all-names (cdr ls-values-sorted)))))
 
-  (define (alist-sort-split alists predicate name)
-    (let* ([alists-sorted (map (lambda (alist) (alist-sort alist predicate name)) alists)]
-           [alists-split (map (lambda (alist) (alist-split alist (list name) #f)) alists-sorted)])
-      (apply map (lambda (alist) (alist-drop alist (list name))) alists-split)))
-
-  (define (alist-sort alist predicate name)
-    (let* ([all-names (map car alist)]
-           [new-names (cons name (other-names name all-names))]
-           [new-alist (alist-select alist new-names)]
-           [ls-values (map cdr new-alist)]
-           [ls-row (transpose ls-values)]
-           [ls-row-sorted (sort-ls-row predicate ls-row)])
-      (add-names-ls-values new-names (transpose ls-row-sorted))))
-
-  (define (other-names name names)
-    (filter (lambda (x) (not (symbol=? name x))) names))
+  (define (ls-values-sort predicate ls-values)
+    (transpose (sort-ls-row predicate (transpose ls-values))))
 
   (define (sort-ls-row predicate ls-row)
     (sort (lambda (x y) (predicate (car x)(car y))) ls-row))
 
-    (define (alist-contains? alist names)
-    (let ([all-names (map car alist)])
-      (if (for-all (lambda (name) (member name all-names)) names) #t #f)))
+  ;; key idea is that weighting preserves sort priority
+  (define (sum-col-ranks alist predicates names)
+    (let* ([ls-values (alist-values-map alist names)]
+           [weights (map (lambda (x) (expt 10 x)) (enumerate names))]
+           [ls-ranks (map (lambda (predicate ls weight)
+                            (rank-list predicate ls weight))
+                          predicates ls-values weights)])
+      (map (lambda (x) (apply + x)) (transpose ls-ranks))))
+      
+  (define (rank-list predicate ls weight)
+    (let* ([unique-sorted (sort predicate (remove-duplicates ls))]
+           [ranks (map (lambda (x) (/ x weight)) (enumerate unique-sorted))]
+           [lookup (map (lambda (x y) (cons x y)) unique-sorted ranks)])
+      (map (lambda (x) (cdr (assoc x lookup))) ls)))
 
-  
+  ;; (define (other-names selected-names all-names)
+  ;;   (let* ([bools (map (lambda (x) (not (member x selected-names))) all-names)]
+  ;;          [ls-rows (transpose (list bools all-names))])
+  ;;     (map cadr (filter (lambda (x) (equal? #t (car x))) ls-rows))))
+
   ;; unique ------------------------------------------------------------------------
 
   (define (dataframe-unique df)
@@ -407,9 +414,9 @@
           [ls-values (map cdr alist)])
       (add-names-ls-values names (ls-values-unique ls-values #f))))
 
-  (define (ls-values-unique ls-values row-based?)
-    (let ([row-based (remove-duplicates (transpose ls-values))])
-      (if row-based? row-based (transpose row-based))))
+  (define (ls-values-unique ls-values row-based)
+    (let ([ls-rows (remove-duplicates (transpose ls-values))])
+      (if row-based ls-rows (transpose ls-rows))))
 
   (define (transpose ls)
     (apply map list ls))
