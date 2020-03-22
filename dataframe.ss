@@ -383,14 +383,13 @@
   (define (sort-ls-row predicate ls-row)
     (sort (lambda (x y) (predicate (car x)(car y))) ls-row))
 
-  ;; key idea is that weighting preserves sort priority
   (define (sum-col-ranks alist predicates names)
     (let* ([ls-values (alist-values-map alist names)]
            [weights (map (lambda (x) (expt 10 x)) (enumerate names))]
            [ls-ranks (map (lambda (predicate ls weight)
                             (rank-list predicate ls weight))
                           predicates ls-values weights)])
-      (map (lambda (x) (apply + x)) (transpose ls-ranks))))
+      (apply map + ls-ranks)))
       
   (define (rank-list predicate ls weight)
     (let* ([unique-sorted (sort predicate (remove-duplicates ls))]
