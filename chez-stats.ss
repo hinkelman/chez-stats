@@ -6,42 +6,6 @@
    read-csv
    read-tsv
    write-csv
-   ;; dataframe
-   ->
-   ->>
-   $
-   aggregate-expr
-   dataframe->rowtable
-   dataframe?
-   dataframe-aggregate
-   dataframe-append
-   dataframe-append-all
-   dataframe-alist
-   dataframe-contains?
-   dataframe-dim
-   dataframe-drop
-   dataframe-equal?
-   dataframe-filter
-   dataframe-head
-   dataframe-list-modify
-   dataframe-modify
-   dataframe-names
-   dataframe-names-update
-   dataframe-partition
-   dataframe-rename
-   dataframe-read
-   dataframe-select
-   dataframe-sort
-   dataframe-split
-   dataframe-tail
-   dataframe-unique
-   dataframe-values
-   dataframe-write
-   filter-expr
-   make-dataframe
-   modify-expr
-   rowtable->dataframe
-   sort-expr
    ;; random-variates
    random-bernoulli
    random-beta
@@ -76,7 +40,6 @@
 
   (import (chezscheme)
 	  (chez-stats csv)
-	  (chez-stats dataframe)
 	  (chez-stats random-variates)
 	  (chez-stats statistics))
   )
