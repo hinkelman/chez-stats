@@ -18,6 +18,9 @@
   (import (chezscheme)
 	  (chez-stats assertions))
 
+  ;; in some simple deleted time tests, this recursive version of build-random-list
+  ;; was about 3x faster than a version that used fold-right and (make-list)
+  ;; when drawing 10 million random-bernoulli values
   (define (build-random-list n proc)
     (define (iterate result i)
       (if (= i n)
