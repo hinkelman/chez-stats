@@ -1,110 +1,7 @@
 (import (chez-stats chez-stats)
 	(srfi s64 testing))
 
-;; Descriptive Statistics
-
-(test-begin "count-test")
-(test-equal (list '(1 2 3 4) '(2 2 1 1)) (count '(1 2 3 4 2 1)))
-(test-equal (list '(1 1.1 2 2.2) '(1 3 1 1)) (count '(1.1 1 2.2 2 1.1 1.1)))
-(test-equal (list '(1/2 1 2) '(3 2 1)) (count '(0.5 1/2 #e0.5 1 1 2)))
-(test-error (count '("a" "b" "b" "a")))
-(test-end "count-test")
-
-(test-begin "cumulative-sum-test")
-(test-equal '(1 3 6 10 15) (cumulative-sum '(1 2 3 4 5)))
-(test-equal '(5 9 12 14 15) (cumulative-sum '(5 4 3 2 1)))
-(test-error (cumulative-sum '()))
-(test-end "cumulative-sum-test")
-
-(test-begin "ecdf-test")
-(test-equal (list '(1 5 10) '(1/5 4/5 1)) (ecdf '(1 5 5 5 10)))
-(test-equal (list '(0.5 2 2.5 4 5) '(1/6 1/2 2/3 5/6 1)) (ecdf '(0.5 2 2 2.5 4 5)))
-(test-equal (list '(0.5 10 20) '(1/3 5/6 1)) (ecdf '(1/2 0.5 10 10 10 20)))
-(test-error (ecdf "a"))
-(test-end "ecdf-test")
-
-(test-begin "interquartile-range")
-(test-assert (= 2.5 (interquartile-range '(1 2 3 4 5 6) 7)))
-(test-error (interquartile-range '(1) 100))
-(test-end "interquartile-range")
-
-(test-begin "kurtosis-test")
-(test-assert (= 17/10 (kurtosis '(1 2 3 4 5))))
-(test-assert (= 51/25 (kurtosis '(1 2 2 3 3 3))))
-(test-error (kurtosis '()))
-(test-error (kurtosis "a"))
-(test-end "kurtosis-test")
-
-(test-begin "mean-test")
-(test-assert (= 3 (mean '(1 2 3 4 5))))
-(test-assert (= 0 (mean '(-10 0 10))))
-(test-assert (= 27.5 (exact->inexact (mean '(1 2 3 4 5 150)))))
-(test-error (mean '()))
-(test-error (mean "a"))
-(test-end "mean-test")
-
-(test-begin "median-test")
-(test-assert (= 3.5 (median '(1 2 3 4 5 6))))
-(test-error (median '()))
-(test-error (median '("a")))
-(test-end "median-test")
-
-(test-begin "mode-test")
-(test-equal '(1 2) (mode '(1 1 1 2 2 2)))
-(test-equal '(4) (mode '(1 2 3 3 4 4 4)))
-(test-error (mode 'a))
-(test-end "mode-test")
-
-(test-begin "quantile-test")
-(test-assert (= 3 (quantile '(1 2 3 4 5 6) 0.5 1)))
-(test-assert (= 3.0 (quantile '(1 2 3 4 5 6) 0.5 4)))
-(test-assert (= 3.5 (quantile '(1 2 3 4 5 6) 0.5 8)))
-(test-assert (= 1.125 (quantile '(1 2 3 4 5 6) 0.025 7)))
-(test-error (quantile '(1 2) 0.5 100))
-(test-error (quantile '(1 2) 2 7))
-(test-end "quantile-test")
-
-(test-begin "range-test")
-(test-equal (cons 1 5) (range '(1 2 3 4 5)))
-(test-equal (cons -99 100) (range '(-10 -7 3 -99 100)))
-(test-error (range '()))
-(test-end "range-test")
-
-(test-begin "skewness-test")
-(test-assert (= 0 (skewness '(1 2 3 4 5))))
-(test-assert (= -0.6 (skewness '(1 2 2 3 3 3 4 4 4 4))))
-(test-error (skewness '()))
-(test-error (skewness '("a" 1)))
-(test-end "skewness-test")
-
-(test-begin "standard-deviation-test")
-(test-assert (= 1.8708286933869707 (standard-deviation '(0 1 2 3 4 5))))
-(test-assert (= 0 (standard-deviation '(1 1 1))))
-(test-error (standard-deviation '(1 'a)))
-(test-end "standard-deviation-test")
-
-(test-begin "unique-test")
-(test-equal '(1/2 1 5.2) (unique '(0.5 #e0.5 1/2 1 1 1 5.2)))
-(test-equal '(0 1 2) (unique '(0 0 0 1 1 1 2)))
-(test-error (unique 'a))
-(test-end "unique-test")
-
-(test-begin "variance-test")
-(test-assert (= 233840.25 (variance '(1 10 100 1000))))
-(test-assert (= 3.5 (variance '(0 1 2 3 4 5))))
-(test-error (variance '()))
-(test-end "variance-test")
-
-(test-begin "weighted-mean-test")
-(test-assert (= 7/3 (weighted-mean '(1 2 3 4 5) '(5 4 3 2 1))))
-(test-assert (= 3 (weighted-mean '(1 2 3 4 5) '(2 2 2 2 2))))
-(test-assert (= 13/4 (weighted-mean '(1 2 3 4 5) '(2 0 2 2 2))))
-(test-error (weighted-mean '() '(1 2 3)))
-(test-error (weighted-mean '(1) '(1 2 3)))
-(test-error (weighted-mean '(1) '(1 2 "a")))
-(test-end "weighted-mean-test")
-
-;; Read/Write CSV
+;; csv
 
 (test-begin "csv-test")
 (define example-list (list
@@ -122,7 +19,7 @@
 (delete-file "example2.csv")
 (test-end "csv-test")
 
-;; Random Variates
+;; random-variates
 
 (test-begin "bernoulli-test")
 (define bernoulli-list (random-bernoulli 1e5 0.2))
@@ -248,6 +145,109 @@
 (test-error (random-uniform 2 'a 1))
 (test-error (random-uniform 2 2 1))
 (test-end "uniform-test")
+
+;; statistics
+
+(test-begin "count-test")
+(test-equal '((1 2 3 4) (2 2 1 1)) (count '(1 2 3 4 2 1)))
+(test-equal '((1 1.1 2 2.2) (1 3 1 1)) (count '(1.1 1 2.2 2 1.1 1.1)))
+(test-equal '((1/2 1 2) (3 2 1)) (count '(0.5 1/2 #e0.5 1 1 2)))
+(test-error (count '("a" "b" "b" "a")))
+(test-end "count-test")
+
+(test-begin "cumulative-sum-test")
+(test-equal '(1 3 6 10 15) (cumulative-sum '(1 2 3 4 5)))
+(test-equal '(5 9 12 14 15) (cumulative-sum '(5 4 3 2 1)))
+(test-error (cumulative-sum '()))
+(test-end "cumulative-sum-test")
+
+(test-begin "ecdf-test")
+(test-equal '((1 5 10) (1/5 4/5 1)) (ecdf '(1 5 5 5 10)))
+(test-equal '((0.5 2 2.5 4 5) (1/6 1/2 2/3 5/6 1)) (ecdf '(0.5 2 2 2.5 4 5)))
+(test-equal '((0.5 10 20) (1/3 5/6 1)) (ecdf '(1/2 0.5 10 10 10 20)))
+(test-error (ecdf "a"))
+(test-end "ecdf-test")
+
+(test-begin "interquartile-range")
+(test-assert (= 2.5 (interquartile-range '(1 2 3 4 5 6) 7)))
+(test-error (interquartile-range '(1) 100))
+(test-end "interquartile-range")
+
+(test-begin "kurtosis-test")
+(test-assert (= 17/10 (kurtosis '(1 2 3 4 5))))
+(test-assert (= 51/25 (kurtosis '(1 2 2 3 3 3))))
+(test-error (kurtosis '()))
+(test-error (kurtosis "a"))
+(test-end "kurtosis-test")
+
+(test-begin "mean-test")
+(test-assert (= 3 (mean '(1 2 3 4 5))))
+(test-assert (= 0 (mean '(-10 0 10))))
+(test-assert (= 27.5 (exact->inexact (mean '(1 2 3 4 5 150)))))
+(test-error (mean '()))
+(test-error (mean "a"))
+(test-end "mean-test")
+
+(test-begin "median-test")
+(test-assert (= 3.5 (median '(1 2 3 4 5 6))))
+(test-error (median '()))
+(test-error (median '("a")))
+(test-end "median-test")
+
+(test-begin "mode-test")
+(test-equal '(1 2) (mode '(1 1 1 2 2 2)))
+(test-equal '(4) (mode '(1 2 3 3 4 4 4)))
+(test-error (mode 'a))
+(test-end "mode-test")
+
+(test-begin "quantile-test")
+(test-assert (= 3 (quantile '(1 2 3 4 5 6) 0.5 1)))
+(test-assert (= 3.0 (quantile '(1 2 3 4 5 6) 0.5 4)))
+(test-assert (= 3.5 (quantile '(1 2 3 4 5 6) 0.5 8)))
+(test-assert (= 1.125 (quantile '(1 2 3 4 5 6) 0.025 7)))
+(test-error (quantile '(1 2) 0.5 100))
+(test-error (quantile '(1 2) 2 7))
+(test-end "quantile-test")
+
+(test-begin "range-test")
+(test-equal (cons 1 5) (range '(1 2 3 4 5)))
+(test-equal (cons -99 100) (range '(-10 -7 3 -99 100)))
+(test-error (range '()))
+(test-end "range-test")
+
+(test-begin "skewness-test")
+(test-assert (= 0 (skewness '(1 2 3 4 5))))
+(test-assert (= -0.6 (skewness '(1 2 2 3 3 3 4 4 4 4))))
+(test-error (skewness '()))
+(test-error (skewness '("a" 1)))
+(test-end "skewness-test")
+
+(test-begin "standard-deviation-test")
+(test-assert (= 1.8708286933869707 (standard-deviation '(0 1 2 3 4 5))))
+(test-assert (= 0 (standard-deviation '(1 1 1))))
+(test-error (standard-deviation '(1 'a)))
+(test-end "standard-deviation-test")
+
+(test-begin "unique-test")
+(test-equal '(1/2 1 5.2) (unique '(0.5 #e0.5 1/2 1 1 1 5.2)))
+(test-equal '(0 1 2) (unique '(0 0 0 1 1 1 2)))
+(test-error (unique 'a))
+(test-end "unique-test")
+
+(test-begin "variance-test")
+(test-assert (= 233840.25 (variance '(1 10 100 1000))))
+(test-assert (= 3.5 (variance '(0 1 2 3 4 5))))
+(test-error (variance '()))
+(test-end "variance-test")
+
+(test-begin "weighted-mean-test")
+(test-assert (= 7/3 (weighted-mean '(1 2 3 4 5) '(5 4 3 2 1))))
+(test-assert (= 3 (weighted-mean '(1 2 3 4 5) '(2 2 2 2 2))))
+(test-assert (= 13/4 (weighted-mean '(1 2 3 4 5) '(2 0 2 2 2))))
+(test-error (weighted-mean '() '(1 2 3)))
+(test-error (weighted-mean '(1) '(1 2 3)))
+(test-error (weighted-mean '(1) '(1 2 "a")))
+(test-end "weighted-mean-test")
 
 (exit (if (zero? (test-runner-fail-count (test-runner-get))) 0 1))
 

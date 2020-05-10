@@ -55,12 +55,12 @@
        [(>= j n-os) (list-ref order-stats (sub1 n-os))]
        [else (+ (* (- 1 gamma) (list-ref order-stats (sub1 j)))
 		(* gamma (list-ref order-stats j)))]))
-    (define gamma-proc
+    (define (gamma-proc g j)
       (cond
-       [(= type 1) (lambda (g j) (if (= g 0) 0 1))]
-       [(= type 2) (lambda (g j) (if (= g 0) 0.5 1))]
-       [(= type 3) (lambda (g j) (if (and (= g 0) (even? j)) 0 1))]
-       [else (lambda (g j) g)]))
+       [(= type 1) (if (= g 0) 0 1)]
+       [(= type 2) (if (= g 0) 0.5 1)]
+       [(= type 3) (if (and (= g 0) (even? j)) 0 1)]
+       [else g]))
     (let ([proc-string "(quantile ls p type)"])
       (check-list ls "ls" proc-string)
       (check-p p proc-string)
@@ -142,22 +142,19 @@
     (define (update-ms lsi ms i)
       (let* ([m (car ms)]
 	     [s (cdr ms)]
-	     [new-m (+ m (/ (- lsi m) i))])
+	     [new-m (+ m (/ (- lsi m) (add1 i)))])
 	(cons new-m
 	      (+ s (* (- lsi m) (- lsi new-m))))))		     
     (define (iterate ls ms i)
       (cond
-       ;; when exit statement is reached, i is (length x) + 1
-       ;; need to subtract 2 to get (length x) - 1 (i.e., sample variance)
-       [(null? ls)  (/ (cdr ms) (- i 2.0))]
+       [(null? ls)  (/ (cdr ms) (- i 1))]
        [else (iterate (cdr ls) (update-ms (car ls) ms i) (add1 i))]))
     (check-list ls "ls" "(variance ls)")
-    (iterate (cdr ls) (cons (car ls) 0) 2))
+    (iterate (cdr ls) (cons (car ls) 0) 1))
   
   (define (standard-deviation ls)
     (check-list ls "ls" "(standard-deviation ls)")
     (sqrt (variance ls)))
-  
   )
 
 

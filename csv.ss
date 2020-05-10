@@ -2,7 +2,9 @@
   (export
    write-csv
    preview-csv
-   read-csv)
+   preview-tsv
+   read-csv
+   read-tsv)
 
   (import (chezscheme))
 
@@ -21,7 +23,7 @@
 	      [else (loop (read-char p) (cons c line))]))))
 
   ;;https://github.com/alex-hhh/data-frame/blob/master/private/csv.rkt
-  (define (parse-line line)
+  (define (parse-line line sep)
     (let ([in (open-input-string line)])
       (let loop ([c (read-char in)]
 		 [current ""]
@@ -29,7 +31,7 @@
 		 [in-string #f])
 	(cond [(eof-object? c)
 	       (reverse (cons current row))]
-	      [(and (char=? c #\,) (not in-string))
+	      [(and (char=? c sep) (not in-string))
 	       (loop (read-char in) "" (cons current row) #f)]
 	      [(and in-string (char=? c #\") (equal? (peek-char in) #\"))
 	       (read-char in)             ; consume the next char
@@ -39,7 +41,7 @@
 	      [else
 	       (loop (read-char in) (string-append current (string c)) row in-string)]))))
 
-  (define (preview-csv path rows)
+  (define (preview-delim path rows sep)
     (let ([p (open-input-file path)])
       (let loop ([row (read-line p)]
 		 [results '()]
@@ -48,10 +50,19 @@
 	       (close-port p)
 	       (reverse results)]
 	      [else
-	       (loop (read-line p) (cons (parse-line row) results) (sub1 iter))]))))
+	       (loop (read-line p) (cons (parse-line row sep) results) (sub1 iter))]))))
+
+  (define (preview-csv path rows)
+    (preview-delim path rows #\,))
+
+  (define (preview-tsv path rows)
+    (preview-delim path rows #\tab))
 
   (define (read-csv path)
     (preview-csv path +inf.0))
+
+  (define (read-tsv path)
+    (preview-tsv path +inf.0))
 
   (define (quote-string str)
     (let* ([in (open-input-string str)]

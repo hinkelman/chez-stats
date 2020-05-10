@@ -24,7 +24,13 @@ $ cd ~/scheme # where '~/scheme' is the path to your Chez Scheme libraries
 $ git clone git://github.com/hinkelman/chez-stats.git
 ```
 
-For more information on installing Chez Scheme libraries, see this [blog post](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/).
+#### Development Version
+
+```
+$ git clone -b dev git://github.com/hinkelman/chez-stats.git
+```
+
+For more information on installing Chez Scheme libraries, see blog posts for [macOS and Windows](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/) or [Ubuntu](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs-ubuntu/).
 
 ### Import 
 
@@ -34,50 +40,50 @@ Import all `chez-stats` procedures: `(import (chez-stats chez-stats))`
 
 ### Descriptive Statistics  
 
-[`(count ls)`](#procedure-count-ls)  
-[`(cumulative-sum ls)`](#procedure-cumulative-sum-ls)  
-[`(ecdf ls)`](#procedure-ecdf-ls)  
-[`(interquartile-range ls type)`](#procedure-interquartile-range-ls-type)  
-[`(kurtosis ls)`](#procedure-kurtosis-ls)  
-[`(mean ls)`](#procdure-mean-ls)  
-[`(median ls)`](#procedure-median-ls)  
-[`(mode ls)`](#procedure-mode-ls)  
-[`(quantile ls p type)`](#procedure-quantile-ls-p-type)  
-[`(range ls)`](#procedure-range-ls)  
-[`(skewness ls)`](#procedure-skewness-ls)  
-[`(standard-deviation ls)`](#procedure-standard-deviation-ls)  
-[`(unique ls)`](#procedure-unique-ls)  
-[`(variance ls)`](#procedure-variance-ls)  
-[`(weighted-mean ls weights)`](#procedure-weighted-mean-ls-weights)
+[`(count ls)`](#count)  
+[`(cumulative-sum ls)`](#cumulative-sum)  
+[`(ecdf ls)`](#ecdf)  
+[`(interquartile-range ls type)`](#interquartile-range)  
+[`(kurtosis ls)`](#kurtosis)  
+[`(mean ls)`](#mean)  
+[`(median ls)`](#median)  
+[`(mode ls)`](#mode)  
+[`(quantile ls p type)`](#quantile)  
+[`(range ls)`](#range)  
+[`(skewness ls)`](#skewness)  
+[`(standard-deviation ls)`](#standard-deviation)  
+[`(unique ls)`](#unique)  
+[`(variance ls)`](#variance)  
+[`(weighted-mean ls weights)`](#weighted-mean)
 
 ### Read and Write CSV Files
 
-[`(preview-csv path rows)`](#procedure-preview-csv-path-rows)  
-[`(read-csv path)`](#procedure-read-csv-path)  
-[`(write-csv ls path overwrite)`](#procedure-write-csv-ls-path-overwrite)  
+[`(preview-csv path rows)`](#preview-csv)  
+[`(read-csv path)`](#read-csv)  
+[`(write-csv ls path overwrite)`](#write-csv)  
 
 ### Generate Random Variates
 
-[`(random-bernoulli n p)`](#procedure-random-bernoulli-n-p)  
-[`(random-beta n a b)`](#procedure-random-beta-n-a-b)  
-[`(random-beta-binomial n trials p dispersion)`](#procedure-random-beta-binomial-n-trials-p-dispersion)  
-[`(random-binomial n trials p)`](#procedure-random-binomial-n-trials-p)  
-[`(random-exponential n mu)`](#procedure-random-exponential-n-mu)  
-[`(random-gamma n shape rate)`](#procedure-random-gamma-n-shape-rate)  
-[`(random-geometric n p)`](#procedure-random-geometric-n-p)  
-[`(random-lognormal n mulog sdlog)`](#procedure-random-lognormal-n-mulog-sdlog)  
-[`(random-multinomial trials ps)`](#procedure-random-multinomial-trials-ps)  
-[`(random-negative-binomial n trials p)`](#procedure-random-negative-binomial-n-trials-p)  
-[`(random-normal n mu sd)`](#procedure-random-normal-n-mu-sd)  
-[`(random-pareto n shape)`](#procedure-random-pareto-n-shape)  
-[`(random-poisson n mu)`](#procedure-random-poisson-n-mu)  
-[`(random-uniform n mn mx)`](#procedure-random-uniform-n-mn-mx)
+[`(random-bernoulli n p)`](#random-bernoulli)  
+[`(random-beta n a b)`](#random-beta)  
+[`(random-beta-binomial n trials p dispersion)`](#random-beta-binomial)  
+[`(random-binomial n trials p)`](#random-binomial)  
+[`(random-exponential n mu)`](#random-exponential)  
+[`(random-gamma n shape rate)`](#random-gamma)  
+[`(random-geometric n p)`](#random-geometric)  
+[`(random-lognormal n mulog sdlog)`](#random-lognormal)  
+[`(random-multinomial trials ps)`](#random-multinomial)  
+[`(random-negative-binomial n trials p)`](#random-negative-binomial)  
+[`(random-normal n mu sd)`](#random-normal)  
+[`(random-pareto n shape)`](#random-pareto)  
+[`(random-poisson n mu)`](#random-poisson)  
+[`(random-uniform n mn mx)`](#random-uniform)  
 
 ## Descriptive Statistics
 
 Import only the descriptive statistics procedures: `(import (chez-stats statistics))`
 
-#### procedure: `(count ls)`
+#### <a name="count"></a> procedure: `(count ls)`
 **returns:** a list containing a sorted list of the unique values in `ls` and a list of counts corresponding to the unique values
 
 ```
@@ -91,7 +97,7 @@ Import only the descriptive statistics procedures: `(import (chez-stats statisti
 Exception in (count ls): at least one element of ls is not a real number
 ```
 
-#### procedure: `(cumulative-sum ls)`
+#### <a name="cumulative-sum"></a> procedure: `(cumulative-sum ls)`
 **returns:** a list that is the cumulative sum of the values in `ls`
 
 ```
@@ -101,7 +107,7 @@ Exception in (count ls): at least one element of ls is not a real number
 (5 9 12 14 15)
 ```
 
-#### procedure: `(ecdf ls)`
+#### <a name="ecdf"></a> procedure: `(ecdf ls)`
 **returns:** a list containing a sorted list of the unique values in `ls` and list of the empirical cumulative distribution corresponding to the unique values
 
 ```
@@ -113,7 +119,7 @@ Exception in (count ls): at least one element of ls is not a real number
 ((0.5 10 20) (1/3 5/6 1))
 ```
 
-#### procedure: `(interquartile-range ls type)`
+#### <a name="interquartile-range"></a> procedure: `(interquartile-range ls type)`
 **returns:** the interquartile range of the values in `ls` for the given `type` ([see quantile](#procedure-quantile-ls-p-type))
 
 ```
@@ -125,7 +131,7 @@ Exception in (count ls): at least one element of ls is not a real number
 2.25
 ```
 
-#### procedure: `(kurtosis ls)`
+#### <a name="kurtosis"></a> procedure: `(kurtosis ls)`
 **returns:** the kurtosis of the values in `ls`
 
 ```
@@ -135,7 +141,7 @@ Exception in (count ls): at least one element of ls is not a real number
 51/25
 ```
 
-#### procedure: `(mean ls)`
+#### <a name="mean"></a> procedure: `(mean ls)`
 **returns:** the arithmetic mean of the values in `ls`
 
 ```
@@ -147,7 +153,7 @@ Exception in (count ls): at least one element of ls is not a real number
 27.5
 ```
 
-#### procedure: `(median ls)`
+#### <a name="median"></a> procedure: `(median ls)`
 **returns:** the median of `ls`
 
 ```
@@ -157,7 +163,7 @@ Exception in (count ls): at least one element of ls is not a real number
 3.5
 ```
 
-#### procedure: `(mode ls)`
+#### <a name="mode"></a> procedure: `(mode ls)`
 **returns:** a list with the values in `ls` that occur most frequently
 
 ```
@@ -167,7 +173,7 @@ Exception in (count ls): at least one element of ls is not a real number
 (4)
 ```
 
-#### procedure: `(quantile ls p type)`
+#### <a name="quantile"></a> procedure: `(quantile ls p type)`
 **returns:** the sample quantile of the values in `ls` corresponding to the given probability, `p`, and `type`
 
 The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stable/2684934) who recommend type 8. The [default in R](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html) is type 7.
@@ -183,7 +189,7 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 1.125
 ```
 
-#### procedure: `(range ls)`
+#### <a name="range"></a> procedure: `(range ls)`
 **returns:** a pair containing the minimum and maximum values of `ls`
 
 ```
@@ -193,7 +199,7 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 (-99 . 100)
 ```
 
-#### procedure: `(skewness ls)`
+#### <a name="skewness"></a> procedure: `(skewness ls)`
 **returns:** the skewness of the values in `ls`
 
 ```
@@ -203,7 +209,7 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 -0.6
 ```
 
-#### procedure: `(standard-deviation ls)`
+#### <a name="standard-deviation"></a> procedure: `(standard-deviation ls)`
 **returns:** the standard deviation of the values in `ls`
 
 ```
@@ -213,7 +219,7 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 1.8708286933869707
 ```
 
-#### procedure: `(unique ls)`
+#### <a name="unique"></a> procedure: `(unique ls)`
 **returns:** a sorted list of the unique values in `ls`
 
 ```
@@ -223,7 +229,7 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 (0 1 2)
 ```
 
-#### procedure: `(variance ls)`
+#### <a name="variance"></a> procedure: `(variance ls)`
 **returns:** the sample variance of the values in `ls` based on [Welford's algorithm](https://www.johndcook.com/blog/standard_deviation/)
 
 ```
@@ -233,7 +239,7 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 3.5
 ```
 
-#### procedure: `(weighted-mean ls weights)`
+#### <a name="weighted-mean"></a> procedure: `(weighted-mean ls weights)`
 **returns:** the arithmetic mean of the values in `ls` weighted by the values in `weights`
 
 ```
@@ -257,7 +263,7 @@ same number of columns.
 
 Import only the CSV procedures: `(import (chez-stats csv))`
 
-#### procedure: `(preview-csv path rows)`
+#### <a name="preview-csv"></a> procedure: `(preview-csv path rows)`
 **returns:** a list of lists where each sub-list is one row in the CSV file at `path` up to the number of `rows`
 
 ```
@@ -267,7 +273,7 @@ Import only the CSV procedures: `(import (chez-stats csv))`
   ("10.02" "A" "\"1,000\"" "\"Glen \"Big Baby\" Davis\""))
 ```
 
-#### procedure: `(read-csv path)`
+#### <a name="read-csv"></a> procedure: `(read-csv path)`
 **returns:** a list of lists where each sub-list is one row in the CSV file at `path`
 
 ```
@@ -278,7 +284,7 @@ Import only the CSV procedures: `(import (chez-stats csv))`
   ("0.3333333333333333" "B" "1000" "\"Earvin \"Magic\" Johnson\""))
 ```
 
-#### procedure: `(write-csv ls path overwrite)`
+#### <a name="write-csv"></a> procedure: `(write-csv ls path overwrite)`
 **returns:** writes a list of lists as a CSV file to `path`; if file exists at `path`, operation will fail unless `overwrite` is `#t`
 
 ```
@@ -295,7 +301,7 @@ Import only the CSV procedures: `(import (chez-stats csv))`
 
 Import only the random variate procedures: `(import (chez-stats random-variates))`
 
-#### procedure: `(random-bernoulli n p)`
+#### <a name="random-bernoulli"></a> procedure: `(random-bernoulli n p)`
 **returns:** a list of `n` numbers from a Bernoulli distribution with probability `p`
 
 ```
@@ -305,7 +311,7 @@ Import only the random variate procedures: `(import (chez-stats random-variates)
 (1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 1 1 1 1 1 1)
 ```
 
-#### procedure: `(random-beta n a b)`
+#### <a name="random-beta"></a> procedure: `(random-beta n a b)`
 **returns:** a list of `n` numbers from a beta distribution with shape parameters `a` and `b`
 
 ```
@@ -319,7 +325,7 @@ Import only the random variate procedures: `(import (chez-stats random-variates)
 (1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0)
 ```
 
-#### procedure: `(random-beta-binomial n trials p dispersion)`
+#### <a name="random-beta-binomial"></a> procedure: `(random-beta-binomial n trials p dispersion)`
 **returns:** a list of `n` successes out the number of `trials` from a binomial distribution where probability of success `p` is drawn from a beta distribution with shape parameters derived from `p` and `dispersion`
 
 ```
@@ -341,7 +347,7 @@ Import only the random variate procedures: `(import (chez-stats random-variates)
 22.50210069290693
 ```
 
-#### procedure: `(random-binomial n trials p)`
+#### <a name="random-binomial"></a> procedure: `(random-binomial n trials p)`
 **returns:** a list of `n` successes out of the number of `trials` from a binomial distribution with probability `p`
 
 ```
@@ -353,7 +359,7 @@ Import only the random variate procedures: `(import (chez-stats random-variates)
 (1 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0 1 1 1 0 1 0 1 0 0)
  ```
 
-#### procedure: `(random-exponential n mu)`
+#### <a name="random-exponential"></a> procedure: `(random-exponential n mu)`
 **returns:** a list of `n` numbers from an exponential distribution with mean `mu`
 
 ```
@@ -363,7 +369,7 @@ Import only the random variate procedures: `(import (chez-stats random-variates)
   32.16039857943056 16.818138818937218 38.53838415351449)
 ```
 
-#### procedure: `(random-gamma n shape rate)`
+#### <a name="random-gamma"></a> procedure: `(random-gamma n shape rate)`
 **returns:** a list of `n` numbers from an gamma distribution with `shape` and `rate` parameters
 
 ```
@@ -377,7 +383,7 @@ Import only the random variate procedures: `(import (chez-stats random-variates)
 0.9989805807416875
 ```
 
-#### procedure: `(random-geometric n p)`
+#### <a name="random-geometric"></a> procedure: `(random-geometric n p)`
 **returns:** a list of `n` numbers from a geometric distribution with probability `p`
 
 The probability distribution of the number of Bernoulli trials needed to get one success, supported on the set { 1, 2, 3, ... } (see [Wikipedia](https://en.wikipedia.org/wiki/Geometric_distribution)). Note, `rgeom` in R uses the other version of the geometric distribution described on the Wikipedia page.
@@ -389,7 +395,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
 (1.0 2.0 1.0 1.0 1.0 2.0 2.0 1.0 1.0 1.0 1.0 1.0 1.0 2.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0)
 ```
 
-#### procedure: `(random-lognormal n mulog sdlog)`
+#### <a name="random-lognormal"></a> procedure: `(random-lognormal n mulog sdlog)`
 **returns:** a list of `n` numbers from a log normal distribution; `mulog` and `sdlog` are the mean and standard deviation of the distribution on the log scale
 
 ```
@@ -407,7 +413,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
 0.4995377386643435
 ```
 
-#### procedure: `(random-multinomial trials ps)`
+#### <a name="random-multinomial"></a> procedure: `(random-multinomial trials ps)`
 **returns:** a list of successes from a multinomial distribution that sums to `trials` and is the same length as the list of the probability `ps` of success; if necessary, `ps` is rescaled to sum to one
 
 ```
@@ -421,7 +427,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
 (0.01016 0.50004 0.4898)
 ```
 
-#### procedure: `(random-negative-binomial n trials p)`
+#### <a name="random-negative-binomial"></a> procedure: `(random-negative-binomial n trials p)`
 **returns:** a list of `n` successes from a negative binomial distribution with target number of successful `trials` with probability `p` of success
 
 ```
@@ -433,7 +439,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
 7.00023
 ```
 
-#### procedure: `(random-normal n mu sd)`
+#### <a name="random-normal"></a> procedure: `(random-normal n mu sd)`
 **returns:** a list of `n` numbers from a normal distribution with mean `mu` and standard deviation `sd`
 
 ```
@@ -447,7 +453,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
   -30.757726972313066 132.37810774263465 145.9341465922021)
 ```
 
-#### procedure: `(random-pareto n shape)`
+#### <a name="random-pareto"></a> procedure: `(random-pareto n shape)`
 **returns:** a list of `n` numbers from a Pareto distribution with `shape` parameter
 
 ```
@@ -461,7 +467,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
   2.389540116143122 1.9472706245609315 1.591010960196833)
 ```
 
-#### procedure: `(random-poisson n mu)`
+#### <a name="random-poisson"></a> procedure: `(random-poisson n mu)`
 **returns:** a list of `n` integers from a Poisson distribution with mean and variance `mu`
 
 ```
@@ -471,7 +477,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
 (102 94 107 102 106 100 99 102 94 88 85 103 96 92 110 105 83 87 109 84 98 105 83 107 111)
 ```
 
-#### procedure: `(random-uniform n mn mx)`
+#### <a name="random-uniform"></a> procedure: `(random-uniform n mn mx)`
 **returns:** a list of `n` numbers from a uniform distribution with mininum `mn` and maximum `mx`
 
 ```

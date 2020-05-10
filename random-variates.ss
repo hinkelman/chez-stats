@@ -18,13 +18,16 @@
   (import (chezscheme)
 	  (chez-stats assertions))
 
+  ;; in some simple deleted time tests, this recursive version of build-random-list
+  ;; was about 3x faster than a version that used fold-right and (make-list)
+  ;; when drawing 10 million random-bernoulli values
   (define (build-random-list n proc)
     (define (iterate result i)
       (if (= i n)
 	  result
 	  (iterate (cons (proc) result) (add1 i))))
     (iterate '() 0))
-  
+ 
   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-bernoulli n p)
     (define (rbern p)
@@ -33,7 +36,7 @@
       (check-positive-integer n "n" proc-string)
       (check-p p proc-string))
     (build-random-list n (lambda () (rbern p))))
-
+  
   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pd
   (define (random-binomial n trials p)
     (define (rbinom trials p)
@@ -52,7 +55,7 @@
       (let ([p-sum (apply + ps)])
 	(if (= p-sum 1)
 	    ps
-	    (map (lambda (x) (/ x p-sum)) ps))))
+	    (map (lambda (p) (/ p p-sum)) ps))))
     (define (iterate p-scaled p-used results)
       (cond
        [(null? p-scaled)
@@ -71,7 +74,7 @@
       (check-positive-integer trials "trials" proc-string)
       (check-list ps "ps" proc-string))
     (iterate (scale-ps ps) '() '()))
-  
+
   ;; SRFI 27
   (define (random-exponential n mu)
     (define (rexp mu)
@@ -89,7 +92,7 @@
       (check-positive-integer n "n" proc-string)
       (check-p-exclusive p proc-string))
     (build-random-list n (lambda () (rgeom p))))
-  
+
   ;; rejection method from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-normal n mu sd)
     (define (rnorm mu sd)
@@ -161,7 +164,7 @@
 	   [b (* g (- 1 p))])
       (map (lambda (x) (list-ref (random-binomial 1 trials x) 0))
   	   (random-beta n a b))))
-      	      
+
   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-lognormal n mulog sdlog)
     (let ([proc-string "(random-lognormal n mulog sdlog)"])
@@ -207,7 +210,7 @@
       (check-positive-real trials "trials" proc-string))
     (let ([gamma-list (random-gamma n trials (/ p (- 1 p)))])
       (map (lambda (x) (list-ref (random-poisson 1 x) 0)) gamma-list)))
-	
+
   (define (random-uniform n mn mx)
     (define (runif mn mx)
       (+ mn (* (- mx mn) (random 1.0))))
@@ -218,5 +221,5 @@
       (unless (> mx mn)
 	(assertion-violation proc-string "mx is not greater than mn")))
     (build-random-list n (lambda () (runif mn mx))))
-    
+
   )
