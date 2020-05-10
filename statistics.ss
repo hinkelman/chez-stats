@@ -55,12 +55,12 @@
        [(>= j n-os) (list-ref order-stats (sub1 n-os))]
        [else (+ (* (- 1 gamma) (list-ref order-stats (sub1 j)))
 		(* gamma (list-ref order-stats j)))]))
-    (define gamma-proc
+    (define (gamma-proc g j)
       (cond
-       [(= type 1) (lambda (g j) (if (= g 0) 0 1))]
-       [(= type 2) (lambda (g j) (if (= g 0) 0.5 1))]
-       [(= type 3) (lambda (g j) (if (and (= g 0) (even? j)) 0 1))]
-       [else (lambda (g j) g)]))
+       [(= type 1) (if (= g 0) 0 1)]
+       [(= type 2) (if (= g 0) 0.5 1)]
+       [(= type 3) (if (and (= g 0) (even? j)) 0 1)]
+       [else g]))
     (let ([proc-string "(quantile ls p type)"])
       (check-list ls "ls" proc-string)
       (check-p p proc-string)
