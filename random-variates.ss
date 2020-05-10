@@ -117,21 +117,23 @@
   ;; material at url refers to rate parameter as scale
   (define (random-gamma n shape rate)
     (define (rgamma shape rate)
-      (cond [(not (= rate 1))
-	     (/ (rgamma shape 1) rate)]
-	    [else
-	     (cond [(< shape 1)
-		    (* (rgamma (add1 shape) rate) (expt (random 1.0) (/ 1 shape)))]
-		   [else
-		    (let* ([d (- shape 1/3)]
-			   [c (/ 1 (sqrt (* 9 d)))]
-			   [Z (list-ref (random-normal 1 0 1) 0)]
-			   [U (random 1.0)]
-			   [V (expt (add1 (* c Z)) 3)]
-			   [z-comp (/ -1 c)]
-			   [log-U-comp (+ (* 1/2 (expt Z 2)) (- d (* d V)) (* d (log V)))])
-		      (cond [(and (> Z z-comp) (< (log U) log-U-comp)) (* d V)]
-			    [else (rgamma shape rate)]))])]))
+      (if (not (= rate 1))
+          (/ (rgamma shape 1) rate)
+          (if (< shape 1)
+              (* (rgamma (add1 shape) rate)
+                 (expt (random 1.0) (/ 1 shape)))
+              (let* ([d (- shape 1/3)]
+                     [c (/ 1 (sqrt (* 9 d)))]
+                     [Z (list-ref (random-normal 1 0 1) 0)]
+                     [U (random 1.0)]
+                     [V (expt (add1 (* c Z)) 3)]
+                     [z-comp (/ -1 c)]
+                     [log-U-comp (+ (* 1/2 (expt Z 2))
+                                    (- d (* d V))
+                                    (* d (log V)))])
+                (if (and (> Z z-comp) (< (log U) log-U-comp))
+                    (* d V)
+                    (rgamma shape rate))))))
     (let ([proc-string "(random-gamma n shape rate)"])
       (check-positive-integer n "n" proc-string)
       (check-positive-real shape "shape" proc-string)
