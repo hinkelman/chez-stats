@@ -142,17 +142,15 @@
     (define (update-ms lsi ms i)
       (let* ([m (car ms)]
 	     [s (cdr ms)]
-	     [new-m (+ m (/ (- lsi m) i))])
+	     [new-m (+ m (/ (- lsi m) (add1 i)))])
 	(cons new-m
 	      (+ s (* (- lsi m) (- lsi new-m))))))		     
     (define (iterate ls ms i)
       (cond
-       ;; when exit statement is reached, i is (length x) + 1
-       ;; need to subtract 2 to get (length x) - 1 (i.e., sample variance)
-       [(null? ls)  (/ (cdr ms) (- i 2.0))]
+       [(null? ls)  (/ (cdr ms) (- i 1))]
        [else (iterate (cdr ls) (update-ms (car ls) ms i) (add1 i))]))
     (check-list ls "ls" "(variance ls)")
-    (iterate (cdr ls) (cons (car ls) 0) 2))
+    (iterate (cdr ls) (cons (car ls) 0) 1))
   
   (define (standard-deviation ls)
     (check-list ls "ls" "(standard-deviation ls)")
