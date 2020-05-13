@@ -22,16 +22,13 @@
    random-poisson
    random-uniform
    ;; statistics
-   count
+   count-unique
    cumulative-sum
-   ecdf
-   interquartile-range
    kurtosis
    mean
    median
    mode
    quantile
-   range
    standard-deviation
    skewness
    unique

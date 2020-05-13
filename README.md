@@ -1,38 +1,20 @@
 # Chez Scheme Statistics Library
 
-Read/write CSV files, compute descriptive statistics, and generate random variates in Chez Scheme.
+Read/write comma- and tab-delimited text files, compute descriptive statistics, and generate random variates in Chez Scheme.
 
 Related blog posts:  
 [Writing a Chez Scheme library](https://www.travishinkelman.com/post/writing-chez-scheme-library/)  
 [Reading and writing CSV files in Chez Scheme](https://www.travishinkelman.com/post/reading-writing-csv-files-chez-scheme/)  
-[chez-stats is now available through Raven](https://www.travishinkelman.com/post/chez-stats-now-available-through-raven/)
 
 ## Installation and Import
 
-### [Raven](http://ravensc.com) Package Manager
-
-```
-raven install chez-stats
-```
-
 ### Manual Installation
 
-```
-$ cd ~/scheme # where '~/scheme' is the path to your Chez Scheme libraries
-$ git clone git://github.com/hinkelman/chez-stats.git
-```
-
-#### Development Version
-
-```
-$ git clone -b dev git://github.com/hinkelman/chez-stats.git
-```
-
-For more information on installing Chez Scheme libraries, see blog posts for [macOS and Windows](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/) or [Ubuntu](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs-ubuntu/).
+Clone or download this repository. Move `chez-stats.sls` and `chez-stats` from downloaded and unzipped folder to one of the directories listed when you run `(library-directories)` in Chez Scheme. For more information on installing Chez Scheme libraries, see blog posts for [macOS and Windows](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/) or [Ubuntu](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs-ubuntu/).
 
 ### Import 
 
-Import all `chez-stats` procedures: `(import (chez-stats chez-stats))`
+Import all `chez-stats` procedures: `(import (chez-stats))`
 
 ## Table of Contents
 
@@ -79,20 +61,18 @@ Import all `chez-stats` procedures: `(import (chez-stats chez-stats))`
 
 ## Descriptive Statistics
 
-Import only the descriptive statistics procedures: `(import (chez-stats statistics))`
-
-#### <a name="count"></a> procedure: `(count ls)`
-**returns:** a list containing a sorted list of the unique values in `ls` and a list of counts corresponding to the unique values
+#### <a name="count-unique"></a> procedure: `(count-unique ls)`
+**returns:** a list of pairs where the `car` and `cdr` of each pair are the unique values and counts, respectively, of the values in list `ls`
 
 ```
-> (count '(1 2 3 4 2 1))
-((1 2 3 4) (2 2 1 1))
-> (count '(1.1 1 2.2 2 1.1 1.1))
-((1 1.1 2 2.2) (1 3 1 1))
-> (count '(0.5 1/2 #e0.5 1 1 2))
-((1/2 1 2) (3 2 1))
-> (count '("a" "b" "b" "a"))
-Exception in (count ls): at least one element of ls is not a real number
+> (count-unique '(1 2 3 4 2 1))
+((1 . 2) (2 . 2) (3 . 1) (4 . 1))
+> (count-unique '(1.1 1 2.2 2 1.1 1.1))
+((1 . 1) (1.1 . 3) (2 . 1) (2.2 . 1))
+> (count-unique '(0.5 1/2 #e0.5 1 1 2))
+((1/2 . 3) (1 . 2) (2 . 1))
+> (count-unique '("a" "b" "b" "a"))
+Exception in (count-unique ls): at least one element of ls is not a real number
 ```
 
 #### <a name="cumulative-sum"></a> procedure: `(cumulative-sum ls)`

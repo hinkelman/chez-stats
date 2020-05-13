@@ -1,15 +1,12 @@
 (library (chez-stats statistics)
   (export
-   count
+   count-unique
    cumulative-sum
-   ecdf
-   interquartile-range
    kurtosis
    mean
    median
    mode
    quantile
-   range
    standard-deviation
    skewness
    unique
@@ -19,14 +16,15 @@
   (import (chezscheme)
 	  (chez-stats assertions))
   
-  (define (count ls)
-    (check-list ls "ls" "(count ls)")
+  (define (count-unique ls)
+    (check-list ls "ls" "(count-unique ls)")
     (let ([sorted-list (sort < ls)])
       (define (iterate first rest n vals counts)
 	(cond
 	 [(null? rest)
-	  (list (reverse (cons first vals))
-	        (reverse (cons n counts)))]
+	  (map cons
+	       (reverse (cons first vals))
+	       (reverse (cons n counts)))]
          [(= first (car rest))
 	  (iterate (car rest) (cdr rest) (add1 n) vals counts)]
          [else
@@ -35,16 +33,16 @@
   
   (define (mode ls)
     (check-list ls "ls" "(mode ls)")
-    (let* ([val-count (count ls)]
-	   [mx (apply max (cadr val-count))])
+    (let* ([val-count (count-unique ls)]
+	   [mx (apply max (map cdr val-count))])
       (filter (lambda (x) (not (null? x)))
 	      (map (lambda (val count) (if (= count mx) val '()))
-		   (car val-count)
-		   (cadr val-count)))))
+		   (map car val-count)
+		   (map cdr val-count)))))
 
   (define (unique ls)
     (check-list ls "ls" "(unique ls)")
-    (car (count ls)))
+    (map car (count-unique ls)))
 
   (define (quantile ls p type)
     (define (calc-Q order-stats j gamma)
@@ -80,12 +78,6 @@
     (check-list ls "ls" "(median ls)")
     (quantile ls 0.5 7))
 
-  (define (interquartile-range ls type)
-    (let ([proc-string "(interquartile-range ls type)"])
-      (check-list ls "ls" proc-string)
-      (check-quantile-type type proc-string))
-    (- (quantile ls 0.75 type) (quantile ls 0.25 type)))
-
   (define (cumulative-sum ls)
     (define (iterate ls result total)
       (cond
@@ -95,18 +87,6 @@
 	  (iterate (cdr ls) (cons new-total result) new-total))]))
     (check-list ls "ls" "(cumulative-sum ls)")
     (iterate ls '() 0))
-
-  (define (ecdf ls)
-    (check-list ls "ls" "(ecdf ls)")
-    (let* ([n (length ls)]
-	   [val-count (count ls)]
-	   [cs (cumulative-sum (cadr val-count))])
-      (list (car val-count)
-	    (map (lambda (x) (/ x n)) cs))))
-
-  (define (range ls)
-    (check-list ls "ls" "(range ls)")
-    (cons (apply min ls) (apply max ls)))
 
   (define (mean ls)
     (check-list ls "ls" "(mean ls)")

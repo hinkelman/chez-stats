@@ -1,23 +1,30 @@
-(import (chez-stats)
-	(srfi :64))
+#!/usr/bin/env scheme-script
+;; -*- mode: scheme; coding: utf-8 -*- !#
+;; Copyright (c) 2020 Travis Hinkelman
+;; SPDX-License-Identifier: MIT
+#!r6rs
+
+(import (rnrs (6))
+        (srfi :64 testing)
+        (chez-stats))
 
 ;; csv
 
-(test-begin "csv-test")
-(define example-list (list
-		      (list "col1" "col2" "col3" "col4")
-		      (list 10.02 #\A "1,000" "Glen \"Big Baby\" Davis")
-		      (list 1/3 #\B "1000" "Earvin \"Magic\" Johnson")))
-(write-csv example-list "example.csv" #f)
-(test-error (write-csv example-list "example.csv" #f))
-;; if example-list was all string wouldn't need to jump through these extra hoops
-(define example-list2 (read-csv "example.csv"))
-(write-csv example-list2 "example2.csv" #f)
-(test-equal example-list2 (read-csv "example2.csv"))
-(test-equal (reverse (cdr (reverse example-list2))) (preview-csv "example2.csv" 2))
-(delete-file "example.csv")
-(delete-file "example2.csv")
-(test-end "csv-test")
+;; (test-begin "csv-test")
+;; (define example-list (list
+;; 		      (list "col1" "col2" "col3" "col4")
+;; 		      (list 10.02 #\A "1,000" "Glen \"Big Baby\" Davis")
+;; 		      (list 1/3 #\B "1000" "Earvin \"Magic\" Johnson")))
+;; (write-csv example-list "example.csv" #f)
+;; (test-error (write-csv example-list "example.csv" #f))
+;; ;; if example-list was all string wouldn't need to jump through these extra hoops
+;; (define example-list2 (read-csv "example.csv"))
+;; (write-csv example-list2 "example2.csv" #f)
+;; (test-equal example-list2 (read-csv "example2.csv"))
+;; (test-equal (reverse (cdr (reverse example-list2))) (preview-csv "example2.csv" 2))
+;; (delete-file "example.csv")(test-begin "csv-test")
+;; (delete-file "example2.csv")
+;; (test-end "csv-test")
 
 ;; random-variates
 
@@ -148,30 +155,21 @@
 
 ;; statistics
 
-(test-begin "count-test")
-(test-equal '((1 2 3 4) (2 2 1 1)) (count '(1 2 3 4 2 1)))
-(test-equal '((1 1.1 2 2.2) (1 3 1 1)) (count '(1.1 1 2.2 2 1.1 1.1)))
-(test-equal '((1/2 1 2) (3 2 1)) (count '(0.5 1/2 #e0.5 1 1 2)))
-(test-error (count '("a" "b" "b" "a")))
-(test-end "count-test")
+(test-begin "count-unique-test")
+(test-equal '((1 . 2) (2 . 2) (3 . 1) (4 . 1))
+  (count-unique '(1 2 3 4 2 1)))
+(test-equal '((1 . 1) (1.1 . 3) (2 . 1) (2.2 . 1))
+  (count-unique '(1.1 1 2.2 2 1.1 1.1)))
+(test-equal '((1/2 . 3) (1 . 2) (2 . 1))
+ (count-unique '(0.5 1/2 #e0.5 1 1 2)))
+(test-error (count-unique '("a" "b" "b" "a")))
+(test-end "count-unique-test")
 
 (test-begin "cumulative-sum-test")
 (test-equal '(1 3 6 10 15) (cumulative-sum '(1 2 3 4 5)))
 (test-equal '(5 9 12 14 15) (cumulative-sum '(5 4 3 2 1)))
 (test-error (cumulative-sum '()))
 (test-end "cumulative-sum-test")
-
-(test-begin "ecdf-test")
-(test-equal '((1 5 10) (1/5 4/5 1)) (ecdf '(1 5 5 5 10)))
-(test-equal '((0.5 2 2.5 4 5) (1/6 1/2 2/3 5/6 1)) (ecdf '(0.5 2 2 2.5 4 5)))
-(test-equal '((0.5 10 20) (1/3 5/6 1)) (ecdf '(1/2 0.5 10 10 10 20)))
-(test-error (ecdf "a"))
-(test-end "ecdf-test")
-
-(test-begin "interquartile-range")
-(test-assert (= 2.5 (interquartile-range '(1 2 3 4 5 6) 7)))
-(test-error (interquartile-range '(1) 100))
-(test-end "interquartile-range")
 
 (test-begin "kurtosis-test")
 (test-assert (= 17/10 (kurtosis '(1 2 3 4 5))))
@@ -209,12 +207,6 @@
 (test-error (quantile '(1 2) 2 7))
 (test-end "quantile-test")
 
-(test-begin "range-test")
-(test-equal (cons 1 5) (range '(1 2 3 4 5)))
-(test-equal (cons -99 100) (range '(-10 -7 3 -99 100)))
-(test-error (range '()))
-(test-end "range-test")
-
 (test-begin "skewness-test")
 (test-assert (= 0 (skewness '(1 2 3 4 5))))
 (test-assert (= -0.6 (skewness '(1 2 2 3 3 3 4 4 4 4))))
@@ -231,7 +223,6 @@
 (test-begin "unique-test")
 (test-equal '(1/2 1 5.2) (unique '(0.5 #e0.5 1/2 1 1 1 5.2)))
 (test-equal '(0 1 2) (unique '(0 0 0 1 1 1 2)))
-(test-error (unique 'a))
 (test-end "unique-test")
 
 (test-begin "variance-test")
@@ -250,5 +241,3 @@
 (test-end "weighted-mean-test")
 
 (exit (if (zero? (test-runner-fail-count (test-runner-get))) 0 1))
-
-
