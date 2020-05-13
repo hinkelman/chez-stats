@@ -202,8 +202,6 @@ There is nothing sophisticated about this approach to reading CSV files. For all
 There is no attempt to convert strings to numbers or other objects. The CSV file needs to be rectangular, i.e., every row must have the
 same number of columns.
 
-Import only the CSV procedures: `(import (chez-stats csv))`
-
 #### <a name="preview-csv"></a> procedure: `(preview-csv path rows)`
 **returns:** a list of lists where each sub-list is one row in the CSV file at `path` up to the number of `rows`
 
@@ -239,8 +237,6 @@ Import only the CSV procedures: `(import (chez-stats csv))`
 ```
 
 ## Generate Random Variates
-
-Import only the random variate procedures: `(import (chez-stats random-variates))`
 
 #### <a name="random-bernoulli"></a> procedure: `(random-bernoulli n p)`
 **returns:** a list of `n` numbers from a Bernoulli distribution with probability `p`
