@@ -1,7 +1,5 @@
 # Chez Scheme Statistics Library
 
-![](https://github.com/hinkelman/chez-stats/workflows/Master/badge.svg)
-
 Read/write CSV files, compute descriptive statistics, and generate random variates in Chez Scheme.
 
 Related blog posts:  
