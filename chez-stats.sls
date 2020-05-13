@@ -1,4 +1,4 @@
-(library (chez-stats chez-stats)
+(library (chez-stats)
   (export
    ;; csv
    preview-csv
@@ -39,7 +39,7 @@
    weighted-mean)
 
   (import (chezscheme)
-	  (chez-stats csv)
-	  (chez-stats random-variates)
+	  (chez-stats delimited)
+	  (chez-stats random)
 	  (chez-stats statistics))
   )

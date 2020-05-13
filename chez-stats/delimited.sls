@@ -1,4 +1,4 @@
-(library (chez-stats csv)
+(library (chez-stats delimited)
   (export
    write-csv
    preview-csv

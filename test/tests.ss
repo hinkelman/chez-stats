@@ -1,5 +1,5 @@
-(import (chez-stats chez-stats)
-	(srfi s64 testing))
+(import (chez-stats)
+	(srfi :64))
 
 ;; csv
 
