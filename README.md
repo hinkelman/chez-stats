@@ -20,16 +20,13 @@ Import all `chez-stats` procedures: `(import (chez-stats))`
 
 ### Descriptive Statistics  
 
-[`(count ls)`](#count)  
+[`(count-unique ls)`](#count-unique)  
 [`(cumulative-sum ls)`](#cumulative-sum)  
-[`(ecdf ls)`](#ecdf)  
-[`(interquartile-range ls type)`](#interquartile-range)  
 [`(kurtosis ls)`](#kurtosis)  
 [`(mean ls)`](#mean)  
 [`(median ls)`](#median)  
 [`(mode ls)`](#mode)  
 [`(quantile ls p type)`](#quantile)  
-[`(range ls)`](#range)  
 [`(skewness ls)`](#skewness)  
 [`(standard-deviation ls)`](#standard-deviation)  
 [`(unique ls)`](#unique)  
@@ -85,30 +82,6 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 (5 9 12 14 15)
 ```
 
-#### <a name="ecdf"></a> procedure: `(ecdf ls)`
-**returns:** a list containing a sorted list of the unique values in `ls` and list of the empirical cumulative distribution corresponding to the unique values
-
-```
-> (ecdf '(1 5 5 5 10))
-((1 5 10) (1/5 4/5 1))
-> (ecdf '(0.5 2 2 2.5 4 5))
-((0.5 2 2.5 4 5) (1/6 1/2 2/3 5/6 1))
-> (ecdf '(1/2 0.5 10 10 10 20))
-((0.5 10 20) (1/3 5/6 1))
-```
-
-#### <a name="interquartile-range"></a> procedure: `(interquartile-range ls type)`
-**returns:** the interquartile range of the values in `ls` for the given `type` ([see quantile](#procedure-quantile-ls-p-type))
-
-```
-> (interquartile-range '(1 2 3 4 5 6) 7)
-2.5
-> (quantile '(1 2 3 4 5 6) 0.75 7)
-4.75
-> (quantile '(1 2 3 4 5 6) 0.25 7)
-2.25
-```
-
 #### <a name="kurtosis"></a> procedure: `(kurtosis ls)`
 **returns:** the kurtosis of the values in `ls`
 
@@ -154,7 +127,7 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 #### <a name="quantile"></a> procedure: `(quantile ls p type)`
 **returns:** the sample quantile of the values in `ls` corresponding to the given probability, `p`, and `type`
 
-The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stable/2684934) who recommend type 8. The [default in R](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html) is type 7.
+The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stable/2684934) who recommend type 8, which is the default in `chez-stats`. The [default in R](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html) is type 7.
 
 ```
 > (quantile '(1 2 3 4 5 6) 0.5 1)
@@ -165,16 +138,6 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 3.5
 > (quantile '(1 2 3 4 5 6) 0.025 7)
 1.125
-```
-
-#### <a name="range"></a> procedure: `(range ls)`
-**returns:** a pair containing the minimum and maximum values of `ls`
-
-```
-> (range '(1 2 3 4 5))
-(1 . 5)
-> (range '(-10 -7 3 -99 100))
-(-99 . 100)
 ```
 
 #### <a name="skewness"></a> procedure: `(skewness ls)`

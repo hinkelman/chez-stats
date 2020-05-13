@@ -44,21 +44,12 @@
     (check-list ls "ls" "(unique ls)")
     (map car (count-unique ls)))
 
-  (define (quantile ls p type)
-    (define (calc-Q order-stats j gamma)
-      ;; j is calculated for one-based indexing; need to adjust to zero-based
-      (define n-os (length order-stats))
-      (cond
-       [(< j 1) (list-ref order-stats 0)]
-       [(>= j n-os) (list-ref order-stats (sub1 n-os))]
-       [else (+ (* (- 1 gamma) (list-ref order-stats (sub1 j)))
-		(* gamma (list-ref order-stats j)))]))
-    (define (gamma-proc g j)
-      (cond
-       [(= type 1) (if (= g 0) 0 1)]
-       [(= type 2) (if (= g 0) 0.5 1)]
-       [(= type 3) (if (and (= g 0) (even? j)) 0 1)]
-       [else g]))
+  (define quantile
+    (case-lambda
+      [(ls p) (quantile-helper ls p 8)]
+      [(ls p type) (quantile-helper ls p type)]))
+
+  (define (quantile-helper ls p type)
     (let ([proc-string "(quantile ls p type)"])
       (check-list ls "ls" proc-string)
       (check-p p proc-string)
@@ -68,26 +59,43 @@
 	   ;; ms is list of m values for each quantile type
 	   [ms (list 0 0 -1/2 0 1/2 p (- 1 p) (* (add1 p) 1/3) (+ (* p 1/4) 3/8))]
 	   [m (list-ref ms (sub1 type))]
-	   [j (floor (+ (* n p) m))]
+	   [j-tmp (floor (+ (* n p) m))]
+	   ;; j needs to be a fixnum for indexing
+	   [j (if (flonum? j-tmp) (flonum->fixnum j-tmp) j-tmp)]
 	   [g (- (+ (* n p) m) j)]
-	   [gamma (gamma-proc g j)])
-      ;; j needs to be exact for indexing
-      (calc-Q order-stats (inexact->exact j) gamma)))
+	   [gamma (get-gamma g j type)])
+      (calc-Q order-stats j gamma)))
+
+  (define (calc-Q order-stats j gamma)
+    ;; j is calculated for one-based indexing; need to adjust to zero-based
+    (let ([n-os (length order-stats)])
+      (cond
+       [(< j 1) (list-ref order-stats 0)]
+       [(>= j n-os) (list-ref order-stats (sub1 n-os))]
+       [else (+ (* (- 1 gamma) (list-ref order-stats (sub1 j)))
+		(* gamma (list-ref order-stats j)))])))
+  
+  (define (get-gamma g j type)
+    (cond
+     [(= type 1) (if (= g 0) 0 1)]
+     [(= type 2) (if (= g 0) 0.5 1)]
+     [(= type 3) (if (and (= g 0) (even? j)) 0 1)]
+     [else g]))
 
   (define (median ls)
     (check-list ls "ls" "(median ls)")
     (quantile ls 0.5 7))
 
   (define (cumulative-sum ls)
-    (define (iterate ls result total)
-      (cond
-       [(null? ls) (reverse result)]
-       [else
-	(let ([new-total (+ (car ls) total)])
-	  (iterate (cdr ls) (cons new-total result) new-total))]))
     (check-list ls "ls" "(cumulative-sum ls)")
-    (iterate ls '() 0))
-
+    (let loop ([ls ls]
+	       [result '()]
+	       [total 0])
+      (if (null? ls)
+	  (reverse result)
+	  (let ([new-total (+ (car ls) total)])
+	    (loop (cdr ls) (cons new-total result) new-total)))))
+	  
   (define (mean ls)
     (check-list ls "ls" "(mean ls)")
     (/ (apply + ls) (length ls)))
@@ -119,18 +127,21 @@
     (/ (apply + (map (lambda (x y) (* x y)) ls weights)) (apply + weights)))
 
   (define (variance ls)
-    (define (update-ms lsi ms i)
+    ;; ms is a pair of m and s variables
+    ;; x is current value of ls in loop
+    (define (update-ms x ms i) 
       (let* ([m (car ms)]
 	     [s (cdr ms)]
-	     [new-m (+ m (/ (- lsi m) (add1 i)))])
+	     [new-m (+ m (/ (- x m) (add1 i)))])
 	(cons new-m
-	      (+ s (* (- lsi m) (- lsi new-m))))))		     
-    (define (iterate ls ms i)
-      (cond
-       [(null? ls)  (/ (cdr ms) (- i 1))]
-       [else (iterate (cdr ls) (update-ms (car ls) ms i) (add1 i))]))
+	      (+ s (* (- x m) (- x new-m))))))
     (check-list ls "ls" "(variance ls)")
-    (iterate (cdr ls) (cons (car ls) 0) 1))
+    (let loop ([ls (cdr ls)]
+	       [ms (cons (car ls) 0)] 
+	       [i 1])                 ; one-based indexing in the algorithm
+      (if (null? ls)
+	  (/ (cdr ms) (- i 1))
+          (loop (cdr ls) (update-ms (car ls) ms i) (add1 i)))))
   
   (define (standard-deviation ls)
     (check-list ls "ls" "(standard-deviation ls)")
