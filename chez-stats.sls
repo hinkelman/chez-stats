@@ -18,6 +18,7 @@
    random-pareto
    random-poisson
    random-uniform
+   repeat
    ;; statistics
    count-unique
    cumulative-sum
