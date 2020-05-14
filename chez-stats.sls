@@ -1,12 +1,9 @@
 (library (chez-stats)
   (export
-   ;; csv
-   preview-csv
-   preview-tsv
-   read-csv
-   read-tsv
-   write-csv
-   ;; random-variates
+   ;; delimited
+   read-delim
+   write-delim
+   ;; random
    random-bernoulli
    random-beta
    random-beta-binomial

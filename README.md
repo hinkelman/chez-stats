@@ -35,9 +35,8 @@ Import all `chez-stats` procedures: `(import (chez-stats))`
 
 ### Read and Write CSV Files
 
-[`(preview-csv path rows)`](#preview-csv)  
-[`(read-csv path)`](#read-csv)  
-[`(write-csv ls path overwrite)`](#write-csv)  
+[`(read-delim path sep-char max-rows)`](#read-delim)  
+[`(write-delim ls path sep-char overwrite)`](#write-delim)  
 
 ### Generate Random Variates
 
@@ -196,35 +195,18 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 13/4
 ```
 
-## Read and Write CSV Files
+## Read and Write Delimited Text Files
 
-There is nothing sophisticated about this approach to reading CSV files. For all files, `read-csv` produces a list of lists of strings.
-There is no attempt to convert strings to numbers or other objects. The CSV file needs to be rectangular, i.e., every row must have the
+There is nothing sophisticated about this approach to reading delimited text files. For all files, `read-delimited` produces a list of lists of strings.
+There is no attempt to convert strings to numbers or other objects. The file contents needs to be rectangular, i.e., every row must have the
 same number of columns.
 
-#### <a name="preview-csv"></a> procedure: `(preview-csv path rows)`
-**returns:** a list of lists where each sub-list is one row in the CSV file at `path` up to the number of `rows`
+#### <a name="read-delim"></a> procedure: `(read-delim path sep-char max-rows)`
+**returns:** a list of lists where each sub-list is one row in the file at `path`; `sep-char` and `max-rows` are optional and default to `#\,` and `+inf.0`, respectively 
 
-```
-;; example requires that you first run code for (write-csv) below
-> (preview-csv "example.csv" 2)
-(("col1" "col2" "col3" "col4")
-  ("10.02" "A" "\"1,000\"" "\"Glen \"Big Baby\" Davis\""))
-```
+#### <a name="write-delim"></a> procedure: `(write-delim ls path sep-char overwrite)`
+**writes:** a list of lists `ls` as a delimited text file to `path`; `sep-char` and `overwrite` are optional and default to `#\,` and `#t`, respectively.
 
-#### <a name="read-csv"></a> procedure: `(read-csv path)`
-**returns:** a list of lists where each sub-list is one row in the CSV file at `path`
-
-```
-;; example requires that you first run code for (write-csv) below
-> (read-csv "example.csv")
-(("col1" "col2" "col3" "col4")
-  ("10.02" "A" "\"1,000\"" "\"Glen \"Big Baby\" Davis\"")
-  ("0.3333333333333333" "B" "1000" "\"Earvin \"Magic\" Johnson\""))
-```
-
-#### <a name="write-csv"></a> procedure: `(write-csv ls path overwrite)`
-**returns:** writes a list of lists as a CSV file to `path`; if file exists at `path`, operation will fail unless `overwrite` is `#t`
 
 ```
 > (define example-list (list
@@ -233,8 +215,14 @@ same number of columns.
                         (list 1/3 #\B "1000" "Earvin \"Magic\" Johnson")))
 > (display example-list)
 ((col1 col2 col3 col4) (10.02 A 1,000 Glen "Big Baby" Davis) (1/3 B 1000 Earvin "Magic" Johnson))
-> (write-csv example-list "example.csv" #f)
+> (write-delim example-list "example.csv")
+
+> (read-delim "example.csv")
+(("col1" "col2" "col3" "col4")
+  ("10.02" "A" "\"1,000\"" "\"Glen \"Big Baby\" Davis\"")
+  ("0.3333333333333333" "B" "1000" "\"Earvin \"Magic\" Johnson\""))
 ```
+
 
 ## Generate Random Variates
 
