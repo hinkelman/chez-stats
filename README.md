@@ -33,7 +33,7 @@ Import all `chez-stats` procedures: `(import (chez-stats))`
 [`(variance ls)`](#variance)  
 [`(weighted-mean ls weights)`](#weighted-mean)
 
-### Read and Write CSV Files
+### Read and Write Delimited Text Files
 
 [`(read-delim path sep-char max-rows)`](#read-delim)  
 [`(write-delim ls path sep-char overwrite)`](#write-delim)  
