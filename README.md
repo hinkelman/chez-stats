@@ -1,6 +1,6 @@
 # Chez Scheme Statistics Library
 
-Read/write comma- and tab-delimited text files, compute descriptive statistics, and generate random variates in Chez Scheme.
+Read and write delimited text files, compute descriptive statistics, and generate random variates in Chez Scheme.
 
 Related blog posts:  
 [Writing a Chez Scheme library](https://www.travishinkelman.com/post/writing-chez-scheme-library/)  
