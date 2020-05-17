@@ -8,13 +8,13 @@ Related blog posts:
 
 ## Installation and Import
 
-### [Akku](https://akkuscm.org/)
+### Akku
 
 ```
 $ akku install chez-stats
 ```
 
-For more information on getting started with Akku, see this [blog post](https://www.travishinkelman.com/posts/getting-started-with-akku-package-manager-for-scheme/).
+For more information on getting started with [Akku](https://akkuscm.org/), see this [blog post](https://www.travishinkelman.com/posts/getting-started-with-akku-package-manager-for-scheme/).
 
 ### Manual Installation
 
