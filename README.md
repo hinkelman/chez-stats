@@ -8,13 +8,21 @@ Related blog posts:
 
 ## Installation and Import
 
+### [Akku](https://akkuscm.org/)
+
+```
+$ akku install chez-stats
+```
+
+For more information on getting started with Akku, see this [blog post](https://www.travishinkelman.com/posts/getting-started-with-akku-package-manager-for-scheme/).
+
 ### Manual Installation
 
 Clone or download this repository. Move `chez-stats.sls` and `chez-stats` from downloaded and unzipped folder to one of the directories listed when you run `(library-directories)` in Chez Scheme. For more information on installing Chez Scheme libraries, see blog posts for [macOS and Windows](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs/) or [Ubuntu](https://www.travishinkelman.com/post/getting-started-with-chez-scheme-and-emacs-ubuntu/).
 
 ### Import 
 
-Import all `chez-stats` procedures: `(import (chez-stats))`
+`(import (chez-stats))`
 
 ## Table of Contents
 
