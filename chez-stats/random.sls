@@ -25,6 +25,17 @@
       (if (= i n)
           result
           (loop (add1 i) (cons (thunk) result)))))
+
+  ;; equivalent result to (apply + (repeat...))
+  ;; but presumably more efficient because not building up a list
+  ;; and requires that the thunk returns a number
+  ;; only used in random-binomial
+  (define (repeat-sum n thunk)
+    (let loop ([i 0]
+               [result 0])
+      (if (= i n)
+          result
+          (loop (add1 i) (+ (thunk) result)))))
   
   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-bernoulli p)
@@ -36,7 +47,7 @@
     (let ([proc-string "(random-binomial trials p)"])
       (check-integer-gte-zero trials "trials" proc-string)
       (check-p p proc-string))
-    (apply + (repeat trials (lambda () (random-bernoulli p)))))
+    (repeat-sum trials (lambda () (random-bernoulli p))))
 
   ;; same algorithm as rmultinom in R
   ;; https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Multinom.html
