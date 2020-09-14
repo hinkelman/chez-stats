@@ -7,6 +7,7 @@
    median
    mode
    quantile
+   rep
    standard-deviation
    skewness
    unique
@@ -146,6 +147,31 @@
   (define (standard-deviation ls)
     (check-list ls "ls" "(standard-deviation ls)")
     (sqrt (variance ls)))
+
+  (define (rep n ls type)
+    (let ([proc-string "(rep n ls type)"])
+      (check-positive-integer n "n" proc-string)
+      (unless (list? ls)
+        (assertion-violation proc-string
+                             "ls is not a list"))
+      (unless (symbol? type)
+        (assertion-violation proc-string
+                             "type must be symbol: 'each or 'times"))
+      (cond [(= n 1) ls]
+            [(= (length ls) 1) (make-list n (car ls))]
+            [(symbol=? type 'each)
+             (apply append (map (lambda (x) (make-list n x)) ls))]
+            [(symbol=? type 'times)
+             (rep-times n ls)]
+            [else
+             (assertion-violation proc-string
+                                  "type must be symbol: 'each or 'times")])))
+
+  (define (rep-times n ls)
+    (let loop ([ls-out ls]
+               [n n])
+      (if (= n 1) ls-out
+          (loop (append ls ls-out) (sub1 n)))))
   )
 
 

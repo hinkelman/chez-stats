@@ -35,6 +35,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 [`(median ls)`](#median)  
 [`(mode ls)`](#mode)  
 [`(quantile ls p type)`](#quantile)  
+[`(rep n ls type)`](#rep)  
 [`(skewness ls)`](#skewness)  
 [`(standard-deviation ls)`](#standard-deviation)  
 [`(unique ls)`](#unique)  
@@ -146,6 +147,22 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 3.5
 > (quantile '(1 2 3 4 5 6) 0.025 7)
 1.125
+```
+
+#### <a name="rep"></a> procedure: `(rep n ls type)`
+**returns:** the appended list formed by repeating the values in `ls` either `n` times or `n` times each; replicates behavior of [`rep`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/rep.html) in R
+
+```
+> (rep 3 '(1 2) 'times)
+(1 2 1 2 1 2)
+> (rep 3 '(1 2) 'each)
+(1 1 1 2 2 2)
+> (rep 3 '(a b) 'times)
+(a b a b a b)
+> (rep 3 '((1 2) (a b)) 'times)
+((1 2) (a b) (1 2) (a b) (1 2) (a b))
+> (rep 3 '((1 2) (a b)) 'each)
+((1 2) (1 2) (1 2) (a b) (a b) (a b))
 ```
 
 #### <a name="skewness"></a> procedure: `(skewness ls)`

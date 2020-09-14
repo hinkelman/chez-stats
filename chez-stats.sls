@@ -27,6 +27,7 @@
    median
    mode
    quantile
+   rep
    standard-deviation
    skewness
    unique

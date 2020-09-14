@@ -8,7 +8,6 @@
         (chez-stats))
 
 ;; delimited; only testing comma here (for now?)
-
 (test-begin "delimited-test")
 (define example-list (list
 		      (list "col1" "col2" "col3" "col4")
@@ -191,6 +190,15 @@
 (test-error (quantile '(1 2) 0.5 100))
 (test-error (quantile '(1 2) 2 7))
 (test-end "quantile-test")
+
+(test-begin "rep-test")
+(test-equal '(1 2 1 2 1 2) (rep 3 '(1 2) 'times))
+(test-equal '(1 1 1 2 2 2) (rep 3 '(1 2) 'each))
+(test-equal '("test" "this" "test" "this") (rep 2 '("test" "this") 'times))
+(test-error (rep 1.5 '(10) 'each))
+(test-error (rep 2 10 'each))
+(test-error (rep 2 '(10) "each"))
+(test-end "rep-test")
 
 (test-begin "skewness-test")
 (test-assert (= 0 (skewness '(1 2 3 4 5))))
