@@ -200,6 +200,16 @@
 (test-error (rep 2 '(10) "each"))
 (test-end "rep-test")
 
+(test-begin "rle-test")
+(test-equal '((1 . 1) (2 . 1) (3 . 1) (4 . 1) (2 . 1) (1 . 1))
+  (rle '(1 2 3 4 2 1)))
+(test-equal '((1 . 3) (2 . 1) (1 . 2) (2 . 1))
+  (rle '(1 1 1 2 1 1 2)))
+(test-equal '((3 . 2) (1 . 2) (2 . 3))
+  (rle '(3 3 1 1 2 2 2)))
+(test-error (rle '("a" "b" "b" "a")))
+(test-end "rle-test")
+
 (test-begin "skewness-test")
 (test-assert (= 0 (skewness '(1 2 3 4 5))))
 (test-assert (= -0.6 (skewness '(1 2 2 3 3 3 4 4 4 4))))

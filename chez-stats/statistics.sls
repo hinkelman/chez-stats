@@ -8,6 +8,7 @@
    mode
    quantile
    rep
+   rle
    standard-deviation
    skewness
    unique
@@ -16,21 +17,27 @@
 
   (import (chezscheme)
 	  (chez-stats assertions))
+
+  (define (rle ls)
+    (check-list ls "ls" "(rle ls)")
+    (let loop ([first (car ls)]
+               [rest (cdr ls)]
+               [n 1]
+               [vals '()]
+               [counts '()])
+      (cond
+       [(null? rest)
+	(map cons
+	     (reverse (cons first vals))
+	     (reverse (cons n counts)))]
+       [(= first (car rest))
+	(loop (car rest) (cdr rest) (add1 n) vals counts)]
+       [else
+	(loop (car rest) (cdr rest) 1 (cons first vals) (cons n counts))])))
   
   (define (count-unique ls)
     (check-list ls "ls" "(count-unique ls)")
-    (let ([sorted-list (sort < ls)])
-      (define (iterate first rest n vals counts)
-	(cond
-	 [(null? rest)
-	  (map cons
-	       (reverse (cons first vals))
-	       (reverse (cons n counts)))]
-         [(= first (car rest))
-	  (iterate (car rest) (cdr rest) (add1 n) vals counts)]
-         [else
-	  (iterate (car rest) (cdr rest) 1 (cons first vals) (cons n counts))]))
-      (iterate (car sorted-list) (cdr sorted-list) 1 '() '())))
+    (rle (sort < ls)))
   
   (define (mode ls)
     (check-list ls "ls" "(mode ls)")
@@ -96,7 +103,7 @@
 	  (reverse result)
 	  (let ([new-total (+ (car ls) total)])
 	    (loop (cdr ls) (cons new-total result) new-total)))))
-	  
+  
   (define (mean ls)
     (check-list ls "ls" "(mean ls)")
     (/ (apply + ls) (length ls)))
@@ -172,6 +179,8 @@
                [n n])
       (if (= n 1) ls-out
           (loop (append ls ls-out) (sub1 n)))))
+
+  
   )
 
 

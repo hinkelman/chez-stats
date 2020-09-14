@@ -36,6 +36,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 [`(mode ls)`](#mode)  
 [`(quantile ls p type)`](#quantile)  
 [`(rep n ls type)`](#rep)  
+[`(rle ls)`](#rle)  
 [`(skewness ls)`](#skewness)  
 [`(standard-deviation ls)`](#standard-deviation)  
 [`(unique ls)`](#unique)  
@@ -163,6 +164,18 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 ((1 2) (a b) (1 2) (a b) (1 2) (a b))
 > (rep 3 '((1 2) (a b)) 'each)
 ((1 2) (1 2) (1 2) (a b) (a b) (a b))
+```
+
+#### <a name="rle"></a> procedure: `(rle ls)`
+**returns:** run length encoding as a list of pairs where the `car` and `cdr` of each pair are the values and lengths of the runs, respectively, for the values in list `ls`
+
+```
+> (rle '(1 1 1 2 1 1))
+((1 . 3) (2 . 1) (1 . 2))
+> (rle '(2 2 2 5 3 3))
+((2 . 3) (5 . 1) (3 . 2))
+> (rle '("a" "b" "b" "a"))
+Exception in (rle ls): at least one element of ls is not a real number
 ```
 
 #### <a name="skewness"></a> procedure: `(skewness ls)`

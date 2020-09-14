@@ -28,6 +28,7 @@
    mode
    quantile
    rep
+   rle
    standard-deviation
    skewness
    unique
