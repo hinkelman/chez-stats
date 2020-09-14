@@ -7,6 +7,7 @@
    median
    mode
    quantile
+   rank
    rep
    rle
    standard-deviation
@@ -159,11 +160,13 @@
     (let ([proc-string "(rep n ls type)"])
       (check-positive-integer n "n" proc-string)
       (unless (list? ls)
-        (assertion-violation proc-string
-                             "ls is not a list"))
+        (assertion-violation
+         proc-string
+         "ls is not a list"))
       (unless (symbol? type)
-        (assertion-violation proc-string
-                             "type must be symbol: 'each or 'times"))
+        (assertion-violation
+         proc-string
+         "type must be symbol: 'each or 'times"))
       (cond [(= n 1) ls]
             [(= (length ls) 1) (make-list n (car ls))]
             [(symbol=? type 'each)
@@ -171,8 +174,9 @@
             [(symbol=? type 'times)
              (rep-times n ls)]
             [else
-             (assertion-violation proc-string
-                                  "type must be symbol: 'each or 'times")])))
+             (assertion-violation
+              proc-string
+              "type must be symbol: 'each or 'times")])))
 
   (define (rep-times n ls)
     (let loop ([ls-out ls]
@@ -180,6 +184,66 @@
       (if (= n 1) ls-out
           (loop (append ls ls-out) (sub1 n)))))
 
+  (define rank
+    (case-lambda
+      [(ls) (rank ls 'min)]
+      [(ls ties-method)
+       (let ([proc-string "(rank ls ties-method)"])
+         (check-list ls "ls" proc-string)
+         (unless (and (symbol? ties-method)
+                      (member ties-method '(min max mean)))
+           (assertion-violation
+            proc-string
+            "ties-method must be symbol: 'min, 'max', or 'mean")))
+       (let* ([sorted-ls (sort < ls)]
+              [val-count (rle sorted-ls)]
+              [max-count (apply max (map cdr val-count))])
+         (if (= max-count 1)
+             (rank-simple ls sorted-ls)
+             (rank-ties ls sorted-ls val-count ties-method)))]))
+
+  (define (rank-simple ls sorted-ls)
+    (let* ([ranks (map add1 (iota (length ls)))]
+           [val-rank (map cons sorted-ls ranks)])
+      (match-ranks ls val-rank)))
+
+  (define (match-ranks ls val-rank)
+    (map (lambda (x) (cdr (assoc x val-rank))) ls))
+
+  ;; val-count is a list of pairs
+  (define (rank-ties ls sorted-ls val-count ties-method)
+    (define (iterate val-count ranks)
+      (cond [(null? (cdr val-count))
+             (reverse (rank-ties-helper (car val-count) ranks ties-method))]
+            [else
+             (iterate (cdr val-count)
+                      (rank-ties-helper (car val-count) ranks ties-method))]))
+    (let* ([ranks (iterate val-count '())]
+           [val-rank (map cons sorted-ls ranks)])
+      (match-ranks ls val-rank)))
+
+  (define (rank-ties-helper val-count-pair ranks ties-method)
+    (cond [(= (cdr val-count-pair) 1)
+           (cons (add1 (length ranks)) ranks)]
+          [else
+           (append
+            (handle-ties (get-ranks ranks (cdr val-count-pair)) ties-method)
+            ranks)]))
+
+  (define (get-ranks ranks len)
+    (map (lambda (x)
+           (+ x (length ranks) 1))
+         (iota len)))
+
+  ;; in R, rank includes random, first, last as ties methods
+  ;; they are a little trickier to implement so not including here
+  (define (handle-ties ranks ties-method)
+    (let* ([n (length ranks)]
+           [proc-lookup
+            (list (cons 'mean (lambda (x) (make-list n (mean x))))
+                  (cons 'min (lambda (x) (make-list n (apply min x))))
+                  (cons 'max (lambda (x) (make-list n (apply max x)))))])
+      ((cdr (assoc ties-method proc-lookup)) ranks)))
   
   )
 

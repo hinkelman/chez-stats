@@ -27,6 +27,7 @@
    median
    mode
    quantile
+   rank
    rep
    rle
    standard-deviation
