@@ -35,6 +35,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 [`(median ls)`](#median)  
 [`(mode ls)`](#mode)  
 [`(quantile ls p type)`](#quantile)  
+[`(rank ls ties-method)`](#rank)  
 [`(rep n ls type)`](#rep)  
 [`(rle ls)`](#rle)  
 [`(skewness ls)`](#skewness)  
@@ -148,6 +149,20 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 3.5
 > (quantile '(1 2 3 4 5 6) 0.025 7)
 1.125
+```
+
+#### <a name="rank"></a> procedure: `(rank ls ties-method)`
+**returns:** a list of the sample ranks for the values in `ls`; ties are handled by replacing ranks with `'min` (default), `'max`, or `'mean`
+
+```
+> (rank '(50 20 50 40 30))
+(4 1 4 3 2)
+> (rank '(50 20 50 40 30) 'min)
+(4 1 4 3 2)
+> (rank '(50 20 50 40 30) 'max)
+(5 1 5 3 2)
+> (rank '(50 20 50 40 30) 'mean))
+(9/2 1 9/2 3 2)
 ```
 
 #### <a name="rep"></a> procedure: `(rep n ls type)`

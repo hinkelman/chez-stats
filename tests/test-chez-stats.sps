@@ -191,6 +191,13 @@
 (test-error (quantile '(1 2) 2 7))
 (test-end "quantile-test")
 
+(test-begin "rank-test")
+(test-equal '(3 2 4 1 5) (rank '(30 20 50 10 60)))
+(test-equal '(4 2 5 1 8 5 2 5) (rank '(30 20 50 10 60 50 20 50)))
+(test-equal '(4 5/2 6 1 8 6 5/2 6) (rank '(30 20 50 10 60 50 20 50) 'mean))
+(test-equal '(4 3 7 1 8 7 3 7) (rank '(30 20 50 10 60 50 20 50) 'max))
+(test-end "rank-test")
+
 (test-begin "rep-test")
 (test-equal '(1 2 1 2 1 2) (rep 3 '(1 2) 'times))
 (test-equal '(1 1 1 2 2 2) (rep 3 '(1 2) 'each))
