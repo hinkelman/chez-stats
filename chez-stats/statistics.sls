@@ -22,10 +22,10 @@
   (import (chezscheme)
 	  (chez-stats assertions))
 
-  (define (rle ls)
-    (check-list ls "ls" "(rle ls)")
-    (let loop ([first (car ls)]
-               [rest (cdr ls)]
+  (define (rle lst)
+    (check-list lst "lst" "(rle lst)")
+    (let loop ([first (car lst)]
+               [rest (cdr lst)]
                [n 1]
                [vals '()]
                [counts '()])
@@ -39,35 +39,35 @@
        [else
 	(loop (car rest) (cdr rest) 1 (cons first vals) (cons n counts))])))
   
-  (define (count-unique ls)
-    (check-list ls "ls" "(count-unique ls)")
-    (rle (sort < ls)))
+  (define (count-unique lst)
+    (check-list lst "lst" "(count-unique lst)")
+    (rle (sort < lst)))
   
-  (define (mode ls)
-    (check-list ls "ls" "(mode ls)")
-    (let* ([val-count (count-unique ls)]
+  (define (mode lst)
+    (check-list lst "lst" "(mode lst)")
+    (let* ([val-count (count-unique lst)]
 	   [mx (apply max (map cdr val-count))])
       (filter (lambda (x) (not (null? x)))
 	      (map (lambda (val count) (if (= count mx) val '()))
 		   (map car val-count)
 		   (map cdr val-count)))))
 
-  (define (unique ls)
-    (check-list ls "ls" "(unique ls)")
-    (map car (count-unique ls)))
+  (define (unique lst)
+    (check-list lst "lst" "(unique lst)")
+    (map car (count-unique lst)))
 
   (define quantile
     (case-lambda
-      [(ls p) (quantile-helper ls p 8)]
-      [(ls p type) (quantile-helper ls p type)]))
+      [(lst p) (quantile-helper lst p 8)]
+      [(lst p type) (quantile-helper lst p type)]))
 
-  (define (quantile-helper ls p type)
-    (let ([proc-string "(quantile ls p type)"])
-      (check-list ls "ls" proc-string)
+  (define (quantile-helper lst p type)
+    (let ([proc-string "(quantile lst p type)"])
+      (check-list lst "lst" proc-string)
       (check-p p proc-string)
       (check-quantile-type type proc-string))
-    (let* ([n (length ls)]
-	   [order-stats (unique ls)]
+    (let* ([n (length lst)]
+	   [order-stats (unique lst)]
 	   ;; ms is list of m values for each quantile type
 	   [ms (list 0 0 -1/2 0 1/2 p (- 1 p) (* (add1 p) 1/3) (+ (* p 1/4) 3/8))]
 	   [m (list-ref ms (sub1 type))]
@@ -94,127 +94,127 @@
      [(= type 3) (if (and (= g 0) (even? j)) 0 1)]
      [else g]))
 
-  (define (median ls)
-    (check-list ls "ls" "(median ls)")
-    (quantile ls 0.5 7))
+  (define (median lst)
+    (check-list lst "lst" "(median lst)")
+    (quantile lst 0.5 7))
 
-  (define (cumulative-sum ls)
-    (check-list ls "ls" "(cumulative-sum ls)")
-    (let loop ([ls ls]
+  (define (cumulative-sum lst)
+    (check-list lst "lst" "(cumulative-sum lst)")
+    (let loop ([lst lst]
 	       [result '()]
 	       [total 0])
-      (if (null? ls)
+      (if (null? lst)
 	  (reverse result)
-	  (let ([new-total (+ (car ls) total)])
-	    (loop (cdr ls) (cons new-total result) new-total)))))
+	  (let ([new-total (+ (car lst) total)])
+	    (loop (cdr lst) (cons new-total result) new-total)))))
   
-  (define (mean ls)
-    (check-list ls "ls" "(mean ls)")
-    (/ (apply + ls) (length ls)))
+  (define (mean lst)
+    (check-list lst "lst" "(mean lst)")
+    (/ (apply + lst) (length lst)))
 
-  (define (skewness ls)
-    (check-list ls "ls" "(skewness ls)")
-    (let* ([n (length ls)]
-	   [x-bar (mean ls)]
-	   [x-diff (map (lambda (x) (- x x-bar)) ls)]
+  (define (skewness lst)
+    (check-list lst "lst" "(skewness lst)")
+    (let* ([n (length lst)]
+	   [x-bar (mean lst)]
+	   [x-diff (map (lambda (x) (- x x-bar)) lst)]
 	   [num (/ (apply + (map (lambda (x) (expt x 3)) x-diff)) n)]
 	   [den (/ (apply + (map (lambda (x) (expt x 2)) x-diff)) n)])
       (/ num (expt den (/ 3 2)))))
 
-  (define (kurtosis ls)
-    (check-list ls "ls" "(kurtosis ls)")
-    (let* ([n (length ls)]
-	   [x-bar (mean ls)]
-	   [x-diff (map (lambda (x) (- x x-bar)) ls)]
+  (define (kurtosis lst)
+    (check-list lst "lst" "(kurtosis lst)")
+    (let* ([n (length lst)]
+	   [x-bar (mean lst)]
+	   [x-diff (map (lambda (x) (- x x-bar)) lst)]
 	   [num (apply + (map (lambda (x) (expt x 4)) x-diff))]
 	   [den (expt (apply + (map (lambda (x) (expt x 2)) x-diff)) 2)])
       (* n (/ num den))))
 
-  (define (weighted-mean ls weights)
-    (let ([proc-string "(weighted-mean ls weights)"])
-      (check-list ls "ls" proc-string )
+  (define (weighted-mean lst weights)
+    (let ([proc-string "(weighted-mean lst weights)"])
+      (check-list lst "lst" proc-string )
       (check-list weights "weights" proc-string)
-      (unless (= (length ls) (length weights))
-	(assertion-violation proc-string "ls and weights are not the same length")))
-    (/ (apply + (map (lambda (x y) (* x y)) ls weights)) (apply + weights)))
+      (unless (= (length lst) (length weights))
+	(assertion-violation proc-string "lst and weights are not the same length")))
+    (/ (apply + (map (lambda (x y) (* x y)) lst weights)) (apply + weights)))
 
-  (define (variance ls)
+  (define (variance lst)
     ;; ms is a pair of m and s variables
-    ;; x is current value of ls in loop
+    ;; x is current value of lst in loop
     (define (update-ms x ms i) 
       (let* ([m (car ms)]
 	     [s (cdr ms)]
 	     [new-m (+ m (/ (- x m) (add1 i)))])
 	(cons new-m
 	      (+ s (* (- x m) (- x new-m))))))
-    (check-list ls "ls" "(variance ls)")
-    (let loop ([ls (cdr ls)]
-	       [ms (cons (car ls) 0)] 
+    (check-list lst "lst" "(variance lst)")
+    (let loop ([lst (cdr lst)]
+	       [ms (cons (car lst) 0)] 
 	       [i 1])                 ; one-based indexing in the algorithm
-      (if (null? ls)
+      (if (null? lst)
 	  (/ (cdr ms) (- i 1))
-          (loop (cdr ls) (update-ms (car ls) ms i) (add1 i)))))
+          (loop (cdr lst) (update-ms (car lst) ms i) (add1 i)))))
   
-  (define (standard-deviation ls)
-    (check-list ls "ls" "(standard-deviation ls)")
-    (sqrt (variance ls)))
+  (define (standard-deviation lst)
+    (check-list lst "lst" "(standard-deviation lst)")
+    (sqrt (variance lst)))
 
-  (define (rep n ls type)
-    (let ([proc-string "(rep n ls type)"])
+  (define (rep n lst type)
+    (let ([proc-string "(rep n lst type)"])
       (check-positive-integer n "n" proc-string)
-      (unless (list? ls)
+      (unless (list? lst)
         (assertion-violation
          proc-string
-         "ls is not a list"))
+         "lst is not a list"))
       (unless (symbol? type)
         (assertion-violation
          proc-string
          "type must be symbol: 'each or 'times"))
-      (cond [(= n 1) ls]
-            [(= (length ls) 1) (make-list n (car ls))]
+      (cond [(= n 1) lst]
+            [(= (length lst) 1) (make-list n (car lst))]
             [(symbol=? type 'each)
-             (apply append (map (lambda (x) (make-list n x)) ls))]
+             (apply append (map (lambda (x) (make-list n x)) lst))]
             [(symbol=? type 'times)
-             (rep-times n ls)]
+             (rep-times n lst)]
             [else
              (assertion-violation
               proc-string
               "type must be one of these symbols: 'each or 'times")])))
 
-  (define (rep-times n ls)
-    (let loop ([ls-out ls]
+  (define (rep-times n lst)
+    (let loop ([lst-out lst]
                [n n])
-      (if (= n 1) ls-out
-          (loop (append ls ls-out) (sub1 n)))))
+      (if (= n 1) lst-out
+          (loop (append lst lst-out) (sub1 n)))))
 
   (define rank
     (case-lambda
-      [(ls) (rank ls 'min)]
-      [(ls ties-method)
-       (let ([proc-string "(rank ls ties-method)"])
-         (check-list ls "ls" proc-string)
+      [(lst) (rank lst 'min)]
+      [(lst ties-method)
+       (let ([proc-string "(rank lst ties-method)"])
+         (check-list lst "lst" proc-string)
          (unless (and (symbol? ties-method)
                       (member ties-method '(min max mean)))
            (assertion-violation
             proc-string
             "ties-method must be one of these symbols: 'min, 'max, or 'mean")))
-       (let* ([sorted-ls (sort < ls)]
-              [val-count (rle sorted-ls)]
+       (let* ([sorted-lst (sort < lst)]
+              [val-count (rle sorted-lst)]
               [max-count (apply max (map cdr val-count))])
          (if (= max-count 1)
-             (rank-simple ls sorted-ls)
-             (rank-ties ls sorted-ls val-count ties-method)))]))
+             (rank-simple lst sorted-lst)
+             (rank-ties lst sorted-lst val-count ties-method)))]))
 
-  (define (rank-simple ls sorted-ls)
-    (let* ([ranks (map add1 (iota (length ls)))]
-           [val-rank (map cons sorted-ls ranks)])
-      (match-ranks ls val-rank)))
+  (define (rank-simple lst sorted-lst)
+    (let* ([ranks (map add1 (iota (length lst)))]
+           [val-rank (map cons sorted-lst ranks)])
+      (match-ranks lst val-rank)))
 
-  (define (match-ranks ls val-rank)
-    (map (lambda (x) (cdr (assoc x val-rank))) ls))
+  (define (match-ranks lst val-rank)
+    (map (lambda (x) (cdr (assoc x val-rank))) lst))
 
   ;; val-count is a list of pairs
-  (define (rank-ties ls sorted-ls val-count ties-method)
+  (define (rank-ties lst sorted-lst val-count ties-method)
     (define (iterate val-count ranks)
       (cond [(null? (cdr val-count))
              (reverse (rank-ties-helper (car val-count) ranks ties-method))]
@@ -222,8 +222,8 @@
              (iterate (cdr val-count)
                       (rank-ties-helper (car val-count) ranks ties-method))]))
     (let* ([ranks (iterate val-count '())]
-           [val-rank (map cons sorted-ls ranks)])
-      (match-ranks ls val-rank)))
+           [val-rank (map cons sorted-lst ranks)])
+      (match-ranks lst val-rank)))
 
   (define (rank-ties-helper val-count-pair ranks ties-method)
     (cond [(= (cdr val-count-pair) 1)

@@ -28,29 +28,29 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 
 ### Descriptive Statistics  
 
-[`(count-unique ls)`](#count-unique)  
+[`(count-unique lst)`](#count-unique)  
 [`(correlation x y method)`](#correlation)  
-[`(cumulative-sum ls)`](#cumulative-sum)  
+[`(cumulative-sum lst)`](#cumulative-sum)  
 [`(diff lst)`](#diff)  
-[`(kurtosis ls)`](#kurtosis)  
-[`(mean ls)`](#mean)  
-[`(median ls)`](#median)  
-[`(mode ls)`](#mode)  
-[`(quantile ls p type)`](#quantile)  
-[`(rank ls ties-method)`](#rank)  
-[`(rep n ls type)`](#rep)  
-[`(rle ls)`](#rle)  
+[`(kurtosis lst)`](#kurtosis)  
+[`(mean lst)`](#mean)  
+[`(median lst)`](#median)  
+[`(mode lst)`](#mode)  
+[`(quantile lst p type)`](#quantile)  
+[`(rank lst ties-method)`](#rank)  
+[`(rep n lst type)`](#rep)  
+[`(rle lst)`](#rle)  
 [`(sign x)`](#sign)  
-[`(skewness ls)`](#skewness)  
-[`(standard-deviation ls)`](#standard-deviation)  
-[`(unique ls)`](#unique)  
-[`(variance ls)`](#variance)  
-[`(weighted-mean ls weights)`](#weighted-mean)
+[`(skewness lst)`](#skewness)  
+[`(standard-deviation lst)`](#standard-deviation)  
+[`(unique lst)`](#unique)  
+[`(variance lst)`](#variance)  
+[`(weighted-mean lst weights)`](#weighted-mean)
 
 ### Read and Write Delimited Text Files
 
 [`(read-delim path sep-char max-rows)`](#read-delim)  
-[`(write-delim ls path sep-char overwrite)`](#write-delim)  
+[`(write-delim lst path sep-char overwrite)`](#write-delim)  
 
 ### Generate Random Variates
 
@@ -72,8 +72,8 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 
 ## Descriptive Statistics
 
-#### <a name="count-unique"></a> procedure: `(count-unique ls)`
-**returns:** a list of pairs where the `car` and `cdr` of each pair are the unique values and counts, respectively, of the values in list `ls`
+#### <a name="count-unique"></a> procedure: `(count-unique lst)`
+**returns:** a list of pairs where the `car` and `cdr` of each pair are the unique values and counts, respectively, of the values in list `lst`
 
 ```
 > (count-unique '(1 2 3 4 2 1))
@@ -83,7 +83,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 > (count-unique '(0.5 1/2 #e0.5 1 1 2))
 ((1/2 . 3) (1 . 2) (2 . 1))
 > (count-unique '("a" "b" "b" "a"))
-Exception in (count-unique ls): at least one element of ls is not a real number
+Exception in (count-unique lst): at least one element of lst is not a real number
 ```
 
 #### <a name="correlation"></a> procedure: `(correlation x y method)`
@@ -106,8 +106,8 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 0.07339758434175737
 ```
 
-#### <a name="cumulative-sum"></a> procedure: `(cumulative-sum ls)`
-**returns:** a list that is the cumulative sum of the values in `ls`
+#### <a name="cumulative-sum"></a> procedure: `(cumulative-sum lst)`
+**returns:** a list that is the cumulative sum of the values in `lst`
 
 ```
 > (cumulative-sum '(1 2 3 4 5))
@@ -117,7 +117,7 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 ```
 
 #### <a name="diff"></a> procedure: `(diff lst)`
-**returns:** list of differences with lag of 1 for all elements in `lst`
+**returns:** list of differences (with lag of one) for all elements in `lst`
 
 ```
 > (diff '(1 3 7 13))
@@ -126,8 +126,8 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 (30 -30)
 ```
 
-#### <a name="kurtosis"></a> procedure: `(kurtosis ls)`
-**returns:** the kurtosis of the values in `ls`
+#### <a name="kurtosis"></a> procedure: `(kurtosis lst)`
+**returns:** the kurtosis of the values in `lst`
 
 ```
 > (kurtosis '(-10 0 10))
@@ -136,8 +136,8 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 51/25
 ```
 
-#### <a name="mean"></a> procedure: `(mean ls)`
-**returns:** the arithmetic mean of the values in `ls`
+#### <a name="mean"></a> procedure: `(mean lst)`
+**returns:** the arithmetic mean of the values in `lst`
 
 ```
 > (mean '(1 2 3 4 5))
@@ -148,8 +148,8 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 27.5
 ```
 
-#### <a name="median"></a> procedure: `(median ls)`
-**returns:** the median of `ls`
+#### <a name="median"></a> procedure: `(median lst)`
+**returns:** the median of `lst`
 
 ```
 > (median '(1 2 3 4 5 6))
@@ -158,8 +158,8 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 3.5
 ```
 
-#### <a name="mode"></a> procedure: `(mode ls)`
-**returns:** a list with the values in `ls` that occur most frequently
+#### <a name="mode"></a> procedure: `(mode lst)`
+**returns:** a list with the values in `lst` that occur most frequently
 
 ```
 > (mode '(1 1 1 2 2 2))
@@ -168,8 +168,8 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 (4)
 ```
 
-#### <a name="quantile"></a> procedure: `(quantile ls p type)`
-**returns:** the sample quantile of the values in `ls` corresponding to the given probability, `p`, and `type`
+#### <a name="quantile"></a> procedure: `(quantile lst p type)`
+**returns:** the sample quantile of the values in `lst` corresponding to the given probability, `p`, and `type`
 
 The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stable/2684934) who recommend type 8, which is the default in `chez-stats`. The [default in R](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html) is type 7.
 
@@ -184,8 +184,8 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 1.125
 ```
 
-#### <a name="rank"></a> procedure: `(rank ls ties-method)`
-**returns:** a list of the sample ranks for the values in `ls`; ties are handled by replacing ranks with `'min` (default), `'max`, or `'mean`
+#### <a name="rank"></a> procedure: `(rank lst ties-method)`
+**returns:** a list of the sample ranks for the values in `lst`; ties are handled by replacing ranks with `'min` (default), `'max`, or `'mean`
 
 ```
 > (rank '(50 20 50 40 30))
@@ -198,8 +198,8 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 (9/2 1 9/2 3 2)
 ```
 
-#### <a name="rep"></a> procedure: `(rep n ls type)`
-**returns:** the appended list formed by repeating the values in `ls` either `n` times or `n` times each; replicates behavior of [`rep`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/rep.html) in R
+#### <a name="rep"></a> procedure: `(rep n lst type)`
+**returns:** the appended list formed by repeating the values in `lst` either `n` times or `n` times each; replicates behavior of [`rep`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/rep.html) in R
 
 ```
 > (rep 3 '(1 2) 'times)
@@ -214,8 +214,8 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 ((1 2) (1 2) (1 2) (a b) (a b) (a b))
 ```
 
-#### <a name="rle"></a> procedure: `(rle ls)`
-**returns:** run length encoding as a list of pairs where the `car` and `cdr` of each pair are the values and lengths of the runs, respectively, for the values in list `ls`
+#### <a name="rle"></a> procedure: `(rle lst)`
+**returns:** run length encoding as a list of pairs where the `car` and `cdr` of each pair are the values and lengths of the runs, respectively, for the values in list `lst`
 
 ```
 > (rle '(1 1 1 2 1 1))
@@ -223,7 +223,7 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 > (rle '(2 2 2 5 3 3))
 ((2 . 3) (5 . 1) (3 . 2))
 > (rle '("a" "b" "b" "a"))
-Exception in (rle ls): at least one element of ls is not a real number
+Exception in (rle lst): at least one element of lst is not a real number
 ```
 
 #### <a name="sign"></a> procedure: `(sign x)`
@@ -234,8 +234,8 @@ Exception in (rle ls): at least one element of ls is not a real number
 (-1 0 1)
 ```
 
-#### <a name="skewness"></a> procedure: `(skewness ls)`
-**returns:** the skewness of the values in `ls`
+#### <a name="skewness"></a> procedure: `(skewness lst)`
+**returns:** the skewness of the values in `lst`
 
 ```
 > (skewness '(1 2 3 4 5))
@@ -244,8 +244,8 @@ Exception in (rle ls): at least one element of ls is not a real number
 -0.6
 ```
 
-#### <a name="standard-deviation"></a> procedure: `(standard-deviation ls)`
-**returns:** the standard deviation of the values in `ls`
+#### <a name="standard-deviation"></a> procedure: `(standard-deviation lst)`
+**returns:** the standard deviation of the values in `lst`
 
 ```
 > (standard-deviation '(0 1 2 3 4 5))
@@ -254,8 +254,8 @@ Exception in (rle ls): at least one element of ls is not a real number
 1.8708286933869707
 ```
 
-#### <a name="unique"></a> procedure: `(unique ls)`
-**returns:** a sorted list of the unique values in `ls`
+#### <a name="unique"></a> procedure: `(unique lst)`
+**returns:** a sorted list of the unique values in `lst`
 
 ```
 > (unique '(0.5 #e0.5 1/2 1 1 1 5.2))
@@ -264,8 +264,8 @@ Exception in (rle ls): at least one element of ls is not a real number
 (0 1 2)
 ```
 
-#### <a name="variance"></a> procedure: `(variance ls)`
-**returns:** the sample variance of the values in `ls` based on [Welford's algorithm](https://www.johndcook.com/blog/standard_deviation/)
+#### <a name="variance"></a> procedure: `(variance lst)`
+**returns:** the sample variance of the values in `lst` based on [Welford's algorithm](https://www.johndcook.com/blog/standard_deviation/)
 
 ```
 > (variance '(1 10 100 1000))
@@ -274,8 +274,8 @@ Exception in (rle ls): at least one element of ls is not a real number
 3.5
 ```
 
-#### <a name="weighted-mean"></a> procedure: `(weighted-mean ls weights)`
-**returns:** the arithmetic mean of the values in `ls` weighted by the values in `weights`
+#### <a name="weighted-mean"></a> procedure: `(weighted-mean lst weights)`
+**returns:** the arithmetic mean of the values in `lst` weighted by the values in `weights`
 
 ```
 > (weighted-mean '(1 2 3 4 5) '(5 4 3 2 1))
@@ -299,8 +299,8 @@ same number of columns.
 #### <a name="read-delim"></a> procedure: `(read-delim path sep-char max-rows)`
 **returns:** a list of lists where each sub-list is one row in the file at `path`; `sep-char` and `max-rows` are optional and default to `#\,` and `+inf.0`, respectively 
 
-#### <a name="write-delim"></a> procedure: `(write-delim ls path sep-char overwrite)`
-**writes:** a list of lists `ls` as a delimited text file to `path`; `sep-char` and `overwrite` are optional and default to `#\,` and `#t`, respectively.
+#### <a name="write-delim"></a> procedure: `(write-delim lst path sep-char overwrite)`
+**writes:** a list of lists `lst` as a delimited text file to `path`; `sep-char` and `overwrite` are optional and default to `#\,` and `#t`, respectively.
 
 
 ```

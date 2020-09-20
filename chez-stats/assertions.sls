@@ -12,13 +12,13 @@
 
   (import (chezscheme))
 
-  (define (check-list ls ls-name who)
-    (unless (list? ls)
-      (assertion-violation who (string-append ls-name " is not a list")))
-    (unless (for-all real? ls)
-      (assertion-violation who (string-append "at least one element of " ls-name " is not a real number")))
-    (when (null? ls)
-      (assertion-violation who (string-append ls-name " is empty"))))
+  (define (check-list lst lst-name who)
+    (unless (list? lst)
+      (assertion-violation who (string-append lst-name " is not a list")))
+    (unless (for-all real? lst)
+      (assertion-violation who (string-append "at least one element of " lst-name " is not a real number")))
+    (when (null? lst)
+      (assertion-violation who (string-append lst-name " is empty"))))
 
   (define (check-quantile-type type who)
     (unless (and (and (> type 0) (< type 10)) (integer? type))

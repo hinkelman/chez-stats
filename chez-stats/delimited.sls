@@ -65,30 +65,30 @@
 
   (define write-delim
     (case-lambda
-      [(ls path) (write-delim-helper ls path #\, #t)]
-      [(ls path sep-char) (write-delim-helper ls path sep-char #t)]
-      [(ls path sep-char overwrite) (write-delim-helper ls path sep-char overwrite)]))
+      [(lst path) (write-delim-helper lst path #\, #t)]
+      [(lst path sep-char) (write-delim-helper lst path sep-char #t)]
+      [(lst path sep-char overwrite) (write-delim-helper lst path sep-char overwrite)]))
 
-  (define (write-delim-helper ls path sep-char overwrite)
+  (define (write-delim-helper lst path sep-char overwrite)
     (when (and (file-exists? path) (not overwrite))
       (assertion-violation path "file already exists"))
     (delete-file path)
     (let ([p (open-output-file path)])
-      (let loop ([ls-local ls])
-	(cond [(null? ls-local)
+      (let loop ([lst-local lst])
+	(cond [(null? lst-local)
 	       (close-port p)]
 	      [else
-	       (put-string p (delimit-list (car ls-local) sep-char))
+	       (put-string p (delimit-list (car lst-local) sep-char))
 	       (newline p)
-	       (loop (cdr ls-local))]))))
+	       (loop (cdr lst-local))]))))
 
-  (define (delimit-list ls sep-char)
-    (let loop ([ls ls]
+  (define (delimit-list lst sep-char)
+    (let loop ([lst lst]
 	       [result ""]
 	       [first? #t])
-      (if (null? ls)
+      (if (null? lst)
   	  result
-  	  (let* ([item (car ls)]
+  	  (let* ([item (car lst)]
   		 [sep-str (if first? "" (string sep-char))]
   		 [item-new (cond [(char? item) (string item)]
   				 [(symbol? item) (symbol->string item)]
@@ -97,7 +97,7 @@
   						    (exact->inexact item)
   						    item))]
   				 [else (quote-string item sep-char)])])
-  	    (loop (cdr ls) (string-append result sep-str item-new) #f)))))
+  	    (loop (cdr lst) (string-append result sep-str item-new) #f)))))
 
   (define (quote-string str sep-char)
     (let* ([in (open-input-string str)]
