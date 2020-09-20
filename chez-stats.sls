@@ -21,7 +21,9 @@
    repeat
    ;; statistics
    count-unique
+   correlation
    cumulative-sum
+   diff
    kurtosis
    mean
    median
@@ -30,6 +32,7 @@
    rank
    rep
    rle
+   sign
    standard-deviation
    skewness
    unique

@@ -29,7 +29,9 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 ### Descriptive Statistics  
 
 [`(count-unique ls)`](#count-unique)  
+[`(correlation x y method)`](#correlation)  
 [`(cumulative-sum ls)`](#cumulative-sum)  
+[`(diff lst)`](#diff)  
 [`(kurtosis ls)`](#kurtosis)  
 [`(mean ls)`](#mean)  
 [`(median ls)`](#median)  
@@ -38,6 +40,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 [`(rank ls ties-method)`](#rank)  
 [`(rep n ls type)`](#rep)  
 [`(rle ls)`](#rle)  
+[`(sign x)`](#sign)  
 [`(skewness ls)`](#skewness)  
 [`(standard-deviation ls)`](#standard-deviation)  
 [`(unique ls)`](#unique)  
@@ -83,6 +86,26 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 Exception in (count-unique ls): at least one element of ls is not a real number
 ```
 
+#### <a name="correlation"></a> procedure: `(correlation x y method)`
+**returns:** correlation coefficient between values in lists `x` and `y`; methods available: `'pearson`, `'spearman`, `'kendall`
+
+```
+> (correlation (iota 10) (iota 10) 'pearson)
+1.0
+> (correlation (iota 10) (map - (iota 10)) 'pearson)
+-1.0
+> (correlation '(1 2 3 4) '(2 2.01 2.01 2) 'pearson)
+0.0
+> (define x '(86 97 99 100 101 103 106 110 112 113 86))
+> (define y '(2 20 28 27 50 29 7 17 6 12 1))
+> (correlation x y 'pearson)
+0.15611738363791983
+> (correlation x y 'spearman)
+0.11389551189455129
+> (correlation x y 'kendall)
+0.07339758434175737
+```
+
 #### <a name="cumulative-sum"></a> procedure: `(cumulative-sum ls)`
 **returns:** a list that is the cumulative sum of the values in `ls`
 
@@ -91,6 +114,16 @@ Exception in (count-unique ls): at least one element of ls is not a real number
 (1 3 6 10 15)
 > (cumulative-sum '(5 4 3 2 1))
 (5 9 12 14 15)
+```
+
+#### <a name="diff"></a> procedure: `(diff lst)`
+**returns:** list of differences with lag of 1 for all elements in `lst`
+
+```
+> (diff '(1 3 7 13))
+(2 4 6)
+> (diff '(-10 20 -10))
+(30 -30)
 ```
 
 #### <a name="kurtosis"></a> procedure: `(kurtosis ls)`
@@ -191,6 +224,14 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 ((2 . 3) (5 . 1) (3 . 2))
 > (rle '("a" "b" "b" "a"))
 Exception in (rle ls): at least one element of ls is not a real number
+```
+
+#### <a name="sign"></a> procedure: `(sign x)`
+**returns:** sign of `x`
+
+```
+> (sign '(-10 0 10))
+(-1 0 1)
 ```
 
 #### <a name="skewness"></a> procedure: `(skewness ls)`

@@ -1,7 +1,9 @@
 (library (chez-stats statistics)
   (export
    count-unique
+   correlation
    cumulative-sum
+   diff
    kurtosis
    mean
    median
@@ -10,6 +12,7 @@
    rank
    rep
    rle
+   sign
    standard-deviation
    skewness
    unique
@@ -176,7 +179,7 @@
             [else
              (assertion-violation
               proc-string
-              "type must be symbol: 'each or 'times")])))
+              "type must be one of these symbols: 'each or 'times")])))
 
   (define (rep-times n ls)
     (let loop ([ls-out ls]
@@ -194,7 +197,7 @@
                       (member ties-method '(min max mean)))
            (assertion-violation
             proc-string
-            "ties-method must be symbol: 'min, 'max', or 'mean")))
+            "ties-method must be one of these symbols: 'min, 'max, or 'mean")))
        (let* ([sorted-ls (sort < ls)]
               [val-count (rle sorted-ls)]
               [max-count (apply max (map cdr val-count))])
@@ -244,6 +247,116 @@
                   (cons 'min (lambda (x) (make-list n (apply min x))))
                   (cons 'max (lambda (x) (make-list n (apply max x)))))])
       ((cdr (assoc ties-method proc-lookup)) ranks)))
+
+  (define (correlation x y method)
+    (let ([proc-string "(correlation x y method)"])
+      (check-list x "x" proc-string)
+      (check-list y "y" proc-string)
+      (unless (= (length x) (length y))
+        (assertion-violation proc-string  "x and y must be same length"))
+      (cond [(symbol=? method 'pearson)
+             (pearson x y)]
+            [(symbol=? method 'spearman)
+             (pearson (rank x 'mean) (rank y 'mean))]
+            [(symbol=? method 'kendall)
+             (exact->inexact (kendall x y))]
+            [else
+             (assertion-violation
+              proc-string
+              "method must be one of these symbols: 'pearson, 'spearman, or 'kendall")]))) 
+  
+  (define (pearson x y)
+    (let ([n (length x)]
+           [x-sum (apply + x)]
+           [y-sum (apply + y)]
+           [xy-sum (apply
+                    + (map (lambda (x-val y-val)
+                             (* x-val y-val))
+                           x y))]
+           [x2-sum (sum-squares x)]
+           [y2-sum (sum-squares y)])
+      (/ (- (* n xy-sum) (* x-sum y-sum))
+         (* (sqrt (- (* n x2-sum) (expt x-sum 2)))
+            (sqrt (- (* n y2-sum) (expt y-sum 2)))))))
+
+  (define (sum-squares lst)
+    (apply + (map (lambda (x) (expt x 2)) lst)))
+
+  (define (kendall x y)
+    (let* ([pairs (sort-two-lists (rank x 'mean)
+                                  (rank y 'mean))]
+           [x-ranks (map car pairs)]
+           [y-ranks (map cdr pairs)]
+           [n (length x-ranks)]
+           [N (/ (* n (sub1 n)) 2)])
+      (let-values ([(C D x-ties y-ties)
+                    (concordance x-ranks y-ranks)])
+      (/ (- C D) (sqrt (* (- N x-ties) (- N y-ties)))))))
+         
+  (define (concordance x y)
+    (let loop ([x x]
+               [y y]
+               [C 0]
+               [D 0]
+               [x-ties 0]
+               [y-ties 0])
+      (cond [(null? (cdr x))
+             (values C D x-ties y-ties)]
+            [else
+             (loop (cdr x) (cdr y)
+                   (+ C (cordant-count x y 1))
+                   (+ D (cordant-count x y -1))
+                   (+ x-ties (ties-count x))
+                   (+ y-ties (ties-count y)))])))
+                   
+  ;; sign = -1, 1
+  (define (cordant-count x y sign)
+    (length
+     (filter (lambda (a)
+               (= a sign))
+             (map * (diff-first-sign x) (diff-first-sign y)))))
+
+  (define (ties-count lst)
+    (length (filter (lambda (x) (= x 0)) (diff-first-sign lst))))
+                  
+  (define (diff-first-sign lst)
+    (map (lambda (x) (sign (- (car lst) x))) (cdr lst)))
+    
+  ;; sort two lists in ascending order
+  ;; sorts first by x and then by y
+  ;; returns sorted list of pairs 
+  (define (sort-two-lists x y)
+    (map cdr (sort (lambda (a b)
+                     (< (car a) (car b)))
+                   (map cons
+                        (sum-weighted-order x y)
+                        (map cons x y)))))
+                    
+  (define (sum-weighted-order x y)
+    (let ([x-weight (weighted-order x 100)]
+          [y-weight (weighted-order y (/ 100 (length (unique y))))])
+      (map + x-weight y-weight)))
+
+  ;; returns list of weighted order values for every value in lst 
+  (define (weighted-order lst weight)
+    (let* ([unique-sorted (unique lst)]
+           [ranks (map (lambda (x) (* x weight)) (enumerate unique-sorted))]
+           [lookup (map cons unique-sorted ranks)]) 
+      (map (lambda (x) (cdr (assoc x lookup))) lst)))
+
+  (define (diff lst)
+    (check-list lst "lst" "(diff lst)")
+    (let loop ([lst lst]
+               [out '()])
+      (cond [(null? (cdr lst))
+             (reverse out)]
+            [(loop (cdr lst)
+                   (cons (- (cadr lst) (car lst)) out))])))
+
+   (define (sign x)
+    (cond [(< x 0) -1]
+          [(> x 0) 1]
+          [else 0]))
   
   )
 
