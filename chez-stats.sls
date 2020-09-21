@@ -17,6 +17,7 @@
    random-normal
    random-pareto
    random-poisson
+   random-sample
    random-uniform
    repeat
    ;; statistics

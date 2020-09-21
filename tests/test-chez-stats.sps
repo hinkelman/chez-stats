@@ -26,14 +26,14 @@
 ;; random-variates
 
 (test-begin "bernoulli-test")
-(define bernoulli-list (repeat 1e5 (lambda () (random-bernoulli 0.2))))
+(define bernoulli-list (random-sample 1e5 'bernoulli 0.2))
 (test-approximate 0.2 (mean bernoulli-list) 0.01)
 (test-approximate 0.16 (variance bernoulli-list) 0.008)
 (test-error (random-bernoulli 2 1.2))
 (test-end "bernoulli-test")
 
 (test-begin "beta-test")
-(define beta-list (repeat 1e5 (lambda () (random-beta 1 3))))
+(define beta-list (random-sample 1e5 'beta 1 3))
 (test-approximate 0.25 (mean beta-list) 0.0125)
 (test-approximate 0.037 (variance beta-list) 0.00185)
 (test-error (random-beta -7 3))
@@ -41,7 +41,7 @@
 (test-end "beta-test")
 
 (test-begin "beta-binomial-test")
-(define beta-binomial-list (repeat 1e5 (lambda () (random-beta-binomial 10 0.5 1.0001))))
+(define beta-binomial-list (random-sample 1e5 'beta-binomial 10 0.5 1.0001))
 (test-approximate 5 (mean beta-binomial-list) 0.25)
 (test-approximate 2.5 (variance beta-binomial-list) 0.125)
 (test-error (random-beta-binomial 10.3 0.5 5))
@@ -51,7 +51,7 @@
 (test-end "beta-binomial-test")
 
 (test-begin "binomial-test")
-(define binomial-list (repeat 1e5 (lambda () (random-binomial 10 0.5))))
+(define binomial-list (random-sample 1e5 'binomial 10 0.5))
 (test-approximate 5 (mean binomial-list) 0.25)
 (test-approximate 2.5 (variance binomial-list) 0.125)
 (test-error (random-binomial -2 0.5))
@@ -59,14 +59,14 @@
 (test-end "binomial-test")
 
 (test-begin "exponential-test")
-(define exponential-list (repeat 1e5 (lambda () (random-exponential 10))))
+(define exponential-list (random-sample 1e5 'exponential 10))
 (test-approximate 10 (mean exponential-list) 0.5)
 (test-approximate 100 (variance exponential-list) 5)
 (test-error (random-exponential -2))
 (test-end "exponential-test")
 
 (test-begin "gamma-test")
-(define gamma-list (repeat 1e5 (lambda () (random-gamma 10 2))))
+(define gamma-list (random-sample 1e5 'gamma 10 2))
 (test-approximate 5 (mean gamma-list) 0.25)
 (test-approximate 2.5 (variance gamma-list) 0.125)
 (test-error (random-gamma -7 2))
@@ -74,14 +74,14 @@
 (test-end "gamma-test")
 
 (test-begin "geometric-test")
-(define geometric-list (repeat 1e5 (lambda () (random-geometric 0.2))))
+(define geometric-list (random-sample 1e5 'geometric 0.2))
 (test-approximate 5 (mean geometric-list) 0.25)
 (test-approximate 20 (variance geometric-list) 1)
 (test-error (random-geometric 1))
 (test-end "geometric-test")
 
 (test-begin "lognormal-test")
-(define lognormal-list (repeat 1e5 (lambda () (random-lognormal 2 1))))
+(define lognormal-list (random-sample 1e5 'lognormal 2 1))
 (test-approximate 12.28 (mean lognormal-list) 0.614)
 (test-approximate 16 (standard-deviation lognormal-list) 0.8)
 (test-error (random-lognormal "a" 1))
@@ -100,7 +100,7 @@
 (test-end "multinomial-test")
 
 (test-begin "negative-binomial-test")
-(define negative-binomial-list (repeat 1e5 (lambda () (random-negative-binomial 10 0.2))))
+(define negative-binomial-list (random-sample 1e5 'negative-binomial 10 0.2))
 (test-approximate 40 (mean negative-binomial-list) 2)
 (test-approximate 201 (variance negative-binomial-list) 10.05)
 (test-error (random-negative-binomial 10 0))
@@ -108,7 +108,7 @@
 (test-end "negative-binomial-test")
 
 (test-begin "normal-test")
-(define normal-list (repeat 1e5 (lambda () (random-normal 42 5))))
+(define normal-list (random-sample 1e5 'normal 42 5))
 (test-approximate 42 (mean normal-list) 2.1)
 (test-approximate 5 (standard-deviation normal-list) 0.25)
 (test-error (random-normal "a" 5))
@@ -116,21 +116,21 @@
 (test-end "normal-test")
 
 (test-begin "pareto-test")
-(define pareto-list (repeat 1e5 (lambda () (random-pareto 5))))
+(define pareto-list (random-sample 1e5 'pareto 5))
 (test-approximate 1.25 (mean pareto-list) 0.0625)
 (test-approximate 0.104 (variance pareto-list) 0.005)
 (test-error (random-pareto -2))
 (test-end "pareto-test")
 
 (test-begin "poisson-test")
-(define poisson-list (repeat 1e5 (lambda () (random-poisson 7))))
+(define poisson-list (random-sample 1e5 'poisson 7))
 (test-approximate 7 (mean poisson-list) 0.35)
 (test-approximate 7 (variance poisson-list) 0.35)
 (test-error (random-poisson -10))
 (test-end "poisson-test")
 
 (test-begin "uniform-test")
-(define uniform-list (repeat 1e5 (lambda () (random-uniform -10 7))))
+(define uniform-list (random-sample 1e5 'uniform -10 7))
 (test-approximate -10 (apply min uniform-list) 0.01)
 (test-approximate 7 (apply max uniform-list) 0.01)
 (test-error (random-uniform 'a 1))

@@ -13,6 +13,7 @@
    random-normal
    random-pareto
    random-poisson
+   random-sample
    random-uniform
    repeat)
 
@@ -36,6 +37,28 @@
       (if (= i n)
           result
           (loop (add1 i) (+ (thunk) result)))))
+
+  (define (random-sample n dist . args)
+    (unless (member dist '(bernoulli beta beta-binomial binomial exponential gamma geometric lognormal multinomial negative-binomial normal pareto poisson uniform))
+      (assertion-violation
+       "(random-sample n dist . args)"
+       "dist must be one of these symbols: 'bernoulli 'beta, 'beta-binomial, 'binomial, 'exponential, 'gamma, 'geometric, 'lognormal, 'multinomial, 'negative-binomial, 'normal, 'pareto, 'poisson, 'uniform"))
+    (let* ([lookup (list (cons 'bernoulli random-bernoulli)
+                         (cons 'beta random-beta)
+                         (cons 'beta-binomial random-beta-binomial)
+                         (cons 'binomial random-binomial)
+                         (cons 'exponential random-exponential)
+                         (cons 'gamma random-gamma)
+                         (cons 'geometric random-geometric)
+                         (cons 'lognormal random-lognormal)
+                         (cons 'multinomial random-multinomial)
+                         (cons 'negative-binomial random-negative-binomial)
+                         (cons 'normal random-normal)
+                         (cons 'pareto random-pareto)
+                         (cons 'poisson random-poisson)
+                         (cons 'uniform random-uniform))]
+           [proc (cdr (assoc dist lookup))])
+      (repeat n (lambda () (apply proc args)))))
   
   ;; from https://www.cse.wustl.edu/~jain/books/ftp/ch5f_slides.pdf
   (define (random-bernoulli p)
