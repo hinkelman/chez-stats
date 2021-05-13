@@ -231,8 +231,12 @@ Exception in (rle lst): at least one element of lst is not a real number
 **returns:** sign of `x`
 
 ```
-> (sign '(-10 0 10))
-(-1 0 1)
+> (sign -3)
+-1
+> (sign 0)
+0
+> (sign 7)
+1
 ```
 
 #### <a name="skewness"></a> procedure: `(skewness lst)`
