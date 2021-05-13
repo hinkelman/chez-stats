@@ -181,6 +181,14 @@
 (test-error (diff "test"))
 (test-end "diff-test")
 
+(test-begin "iqr-test")
+(test-assert (= 4.125 (interquartile-range '(3 7 4 8 9 7) 9)))
+(test-assert (= 2.5 (interquartile-range '(1 2 3 4 5 6) 7)))
+(test-error (interquartile-range 999 7))
+(test-error (interquartile-range '(a b c) 7))
+(test-error (interquartile-range '(1 2 3) 10))
+(test-end "iqr-test")
+
 (test-begin "kurtosis-test")
 (test-assert (= 17/10 (kurtosis '(1 2 3 4 5))))
 (test-assert (= 51/25 (kurtosis '(1 2 2 3 3 3))))
