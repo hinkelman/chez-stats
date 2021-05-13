@@ -25,6 +25,7 @@
    correlation
    cumulative-sum
    diff
+   interquartile-range
    kurtosis
    mean
    median
