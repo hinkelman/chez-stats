@@ -210,6 +210,7 @@
 
 (test-begin "quantile-test")
 (test-assert (= 3 (quantile '(1 2 3 4 5 6) 0.5 1)))
+(test-assert (= 8 (quantile '(3 7 4 8 9 7) 0.75 1)))
 (test-assert (= 3.0 (quantile '(1 2 3 4 5 6) 0.5 4)))
 (test-assert (= 3.5 (quantile '(1 2 3 4 5 6) 0.5 8)))
 (test-assert (= 1.125 (quantile '(1 2 3 4 5 6) 0.025 7)))
