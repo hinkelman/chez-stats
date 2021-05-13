@@ -62,6 +62,9 @@
       [(lst type) (iqr lst type)]))
 
   (define (iqr lst type)
+    (let ([proc-string "(interquartile-range lst type)"])
+      (check-list lst "lst" proc-string)
+      (check-quantile-type type proc-string))
     (let ([lwr (quantile lst 0.25 type)]
           [upr (quantile lst 0.75 type)])
       (- upr lwr)))
