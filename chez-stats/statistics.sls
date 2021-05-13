@@ -56,6 +56,16 @@
     (check-list lst "lst" "(unique lst)")
     (map car (count-unique lst)))
 
+  (define interquartile-range
+    (case-lambda
+      [(lst) (iqr lst 8)]
+      [(lst type) (iqr lst type)]))
+
+  (define (iqr lst type)
+    (let ([lwr (quantile lst 0.25 type)]
+          [upr (quantile lst 0.75 type)])
+      (- upr lwr)))
+
   (define quantile
     (case-lambda
       [(lst p) (quantile-helper lst p 8)]
