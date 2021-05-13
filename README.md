@@ -32,6 +32,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 [`(correlation x y method)`](#correlation)  
 [`(cumulative-sum lst)`](#cumulative-sum)  
 [`(diff lst)`](#diff)  
+[`(interquartile-range lst type)`](#iqr)  
 [`(kurtosis lst)`](#kurtosis)  
 [`(mean lst)`](#mean)  
 [`(median lst)`](#median)  
@@ -125,6 +126,18 @@ Exception in (count-unique lst): at least one element of lst is not a real numbe
 (2 4 6)
 > (diff '(-10 20 -10))
 (30 -30)
+```
+
+#### <a name="iqr"></a> procedure: `(interquartile-range lst type)`
+**returns:** the difference in the 0.25 and 0.75 sample quantiles of the values in `lst` corresponding to the given `type` (see [`quantile`](#quantile) for more info on `type`)
+
+```
+> (interquartile-range '(1 2 3 5 5))
+3.3333333333333335
+> (interquartile-range '(1 2 3 5 5) 1)
+3
+> (interquartile-range '(3 7 4 8 9 7) 9)
+4.125
 ```
 
 #### <a name="kurtosis"></a> procedure: `(kurtosis lst)`
