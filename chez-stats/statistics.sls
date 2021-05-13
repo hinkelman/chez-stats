@@ -77,7 +77,7 @@
       (check-p p proc-string)
       (check-quantile-type type proc-string))
     (let* ([n (length lst)]
-	   [order-stats (unique lst)]
+           [order-stats (sort < lst)]
 	   ;; ms is list of m values for each quantile type
 	   [ms (list 0 0 -1/2 0 1/2 p (- 1 p) (* (add1 p) 1/3) (+ (* p 1/4) 3/8))]
 	   [m (list-ref ms (sub1 type))]
