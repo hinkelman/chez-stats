@@ -585,7 +585,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
 ```
 
 #### <a name="random-uniform"></a> procedure: `(random-uniform mn mx)`
-**returns:** a random variate from a uniform distribution with mininum `mn` and maximum `mx`
+**returns:** a random variate from a uniform distribution with minimum `mn` and maximum `mx`
 
 ```
 > (random-uniform -100 100)

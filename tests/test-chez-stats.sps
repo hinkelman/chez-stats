@@ -55,7 +55,7 @@
 (test-approximate 5 (mean binomial-list) 0.25)
 (test-approximate 2.5 (variance binomial-list) 0.125)
 (test-error (random-binomial -2 0.5))
-(test-error (random-bionmial 2 1.2))
+(test-error (random-binomial 2 1.2))
 (test-end "binomial-test")
 
 (test-begin "exponential-test")
