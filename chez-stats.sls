@@ -34,6 +34,7 @@
    rank
    rep
    rle
+   shuffle
    sign
    standard-deviation
    skewness

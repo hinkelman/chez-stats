@@ -71,6 +71,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 [`(random-uniform mn mx)`](#random-uniform)  
 [`(random-sample n dist . args)`](#random-sample)  
 [`(repeat n thunk)`](#repeat)  
+[`(shuffle lst)`](#shuffle)  
 
 ## Descriptive Statistics
 
@@ -622,4 +623,18 @@ The probability distribution of the number of Bernoulli trials needed to get one
 
 > (repeat 3 (lambda () (random-normal)))
 (0.6050717276786769 0.3875905343441506 0.8670747717354842)
+```
+
+#### <a name="shuffle"></a> procedure: `(shuffle lst)`
+**returns:** a randomly sorted list of the values in `lst` 
+
+```
+> (shuffle (iota 5))
+(3 4 0 1 2)
+
+> (shuffle (iota 5))
+(2 0 4 3 1)
+
+> (shuffle (iota 5))
+(0 1 4 2 3)
 ```

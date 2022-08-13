@@ -15,7 +15,8 @@
    random-poisson
    random-sample
    random-uniform
-   repeat)
+   repeat
+   shuffle)
 
   (import (chezscheme)
 	  (chez-stats assertions))
@@ -223,4 +224,9 @@
 	(assertion-violation proc-string "mx is not greater than mn")))
     (+ mn (* (- mx mn) (random 1.0))))
 
+  (define (shuffle lst)
+    (let* ([n (length lst)]
+           [rand-lst (repeat n (lambda () (random n)))]
+           [lst-pairs (map cons rand-lst lst)])
+      (map cdr (list-sort (lambda (x y) (< (car x) (car y))) lst-pairs))))
   )
