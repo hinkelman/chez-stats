@@ -225,6 +225,7 @@
     (+ mn (* (- mx mn) (random 1.0))))
 
   (define (shuffle lst)
+    (check-list lst "lst" "(shuffle lst)")
     (let* ([n (length lst)]
            [rand-lst (repeat n (lambda () (random n)))]
            [lst-pairs (map cons rand-lst lst)])

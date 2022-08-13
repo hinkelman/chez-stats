@@ -129,6 +129,12 @@
 (test-error (random-poisson -10))
 (test-end "poisson-test")
 
+(test-begin "shuffle-test")
+(test-error (shuffle '()))
+(test-error (shuffle '(1 "a")))
+(test-error (shuffle (vector 1 2 3)))
+(test-end "shuffle-test")
+
 (test-begin "uniform-test")
 (define uniform-list (random-sample 1e5 'uniform -10 7))
 (test-approximate -10 (apply min uniform-list) 0.01)
