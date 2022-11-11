@@ -313,7 +313,7 @@ Exception in (rle lst): at least one element of lst is not a real number
 
 There is nothing sophisticated about this approach to reading delimited text files. For all files, `read-delimited` produces a list of lists of strings.
 There is no attempt to convert strings to numbers or other objects. The file contents needs to be rectangular, i.e., every row must have the
-same number of columns.
+same number of columns. For an alternative approach, see [chez-csv](https://akkuscm.org/packages/chez-csv/).
 
 #### <a name="read-delim"></a> procedure: `(read-delim path sep-char max-rows)`
 **returns:** a list of lists where each sub-list is one row in the file at `path`; `sep-char` and `max-rows` are optional and default to `#\,` and `+inf.0`, respectively 
