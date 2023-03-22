@@ -32,13 +32,13 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 [`(correlation x y method)`](#correlation)  
 [`(cumulative-sum lst)`](#cumulative-sum)  
 [`(diff lst)`](#diff)  
-[`(interquartile-range lst type)`](#iqr)  
+[`(interquartile-range lst [type])`](#iqr)  
 [`(kurtosis lst)`](#kurtosis)  
 [`(mean lst)`](#mean)  
 [`(median lst)`](#median)  
 [`(mode lst)`](#mode)  
-[`(quantile lst p type)`](#quantile)  
-[`(rank lst ties-method)`](#rank)  
+[`(quantile lst p [type])`](#quantile)  
+[`(rank lst [ties-method])`](#rank)  
 [`(rep n lst type)`](#rep)  
 [`(rle lst)`](#rle)  
 [`(sign x)`](#sign)  
@@ -129,7 +129,7 @@ Exception in (count-unique lst): at least one element of lst is not a real numbe
 (30 -30)
 ```
 
-#### <a name="iqr"></a> procedure: `(interquartile-range lst type)`
+#### <a name="iqr"></a> procedure: `(interquartile-range lst [type])`
 **returns:** the difference in the 0.25 and 0.75 sample quantiles of the values in `lst` corresponding to the given `type` (see [`quantile`](#quantile) for more info on `type`)
 
 ```
@@ -183,7 +183,7 @@ Exception in (count-unique lst): at least one element of lst is not a real numbe
 (4)
 ```
 
-#### <a name="quantile"></a> procedure: `(quantile lst p type)`
+#### <a name="quantile"></a> procedure: `(quantile lst p [type])`
 **returns:** the sample quantile of the values in `lst` corresponding to the given probability, `p`, and `type`
 
 The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stable/2684934) who recommend type 8, which is the default in `chez-stats`. The [default in R](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html) is type 7.
@@ -199,7 +199,7 @@ The quantile function follows [Hyndman and Fan 1996](https://www.jstor.org/stabl
 1.125
 ```
 
-#### <a name="rank"></a> procedure: `(rank lst ties-method)`
+#### <a name="rank"></a> procedure: `(rank lst [ties-method])`
 **returns:** a list of the sample ranks for the values in `lst`; ties are handled by replacing ranks with `'min` (default), `'max`, or `'mean`
 
 ```
