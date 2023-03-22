@@ -50,8 +50,8 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 
 ### Read and Write Delimited Text Files
 
-[`(read-delim path sep-char max-rows)`](#read-delim)  
-[`(write-delim lst path sep-char overwrite)`](#write-delim)  
+[`(read-delim path [sep-char max-rows])`](#read-delim)  
+[`(write-delim lst path [sep-char overwrite])`](#write-delim)  
 
 ### Generate Random Variates
 
@@ -65,7 +65,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 [`(random-lognormal mulog sdlog)`](#random-lognormal)  
 [`(random-multinomial trials ps)`](#random-multinomial)  
 [`(random-negative-binomial trials p)`](#random-negative-binomial)  
-[`(random-normal mu sd)`](#random-normal)  
+[`(random-normal [mu sd])`](#random-normal)  
 [`(random-pareto shape)`](#random-pareto)  
 [`(random-poisson mu)`](#random-poisson)  
 [`(random-uniform mn mx)`](#random-uniform)  
@@ -315,10 +315,10 @@ There is nothing sophisticated about this approach to reading delimited text fil
 There is no attempt to convert strings to numbers or other objects. The file contents needs to be rectangular, i.e., every row must have the
 same number of columns. For an alternative approach, see [chez-csv](https://akkuscm.org/packages/chez-csv/).
 
-#### <a name="read-delim"></a> procedure: `(read-delim path sep-char max-rows)`
+#### <a name="read-delim"></a> procedure: `(read-delim path [sep-char max-rows])`
 **returns:** a list of lists where each sub-list is one row in the file at `path`; `sep-char` and `max-rows` are optional and default to `#\,` and `+inf.0`, respectively 
 
-#### <a name="write-delim"></a> procedure: `(write-delim lst path sep-char overwrite)`
+#### <a name="write-delim"></a> procedure: `(write-delim lst path [sep-char overwrite])`
 **writes:** a list of lists `lst` as a delimited text file to `path`; `sep-char` and `overwrite` are optional and default to `#\,` and `#t`, respectively.
 
 
@@ -533,7 +533,7 @@ The probability distribution of the number of Bernoulli trials needed to get one
 7.00099
 ```
 
-#### <a name="random-normal"></a> procedure: `(random-normal mu sd)`
+#### <a name="random-normal"></a> procedure: `(random-normal [mu sd])`
 **returns:** a random variate from a normal distribution with mean `mu` and standard deviation `sd`; `mu` and `sd` are optional and default to `0` and `1`, respectively 
 
 ```
