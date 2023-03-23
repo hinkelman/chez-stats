@@ -237,6 +237,7 @@
 (test-equal '(4 2 5 1 8 5 2 5) (rank '(30 20 50 10 60 50 20 50)))
 (test-equal '(4 5/2 6 1 8 6 5/2 6) (rank '(30 20 50 10 60 50 20 50) 'mean))
 (test-equal '(4 3 7 1 8 7 3 7) (rank '(30 20 50 10 60 50 20 50) 'max))
+(test-equal '(4 2 5 1 8 5 2 5) (rank '(30 20 50 10 60 50 20 50) 'min))
 (test-end "rank-test")
 
 (test-begin "rep-test")
