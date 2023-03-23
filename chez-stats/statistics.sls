@@ -24,6 +24,9 @@
 	  (chez-stats assertions))
 
   (define (rle lst)
+    ;; run length encoding
+    ;; returns a list of pairs where the car and cdr of each pair
+    ;; are the values and lengths of the runs, respectively, for the values in lst
     (check-list lst "lst" "(rle lst)")
     (let loop ([first (car lst)]
                [rest (cdr lst)]
@@ -45,6 +48,7 @@
     (rle (sort < lst)))
   
   (define (mode lst)
+    ;; returns a list with the value(s) in lst that occur most frequently
     (check-list lst "lst" "(mode lst)")
     (let* ([val-count (count-unique lst)]
 	   [mx (apply max (map cdr val-count))])
@@ -58,6 +62,7 @@
     (map car (count-unique lst)))
 
   (define interquartile-range
+    ;; type is an integer from 1-9
     (case-lambda
       [(lst) (iqr lst 8)]
       [(lst type) (iqr lst type)]))
@@ -71,11 +76,13 @@
       (- upr lwr)))
 
   (define quantile
+    ;; type is an integer from 1-9
     (case-lambda
       [(lst p) (quantile-helper lst p 8)]
       [(lst p type) (quantile-helper lst p type)]))
 
   (define (quantile-helper lst p type)
+    ;; see https://www.jstor.org/stable/2684934 for quantile-helper, calc-Q, and get-gamma
     (let ([proc-string "(quantile lst p type)"])
       (check-list lst "lst" proc-string)
       (check-p p proc-string)
@@ -93,7 +100,7 @@
       (calc-Q order-stats j gamma)))
 
   (define (calc-Q order-stats j gamma)
-    ;; j is calculated for one-based indexing; need to adjust to zero-based
+    ;; j is described for one-based indexing; adjusted for zero-based indexing
     (let ([n-os (length order-stats)])
       (cond
        [(< j 1) (list-ref order-stats 0)]
@@ -109,6 +116,7 @@
      [else g]))
 
   (define (median lst)
+    ;; type 7 is chosen to match R even though default for quantile in chez-stats is 8
     (check-list lst "lst" "(median lst)")
     (quantile lst 0.5 7))
 
@@ -127,6 +135,7 @@
     (/ (apply + lst) (length lst)))
 
   (define (skewness lst)
+    ;; based on skewness function from R package `moments`
     (check-list lst "lst" "(skewness lst)")
     (let* ([n (length lst)]
 	   [x-bar (mean lst)]
@@ -136,6 +145,7 @@
       (/ num (expt den (/ 3 2)))))
 
   (define (kurtosis lst)
+    ;; based on kurtosis function from R package `moments`
     (check-list lst "lst" "(kurtosis lst)")
     (let* ([n (length lst)]
 	   [x-bar (mean lst)]
@@ -153,15 +163,19 @@
     (/ (apply + (map (lambda (x y) (* x y)) lst weights)) (apply + weights)))
 
   (define (variance lst)
-    ;; ms is a pair of m and s variables
-    ;; x is current value of lst in loop
-    (define (update-ms x ms i) 
+    (check-list lst "lst" "(variance lst)")
+    (variance-helper lst))
+
+  (define (variance-helper lst)
+    ;; https://www.johndcook.com/blog/standard_deviation/
+    (define (update-ms x ms i)
+      ;; ms is a pair of m and s variables
+      ;; x is current value of lst in loop
       (let* ([m (car ms)]
 	     [s (cdr ms)]
-	     [new-m (+ m (/ (- x m) (add1 i)))])
-	(cons new-m
-	      (+ s (* (- x m) (- x new-m))))))
-    (check-list lst "lst" "(variance lst)")
+	     [new-m (+ m (/ (- x m) (add1 i)))]
+             [new-s (+ s (* (- x m) (- x new-m)))])
+	(cons new-m new-s)))
     (let loop ([lst (cdr lst)]
 	       [ms (cons (car lst) 0)] 
 	       [i 1])                 ; one-based indexing in the algorithm
@@ -174,6 +188,8 @@
     (sqrt (variance lst)))
 
   (define (rep n lst type)
+    ;; returns the appended list formed by repeating the values in lst either n times or n times each
+    ;; replicates behavior of rep in R
     (let ([proc-string "(rep n lst type)"])
       (check-positive-integer n "n" proc-string)
       (unless (list? lst)
@@ -225,42 +241,51 @@
       (match-ranks lst val-rank)))
 
   (define (match-ranks lst val-rank)
+    ;; val-rank is a sorted list of pairs with car = value and cdr = rank
+    ;; finding rank for each value in original unsorted lst
     (map (lambda (x) (cdr (assoc x val-rank))) lst))
 
-  ;; val-count is a list of pairs
   (define (rank-ties lst sorted-lst val-count ties-method)
-    (define (iterate val-count ranks)
-      (cond [(null? (cdr val-count))
-             (reverse (rank-ties-helper (car val-count) ranks ties-method))]
-            [else
-             (iterate (cdr val-count)
-                      (rank-ties-helper (car val-count) ranks ties-method))]))
-    (let* ([ranks (iterate val-count '())]
+    ;; val-count is a list of pairs sorted by value
+    (let* ([ranks (rank-val-count val-count ties-method)]
            [val-rank (map cons sorted-lst ranks)])
       (match-ranks lst val-rank)))
 
-  (define (rank-ties-helper val-count-pair ranks ties-method)
-    (cond [(= (cdr val-count-pair) 1)
-           (cons (add1 (length ranks)) ranks)]
+  (define (rank-val-count val-count ties-method)
+    (let loop ([vc val-count]
+               [ranks '()])
+      (cond [(null? (cdr vc))
+             (reverse (rvc-helper (car vc) ranks ties-method))]
+            [else
+             (loop (cdr vc) (rvc-helper (car vc) ranks ties-method))])))
+
+  (define (rvc-helper val-count-pair ranks ties-method)
+    ;; ranks list is being built up in rank-val-count via calls to rvc-helper
+    (cond [(= (cdr val-count-pair) 1)           ;; if a value only occurs once no ties need to be handled
+           (cons (add1 (length ranks)) ranks)]  ;; the rank of that value is the position in the ranks list (1-indexed)
           [else
            (append
-            (handle-ties (get-ranks ranks (cdr val-count-pair)) ties-method)
+            (handle-ties (get-next-ranks ranks (cdr val-count-pair)) ties-method)
             ranks)]))
 
-  (define (get-ranks ranks len)
-    (map (lambda (x)
-           (+ x (length ranks) 1))
-         (iota len)))
+  (define (get-next-ranks ranks count)
+    ;; count is the cdr of a val-count-pair
+    ;; given list of ranks, e.g., '(1 2 3), and a count, e.g., 2,
+    ;; then returns '(4 5)
+    (map (lambda (x) (+ x (length ranks) 1)) (iota count)))
 
-  ;; in R, rank includes random, first, last as ties methods
-  ;; they are a little trickier to implement so not including here
   (define (handle-ties ranks ties-method)
+    ;; in R, rank includes random, first, last as ties methods
+    ;; they are a little trickier to implement so not including here
     (let* ([n (length ranks)]
            [proc-lookup
-            (list (cons 'mean (lambda (x) (make-list n (mean x))))
-                  (cons 'min (lambda (x) (make-list n (apply min x))))
-                  (cons 'max (lambda (x) (make-list n (apply max x)))))])
-      ((cdr (assoc ties-method proc-lookup)) ranks)))
+            (list (cons 'mean (lambda (x) (mean x)))
+                  (cons 'min (lambda (x) (apply min x)))
+                  (cons 'max (lambda (x) (apply max x))))])
+      ;; the ranks for ties are repeated (hence make-list)
+      ;; e.g., if the sorted list is '(1 2 2) then the naive ranks are '(1 2 3)
+      ;; and 'min = '(1 2 2), 'max = '(1 3 3), 'mean = '(1 5/2 5/2)
+      (make-list n ((cdr (assoc ties-method proc-lookup)) ranks))))
 
   (define (correlation x y method)
     (let ([proc-string "(correlation x y method)"])
@@ -281,14 +306,14 @@
   
   (define (pearson x y)
     (let ([n (length x)]
-           [x-sum (apply + x)]
-           [y-sum (apply + y)]
-           [xy-sum (apply
-                    + (map (lambda (x-val y-val)
-                             (* x-val y-val))
-                           x y))]
-           [x2-sum (sum-squares x)]
-           [y2-sum (sum-squares y)])
+          [x-sum (apply + x)]
+          [y-sum (apply + y)]
+          [xy-sum (apply
+                   + (map (lambda (x-val y-val)
+                            (* x-val y-val))
+                          x y))]
+          [x2-sum (sum-squares x)]
+          [y2-sum (sum-squares y)])
       (/ (- (* n xy-sum) (* x-sum y-sum))
          (* (sqrt (- (* n x2-sum) (expt x-sum 2)))
             (sqrt (- (* n y2-sum) (expt y-sum 2)))))))
@@ -305,8 +330,8 @@
            [N (/ (* n (sub1 n)) 2)])
       (let-values ([(C D x-ties y-ties)
                     (concordance x-ranks y-ranks)])
-      (/ (- C D) (sqrt (* (- N x-ties) (- N y-ties)))))))
-         
+        (/ (- C D) (sqrt (* (- N x-ties) (- N y-ties)))))))
+  
   (define (concordance x y)
     (let loop ([x x]
                [y y]
@@ -322,9 +347,9 @@
                    (+ D (cordant-count x y -1))
                    (+ x-ties (ties-count x))
                    (+ y-ties (ties-count y)))])))
-                   
-  ;; sign = -1, 1
+  
   (define (cordant-count x y sign)
+    ;; sign = -1, 1
     (length
      (filter (lambda (a)
                (= a sign))
@@ -332,33 +357,34 @@
 
   (define (ties-count lst)
     (length (filter (lambda (x) (= x 0)) (diff-first-sign lst))))
-                  
+  
   (define (diff-first-sign lst)
     (map (lambda (x) (sign (- (car lst) x))) (cdr lst)))
-    
-  ;; sort two lists in ascending order
-  ;; sorts first by x and then by y
-  ;; returns sorted list of pairs 
+  
   (define (sort-two-lists x y)
-    (map cdr (sort (lambda (a b)
-                     (< (car a) (car b)))
-                   (map cons
-                        (sum-weighted-order x y)
-                        (map cons x y)))))
-                    
+    ;; sort two lists in ascending order
+    ;; sorts first by x and then by y
+    ;; returns sorted list of pairs
+    (let* ([unsort-pairs (map cons x y)]
+           [swo (sum-weighted-order x y)]
+           [swo-up (map cons swo unsort-pairs)])
+      (map cdr (sort (lambda (a b) (< (car a) (car b))) swo-up))))
+  
   (define (sum-weighted-order x y)
+    ;; initial weight of 100 is arbitrary
     (let ([x-weight (weighted-order x 100)]
           [y-weight (weighted-order y (/ 100 (length (unique y))))])
       (map + x-weight y-weight)))
 
-  ;; returns list of weighted order values for every value in lst 
   (define (weighted-order lst weight)
+    ;; returns list of weighted order values for every value in lst 
     (let* ([unique-sorted (unique lst)]
            [ranks (map (lambda (x) (* x weight)) (enumerate unique-sorted))]
            [lookup (map cons unique-sorted ranks)]) 
       (map (lambda (x) (cdr (assoc x lookup))) lst)))
 
   (define (diff lst)
+    ;; returns list of differences (with lag of one) for all elements in lst
     (check-list lst "lst" "(diff lst)")
     (let loop ([lst lst]
                [out '()])
@@ -367,7 +393,7 @@
             [(loop (cdr lst)
                    (cons (- (cadr lst) (car lst)) out))])))
 
-   (define (sign x)
+  (define (sign x)
     (cond [(< x 0) -1]
           [(> x 0) 1]
           [else 0]))
