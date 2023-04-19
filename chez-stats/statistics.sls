@@ -14,8 +14,9 @@
    rep
    rle
    sign
-   standard-deviation
    skewness
+   standard-deviation
+   sum
    unique
    variance
    weighted-mean)
@@ -23,6 +24,17 @@
   (import (chezscheme)
 	  (chez-stats assertions))
 
+  (define (sum lst)
+    (let ([proc-string "(sum lst)"])
+      (check-is-list lst "lst" proc-string)
+      (check-empty-list lst "lst" proc-string)
+      (cond
+       [(for-all real? lst) (apply + lst)]
+       [(for-all boolean? lst) (length (filter (lambda (x) x) lst))]
+       [else (assertion-violation
+              proc-string
+              "all elements of lst need to be either real numbers or boolean values")])))
+              
   (define (rle lst)
     ;; run length encoding
     ;; returns a list of pairs where the car and cdr of each pair

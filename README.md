@@ -44,6 +44,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 [`(sign x)`](#sign)  
 [`(skewness lst)`](#skewness)  
 [`(standard-deviation lst)`](#standard-deviation)  
+[`(sum lst)`](#sum)  
 [`(unique lst)`](#unique)  
 [`(variance lst)`](#variance)  
 [`(weighted-mean lst weights)`](#weighted-mean)
@@ -271,6 +272,22 @@ Exception in (rle lst): at least one element of lst is not a real number
 1.8708286933869707
 > (sqrt (variance '(0 1 2 3 4 5)))
 1.8708286933869707
+```
+
+#### <a name="sum"></a> procedure: `(sum lst)`
+**returns:** the sum of the values in `lst`
+
+For performance, use `(apply + lst)` to avoid the overhead of the assertions in `(sum lst)`. `sum` provides the small convenience of allowing to sum across a list of boolean values using `filter` and `length`.
+
+```
+> (sum (iota 10))
+45
+> (apply + (iota 10))
+45
+> (sum '(#t #f #t #f #t))
+3
+> (length (filter (lambda (x) x) '(#t #f #t #f #t)))
+3
 ```
 
 #### <a name="unique"></a> procedure: `(unique lst)`

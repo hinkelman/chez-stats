@@ -276,6 +276,16 @@
 (test-error (standard-deviation '(1 'a)))
 (test-end "standard-deviation-test")
 
+(test-begin "sum-test")
+(test-assert (= 15 (sum '(1 2 3 4 5))))
+(test-assert (= 3 (sum '(#t #f #t #t #f #f))))
+(test-assert (= 5 (sum '(#f #f #t #t #t #t #t))))
+(test-assert (= -1 (sum '(-1 -2 -4 6))))
+(test-error (sum '(1 2 3 #t)))
+(test-error (sum '()))
+(test-error (sum "a"))
+(test-end "sum-test")
+
 (test-begin "unique-test")
 (test-equal '(1/2 1 5.2) (unique '(0.5 #e0.5 1/2 1 1 1 5.2)))
 (test-equal '(0 1 2) (unique '(0 0 0 1 1 1 2)))

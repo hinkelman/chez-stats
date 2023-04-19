@@ -36,8 +36,9 @@
    rle
    shuffle
    sign
-   standard-deviation
    skewness
+   standard-deviation
+   sum
    unique
    variance
    weighted-mean)
