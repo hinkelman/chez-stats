@@ -277,7 +277,7 @@ Exception in (rle lst): at least one element of lst is not a real number
 #### <a name="sum"></a> procedure: `(sum lst)`
 **returns:** the sum of the values in `lst`
 
-For performance, use `(apply + lst)` to avoid the overhead of the assertions in `(sum lst)`. `sum` provides the small convenience of allowing to sum across a list of boolean values using `filter` and `length`.
+For performance, use `(apply + lst)` to avoid the overhead of the assertions in `(sum lst)`. `sum` provides the small convenience of allowing to sum across a list of boolean values (using `filter` and `length`).
 
 ```
 > (sum (iota 10))
