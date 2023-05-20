@@ -13,8 +13,6 @@
       [(path sep-char) (read-delim-helper path sep-char +inf.0)]
       [(path sep-char max-rows) (read-delim-helper path sep-char max-rows)]))
 
-  ;; opting for 'comma and 'tab instead of passing
-  ;; characters #\, and #\tab directly 
   (define (read-delim-helper path sep-char max-rows)
     (let ([p (open-input-file path)])
       (let loop ([row (read-line p)]
@@ -29,12 +27,12 @@
 		     (sub1 iter))]))))
   
   ;; https://stackoverflow.com/questions/37858083/how-to-read-a-line-of-input-in-chez-scheme
-  (define (read-line . port)
+  (define (read-line port)
     (define (eat p c)
       (if (and (not (eof-object? (peek-char p)))
 	       (char=? (peek-char p) c))
 	  (read-char p)))
-    (let ([p (if (null? port) (current-input-port) (car port))])
+    (let ([p (if (null? port) (current-input-port) port)])
       (let loop ([c (read-char p)]
 		 [line '()])
 	(cond [(eof-object? c) (if (null? line) c (list->string (reverse line)))]
@@ -89,6 +87,7 @@
       (if (null? lst)
   	  result
   	  (let* ([item (car lst)]
+                 ;; don't place sep-char before first item
   		 [sep-str (if first? "" (string sep-char))]
   		 [item-new (cond [(char? item) (string item)]
   				 [(symbol? item) (symbol->string item)]
@@ -104,7 +103,7 @@
 	   [str-list (string->list str)]
 	   [str-length (length str-list)])
       (if (not (or (member sep-char str-list) (member #\" str-list)))
-  	  str  ;; return string unchanged b/c no commas or double quotes
+  	  str  ;; return string unchanged b/c no sep-char or double quotes
   	  (let loop ([c (read-char in)]
   		     [result "\""]
 		     [ctr 0])
