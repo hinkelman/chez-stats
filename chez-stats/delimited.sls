@@ -40,25 +40,33 @@
 	      [(char=? #\return c) (eat p #\newline) (list->string (reverse line))]
 	      [else (loop (read-char p) (cons c line))]))))
 
-  ;; https://github.com/alex-hhh/data-frame/blob/master/private/csv.rkt
+  ;; some csv files are quoted, i.e., "Date", and others are not, i.e., Date
+  ;; parse-line always unquotes
+  ;; parse-line also removes the double quotes, e.g., "Earvin ""Magic"" Johnson"
   (define (parse-line line sep-char)
     (let ([in (open-input-string line)])
       (let loop ([c (read-char in)]
-		 [current ""]
-		 [row '()]
-		 [in-string #f])
-	(cond [(eof-object? c)
-	       (reverse (cons current row))]
-	      [(and (char=? c sep-char) (not in-string))
-	       (loop (read-char in) "" (cons current row) #f)]
-	      [(and in-string (char=? c #\") (equal? (peek-char in) #\"))
-	       (read-char in)             ; consume the next char
-	       (loop (read-char in) (string-append current (string c)) row in-string)]
-	      [(char=? c #\")
-	       (loop (read-char in) (string-append current (string c)) row (not in-string))]
-	      [else
-	       (loop (read-char in) (string-append current (string c)) row in-string)]))))
-
+                 [last-c #\A]     ;; init w/ arbitrary char unlikely to be separator
+                 [str ""]
+                 [out '()]
+                 [in-string #f])
+        (cond [(eof-object? c)
+               (reverse (cons str out))]
+              [(and (char=? c sep-char) (not in-string))
+               (loop (read-char in) c "" (cons str out) #f)]
+              ;; this case drops the closing #\" of a quoted item
+              [(and (char=? c #\")
+                    (or (equal? (peek-char in) sep-char)
+                        (eof-object? (peek-char in))))
+               (loop (read-char in) c str out #f)]
+              ;; this case drops the opening #\" of a quoted item
+              [(and (char=? c #\")
+                    (or (char=? last-c sep-char)
+                        (equal? (peek-char in) #\")))
+               (loop (read-char in) c str out #t)]
+              [else
+               (loop (read-char in) c (string-append str (string c)) out in-string)]))))
+        
   ;; WRITE ###################################################
 
   (define write-delim
