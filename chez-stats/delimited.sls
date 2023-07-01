@@ -46,26 +46,26 @@
   (define (parse-line line sep-char)
     (let ([in (open-input-string line)])
       (let loop ([c (read-char in)]
-                 [last-c #\A]     ;; init w/ arbitrary char unlikely to be separator
                  [str ""]
                  [out '()]
                  [in-string #f])
         (cond [(eof-object? c)
                (reverse (cons str out))]
+              ;; this case handles true separator (not in string)
               [(and (char=? c sep-char) (not in-string))
-               (loop (read-char in) c "" (cons str out) #f)]
+               (loop (read-char in) "" (cons str out) #f)]
+              ;; this case drops the opening #\" of a quoted item
+              [(and (char=? c #\")
+                    (or (string=? str "")
+                        (equal? (peek-char in) #\")))
+               (loop (read-char in) str out #t)]
               ;; this case drops the closing #\" of a quoted item
               [(and (char=? c #\")
                     (or (equal? (peek-char in) sep-char)
                         (eof-object? (peek-char in))))
-               (loop (read-char in) c str out #f)]
-              ;; this case drops the opening #\" of a quoted item
-              [(and (char=? c #\")
-                    (or (char=? last-c sep-char)
-                        (equal? (peek-char in) #\")))
-               (loop (read-char in) c str out #t)]
+               (loop (read-char in) str out #f)]
               [else
-               (loop (read-char in) c (string-append str (string c)) out in-string)]))))
+               (loop (read-char in) (string-append str (string c)) out in-string)]))))
         
   ;; WRITE ###################################################
 
