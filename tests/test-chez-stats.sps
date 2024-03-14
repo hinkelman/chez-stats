@@ -265,7 +265,7 @@
 
 (test-begin "skewness-test")
 (test-assert (= 0 (skewness '(1 2 3 4 5))))
-(test-assert (= -0.6 (skewness '(1 2 2 3 3 3 4 4 4 4))))
+(test-assert (= -3/5 (skewness '(1 2 2 3 3 3 4 4 4 4))))
 (test-error (skewness '()))
 (test-error (skewness '("a" 1)))
 (test-end "skewness-test")
