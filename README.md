@@ -35,7 +35,7 @@ Clone or download this repository. Move `chez-stats.sls` and `chez-stats` folder
 
 ## Documentation
 
-Full API documentation is available at [[mkdocs](https://hinkelman.github.io/chez-stats/)](https://hinkelman.github.io/chez-stats/). 
+Full API documentation is available at [https://hinkelman.github.io/chez-stats/](https://hinkelman.github.io/chez-stats/). 
 
 ## API Overview
 
