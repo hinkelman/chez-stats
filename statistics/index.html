@@ -1,0 +1,1112 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Read and write delimited text files, compute descriptive statistics, and generate random variates in Chez Scheme.">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../delimited/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Descriptive Statistics - chez-stats</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#descriptive-statistics" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="chez-stats" class="md-header__button md-logo" aria-label="chez-stats" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            chez-stats
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Descriptive Statistics
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hinkelman/chez-stats" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="chez-stats" class="md-nav__button md-logo" aria-label="chez-stats" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    chez-stats
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hinkelman/chez-stats" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Descriptive Statistics
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Descriptive Statistics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#count-unique-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (count-unique lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#correlation-x-y-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (correlation x y method)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cumulative-sum-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (cumulative-sum lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diff-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (diff lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interquartile-range-lst-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (interquartile-range lst [type])
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kurtosis-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (kurtosis lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mean-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (mean lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#median-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (median lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mode-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (mode lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quantile-lst-p-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (quantile lst p [type])
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rank-lst-ties-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (rank lst [ties-method])
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rep-n-lst-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (rep n lst type)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rle-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (rle lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sign-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (sign x)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skewness-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (skewness lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standard-deviation-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (standard-deviation lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sum-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (sum lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unique-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (unique lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variance-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (variance lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weighted-mean-lst-weights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (weighted-mean lst weights)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../delimited/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delimited Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../random/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Random Variates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#count-unique-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (count-unique lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#correlation-x-y-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (correlation x y method)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cumulative-sum-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (cumulative-sum lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diff-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (diff lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interquartile-range-lst-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (interquartile-range lst [type])
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kurtosis-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (kurtosis lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mean-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (mean lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#median-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (median lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mode-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (mode lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quantile-lst-p-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (quantile lst p [type])
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rank-lst-ties-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (rank lst [ties-method])
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rep-n-lst-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (rep n lst type)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rle-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (rle lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sign-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (sign x)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skewness-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (skewness lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standard-deviation-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (standard-deviation lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sum-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (sum lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unique-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (unique lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variance-lst" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (variance lst)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weighted-mean-lst-weights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        (weighted-mean lst weights)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="descriptive-statistics">Descriptive Statistics</h1>
+<h2 id="count-unique-lst"><code>(count-unique lst)</code></h2>
+<p><strong>returns:</strong> a list of pairs where the <code>car</code> and <code>cdr</code> of each pair are the unique values and counts, respectively, of the values in list <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (count-unique '(1 2 3 4 2 1))
+((1 . 2) (2 . 2) (3 . 1) (4 . 1))
+&gt; (count-unique '(1.1 1 2.2 2 1.1 1.1))
+((1 . 1) (1.1 . 3) (2 . 1) (2.2 . 1))
+&gt; (count-unique '(0.5 1/2 #e0.5 1 1 2))
+((1/2 . 3) (1 . 2) (2 . 1))
+&gt; (count-unique '(&quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;a&quot;))
+Exception in (count-unique lst): at least one element of lst is not a real number
+</code></pre>
+<h2 id="correlation-x-y-method"><code>(correlation x y method)</code></h2>
+<p><strong>returns:</strong> correlation coefficient between values in lists <code>x</code> and <code>y</code>; methods available: <code>'pearson</code>, <code>'spearman</code>, <code>'kendall</code></p>
+<pre><code class="language-scheme">&gt; (correlation (iota 10) (iota 10) 'pearson)
+1.0
+&gt; (correlation (iota 10) (map - (iota 10)) 'pearson)
+-1.0
+&gt; (correlation '(1 2 3 4) '(2 2.01 2.01 2) 'pearson)
+0.0
+&gt; (define x '(86 97 99 100 101 103 106 110 112 113 86))
+&gt; (define y '(2 20 28 27 50 29 7 17 6 12 1))
+&gt; (correlation x y 'pearson)
+0.15611738363791983
+&gt; (correlation x y 'spearman)
+0.11389551189455129
+&gt; (correlation x y 'kendall)
+0.07339758434175737
+</code></pre>
+<h2 id="cumulative-sum-lst"><code>(cumulative-sum lst)</code></h2>
+<p><strong>returns:</strong> a list that is the cumulative sum of the values in <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (cumulative-sum '(1 2 3 4 5))
+(1 3 6 10 15)
+&gt; (cumulative-sum '(5 4 3 2 1))
+(5 9 12 14 15)
+</code></pre>
+<h2 id="diff-lst"><code>(diff lst)</code></h2>
+<p><strong>returns:</strong> list of differences (with lag of one) for all elements in <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (diff '(1 3 7 13))
+(2 4 6)
+&gt; (diff '(-10 20 -10))
+(30 -30)
+</code></pre>
+<h2 id="interquartile-range-lst-type"><code>(interquartile-range lst [type])</code></h2>
+<p><strong>returns:</strong> the difference in the 0.25 and 0.75 sample quantiles of the values in <code>lst</code> corresponding to the given <code>type</code> (see <a href="#quantile-lst-p-type"><code>quantile</code></a> for more info on <code>type</code>)</p>
+<pre><code class="language-scheme">&gt; (interquartile-range '(1 2 3 5 5))
+3.3333333333333335
+&gt; (interquartile-range '(1 2 3 5 5) 1)
+3
+&gt; (interquartile-range '(3 7 4 8 9 7) 9)
+4.125
+</code></pre>
+<h2 id="kurtosis-lst"><code>(kurtosis lst)</code></h2>
+<p><strong>returns:</strong> the kurtosis of the values in <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (kurtosis '(-10 0 10))
+3/2
+&gt; (kurtosis '(1 2 2 3 3 3))
+51/25
+</code></pre>
+<h2 id="mean-lst"><code>(mean lst)</code></h2>
+<p><strong>returns:</strong> the arithmetic mean of the values in <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (mean '(1 2 3 4 5))
+3
+&gt; (mean '(-10 0 10))
+0
+&gt; (exact-&gt;inexact (mean '(1 2 3 4 5 150)))
+27.5
+</code></pre>
+<h2 id="median-lst"><code>(median lst)</code></h2>
+<p><strong>returns:</strong> the median of <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (median '(1 2 3 4 5 6))
+3.5
+&gt; (quantile '(1 2 3 4 5 6) 0.5 7))
+3.5
+</code></pre>
+<h2 id="mode-lst"><code>(mode lst)</code></h2>
+<p><strong>returns:</strong> a list with the values in <code>lst</code> that occur most frequently</p>
+<pre><code class="language-scheme">&gt; (mode '(1 1 1 2 2 2))
+(1 2)
+&gt; (mode '(1 2 3 3 4 4 4))
+(4)
+</code></pre>
+<h2 id="quantile-lst-p-type"><code>(quantile lst p [type])</code></h2>
+<p><strong>returns:</strong> the sample quantile of the values in <code>lst</code> corresponding to the given probability, <code>p</code>, and <code>type</code></p>
+<p>The quantile function follows <a href="https://www.jstor.org/stable/2684934">Hyndman and Fan 1996</a> who recommend type 8, which is the default in <code>chez-stats</code>. The <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html">default in R</a> is type 7.</p>
+<pre><code class="language-scheme">&gt; (quantile '(1 2 3 4 5 6) 0.5 1)
+3
+&gt; (quantile '(1 2 3 4 5 6) 0.5 4)
+3.0
+&gt; (quantile '(1 2 3 4 5 6) 0.5 8)
+3.5
+&gt; (quantile '(1 2 3 4 5 6) 0.025 7)
+1.125
+</code></pre>
+<h2 id="rank-lst-ties-method"><code>(rank lst [ties-method])</code></h2>
+<p><strong>returns:</strong> a list of the sample ranks for the values in <code>lst</code>; ties are handled by replacing ranks with <code>'min</code> (default), <code>'max</code>, or <code>'mean</code></p>
+<pre><code class="language-scheme">&gt; (rank '(50 20 50 40 30))
+(4 1 4 3 2)
+&gt; (rank '(50 20 50 40 30) 'min)
+(4 1 4 3 2)
+&gt; (rank '(50 20 50 40 30) 'max)
+(5 1 5 3 2)
+&gt; (rank '(50 20 50 40 30) 'mean))
+(9/2 1 9/2 3 2)
+</code></pre>
+<h2 id="rep-n-lst-type"><code>(rep n lst type)</code></h2>
+<p><strong>returns:</strong> the appended list formed by repeating the values in <code>lst</code> either <code>n</code> times or <code>n</code> times each; replicates behavior of <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/rep.html"><code>rep</code></a> in R</p>
+<pre><code class="language-scheme">&gt; (rep 3 '(1 2) 'times)
+(1 2 1 2 1 2)
+&gt; (rep 3 '(1 2) 'each)
+(1 1 1 2 2 2)
+&gt; (rep 3 '(a b) 'times)
+(a b a b a b)
+&gt; (rep 3 '((1 2) (a b)) 'times)
+((1 2) (a b) (1 2) (a b) (1 2) (a b))
+&gt; (rep 3 '((1 2) (a b)) 'each)
+((1 2) (1 2) (1 2) (a b) (a b) (a b))
+</code></pre>
+<h2 id="rle-lst"><code>(rle lst)</code></h2>
+<p><strong>returns:</strong> run length encoding as a list of pairs where the <code>car</code> and <code>cdr</code> of each pair are the values and lengths of the runs, respectively, for the values in list <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (rle '(1 1 1 2 1 1))
+((1 . 3) (2 . 1) (1 . 2))
+&gt; (rle '(2 2 2 5 3 3))
+((2 . 3) (5 . 1) (3 . 2))
+&gt; (rle '(&quot;a&quot; &quot;b&quot; &quot;b&quot; &quot;a&quot;))
+Exception in (rle lst): at least one element of lst is not a real number
+</code></pre>
+<h2 id="sign-x"><code>(sign x)</code></h2>
+<p><strong>returns:</strong> sign of <code>x</code></p>
+<pre><code class="language-scheme">&gt; (sign -3)
+-1
+&gt; (sign 0)
+0
+&gt; (sign 7)
+1
+</code></pre>
+<h2 id="skewness-lst"><code>(skewness lst)</code></h2>
+<p><strong>returns:</strong> the skewness of the values in <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (skewness '(1 2 3 4 5))
+0.0
+&gt; (skewness '(1 2 2 3 3 3 4 4 4 4))
+-0.6
+</code></pre>
+<h2 id="standard-deviation-lst"><code>(standard-deviation lst)</code></h2>
+<p><strong>returns:</strong> the standard deviation of the values in <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (standard-deviation '(0 1 2 3 4 5))
+1.8708286933869707
+&gt; (sqrt (variance '(0 1 2 3 4 5)))
+1.8708286933869707
+</code></pre>
+<h2 id="sum-lst"><code>(sum lst)</code></h2>
+<p><strong>returns:</strong> the sum of the values in <code>lst</code></p>
+<p>For performance, use <code>(apply + lst)</code> to avoid the overhead of the assertions in <code>(sum lst)</code>. <code>sum</code> provides the small convenience of allowing to sum across a list of boolean values (using <code>filter</code> and <code>length</code>).</p>
+<pre><code class="language-scheme">&gt; (sum (iota 10))
+45
+&gt; (apply + (iota 10))
+45
+&gt; (sum '(#t #f #t #f #t))
+3
+&gt; (length (filter (lambda (x) x) '(#t #f #t #f #t)))
+3
+</code></pre>
+<h2 id="unique-lst"><code>(unique lst)</code></h2>
+<p><strong>returns:</strong> a sorted list of the unique values in <code>lst</code></p>
+<pre><code class="language-scheme">&gt; (unique '(0.5 #e0.5 1/2 1 1 1 5.2))
+(1/2 1 5.2)
+&gt; (unique '(0 0 0 1 1 1 2))
+(0 1 2)
+</code></pre>
+<h2 id="variance-lst"><code>(variance lst)</code></h2>
+<p><strong>returns:</strong> the sample variance of the values in <code>lst</code> based on <a href="https://www.johndcook.com/blog/standard_deviation/">Welford's algorithm</a></p>
+<pre><code class="language-scheme">&gt; (variance '(1 10 100 1000))
+233840.25
+&gt; (variance '(0 1 2 3 4 5))
+3.5
+</code></pre>
+<h2 id="weighted-mean-lst-weights"><code>(weighted-mean lst weights)</code></h2>
+<p><strong>returns:</strong> the arithmetic mean of the values in <code>lst</code> weighted by the values in <code>weights</code></p>
+<pre><code class="language-scheme">&gt; (weighted-mean '(1 2 3 4 5) '(5 4 3 2 1))
+7/3
+&gt; (weighted-mean '(1 2 3 4 5) '(2 2 2 2 2))
+3
+&gt; (mean '(1 2 3 4 5))
+3
+&gt; (weighted-mean '(1 2 3 4 5) '(2 0 2 2 2))
+13/4
+&gt; (mean '(1 3 4 5))
+13/4
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
