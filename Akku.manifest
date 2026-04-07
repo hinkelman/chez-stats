@@ -5,6 +5,7 @@
   (synopsis
    "Read and write delimited text files, compute descriptive statistics, and generate random variates in Chez Scheme.")
   (authors "Travis Hinkelman")
+  (homepage "https://hinkelman.github.io/chez-stats/")
   (license "MIT")
   (depends ("chez-srfi" "^0.0.0-akku.209.552cd37"))
 )
