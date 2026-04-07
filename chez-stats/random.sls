@@ -19,6 +19,8 @@
    shuffle)
 
   (import (chezscheme)
+          (only (chez-stats statistics)
+                cumulative-sum)
 	  (chez-stats assertions))
 
   (define (repeat n thunk)
@@ -40,7 +42,9 @@
           (loop (add1 i) (+ (thunk) result)))))
 
   (define (random-sample n dist . args)
-    (unless (member dist '(bernoulli beta beta-binomial binomial exponential gamma geometric lognormal multinomial negative-binomial normal pareto poisson uniform))
+    (unless (member dist '(bernoulli beta beta-binomial binomial exponential gamma
+                                     geometric lognormal multinomial negative-binomial
+                                     normal pareto poisson uniform))
       (assertion-violation
        "(random-sample n dist . args)"
        "dist must be one of these symbols: 'bernoulli 'beta, 'beta-binomial, 'binomial, 'exponential, 'gamma, 'geometric, 'lognormal, 'multinomial, 'negative-binomial, 'normal, 'pareto, 'poisson, 'uniform"))
@@ -231,3 +235,5 @@
            [lst-pairs (map cons rand-lst lst)])
       (map cdr (list-sort (lambda (x y) (< (car x) (car y))) lst-pairs))))
   )
+
+

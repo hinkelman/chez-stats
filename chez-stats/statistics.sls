@@ -104,9 +104,7 @@
 	   ;; ms is list of m values for each quantile type
 	   [ms (list 0 0 -1/2 0 1/2 p (- 1 p) (* (add1 p) 1/3) (+ (* p 1/4) 3/8))]
 	   [m (list-ref ms (sub1 type))]
-	   [j-tmp (floor (+ (* n p) m))]
-	   ;; j needs to be a fixnum for indexing
-	   [j (if (flonum? j-tmp) (flonum->fixnum j-tmp) j-tmp)]
+	   [j (exact (floor (+ (* n p) m)))]
 	   [g (- (+ (* n p) m) j)]
 	   [gamma (get-gamma g j type)])
       (calc-Q order-stats j gamma)))
