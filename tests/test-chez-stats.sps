@@ -21,9 +21,29 @@
 (test-equal example-list2 (read-delim "example2.csv"))
 (delete-file "example.csv")
 (delete-file "example2.csv")
+;; tab-delimited round-trip
+(define tab-list (list (list "a" "b" "c") (list "1" "2" "3")))
+(write-delim tab-list "example.tsv" #\tab)
+(test-equal tab-list (read-delim "example.tsv" #\tab))
+(delete-file "example.tsv")
+;; max-rows parameter
+(define multi-row-list (list (list "h1" "h2") (list "r1" "r2") (list "r3" "r4") (list "r5" "r6")))
+(write-delim multi-row-list "example-rows.csv")
+(test-equal (list (list "h1" "h2") (list "r1" "r2")) (read-delim "example-rows.csv" #\, 2))
+(delete-file "example-rows.csv")
 (test-end "delimited-test")
 
 ;; random-variates
+
+(test-begin "repeat-test")
+(test-equal '() (repeat 0 (lambda () 1)))
+(test-equal 5 (length (repeat 5 (lambda () 42))))
+(test-assert (for-all (lambda (x) (= x 42)) (repeat 5 (lambda () 42))))
+(test-end "repeat-test")
+
+(test-begin "random-sample-test")
+(test-error (random-sample 10 'not-a-dist))
+(test-end "random-sample-test")
 
 (test-begin "bernoulli-test")
 (define bernoulli-list (random-sample 1e5 'bernoulli 0.2))
@@ -133,6 +153,12 @@
 (test-error (shuffle '()))
 (test-error (shuffle '(1 "a")))
 (test-error (shuffle (vector 1 2 3)))
+;; shuffle returns a list of the same length
+(test-equal 10 (length (shuffle '(1 2 3 4 5 6 7 8 9 10))))
+;; shuffle preserves elements (same sorted result)
+(test-equal '(1 2 3 4 5) (list-sort < (shuffle '(5 3 1 4 2))))
+;; single-element shuffle returns same list
+(test-equal '(42) (shuffle '(42)))
 (test-end "shuffle-test")
 
 (test-begin "uniform-test")
