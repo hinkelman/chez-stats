@@ -1,0 +1,14 @@
+site_name: chez-stats
+site_description: Read and write delimited text files, compute descriptive statistics, and generate random variates in Chez Scheme.
+repo_url: https://github.com/hinkelman/chez-stats
+
+theme:
+  name: material
+  palette:
+    scheme: default
+
+nav:
+  - Home: index.md
+  - Descriptive Statistics: statistics.md
+  - Delimited Files: delimited.md
+  - Random Variates: random.md
